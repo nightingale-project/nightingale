@@ -8,3 +8,12 @@ Remember to use google style with Clang
 Black - install: <pip install black> usage: <black [file or directory]>
 Clang - install: <sudo apt install clang-format> usage: <clang-format --style=Google -i [filename]>
 Clang info here: https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+
+# ROS Install
+This metapackage uses vcstool to keep track of 3rd party packages that must be built from source
+See ROS page on vcstool for context
+Repositories can be imported with "vcs import src/ < src/nightingale/nightingale.rosinstall && vcs import src/ < src/kinova-movo/movo.rosinstall" from the root of the ws
+
+# Simulation
+Simulation of Movo in hospital can be spawned with <roslaunch nightingale_simulation hospital.launch>
+See "Moving the base" section in the kinova-movo dev_notes.txt for instructions on moving the base in simulation
