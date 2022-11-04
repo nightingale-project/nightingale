@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Location is one of {sim,robohub} (and more to come!) -->
+    <arg name="location" default="robohub" />
+
+    <!-- launch amcl -->
+    <include file="$(find nightingale_navigation)/launch/localization.launch">
+        <arg name="location" value="$(arg location)"/>
+    </include>
+
+    <!-- launch move_base -->
+    <include file="$(find nightingale_navigation)/launch/move_base.launch"/>
+</launch>

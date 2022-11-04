@@ -17,3 +17,25 @@ Repositories can be imported with "vcs import src/ < src/nightingale/nightingale
 # Simulation
 Simulation of Movo in hospital can be spawned with <roslaunch nightingale_simulation hospital.launch>
 See "Moving the base" section in the kinova-movo dev_notes.txt for instructions on moving the base in simulation
+
+# Mapping
+launch gmapping with <roslaunch nightingale_navigation mapping.launch>
+drive the robot around and generate the map
+the map is publsihed to /map. you can visualize it through rviz
+save the map with <rosrun map_server map_saver -f 'map'>
+
+# Localization
+launch the map server and amcl with <roslaunch nightingale_navigation localization.launch>
+the /particlecloud topic shows the estimated pose array. you can visualize it through rviz
+
+younes todo add steps for the move base launch file
+
+younes todo delete below
+In sim:
+Always run roslaunch nightingale_simulation hospital.launch
+in another terminal run rosrun rviz rviz -d $(rospack find movo_viz)/rviz/robot.rviz
+
+for mapping then run: roslaunch nightingale_navigation mapping.launch
+for localization run: roslaunch nightingale_navigation localization.launch
+
+for localization and move_base run both: roslaunch nightingale_navigation localization.launch and roslaunch nightingale_navigation move_base.launch
