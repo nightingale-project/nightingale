@@ -21,12 +21,11 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 catkin_package(
-  INCLUDE_DIRS include
+#  INCLUDE_DIRS include
 #  LIBRARIES nightingale_navigation
 #  CATKIN_DEPENDS actionlib actionlib_msgs amcl geometry_msgs gmapping move_base move_base_msgs nightingale_msgs roscpp rospy std_msgs tf2 tf2_geometry_msgs
 #  DEPENDS system_lib
 )
-
 
 #############
 ## Install ##

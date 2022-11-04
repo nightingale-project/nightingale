@@ -11,6 +11,7 @@
     <arg name="eband_disallow_hysteresis" default="false" />
     <!-- <arg name="map_topic" default="/map" /> -->
 
+
     <node pkg="move_base" type="move_base" name="move_base" clear_params="true">
     <!-- Remap into correct namespace for mux -->
         <remap from="cmd_vel" to="/movo/navigation/cmd_vel" />
