@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+    <!--- Run gmapping -->
+    <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
+        <rosparam command="load" file="$(find nightingale_navigation)/configs/gmapping.yaml"/>
+        <remap from="scan" to="/movo/base_scan_filtered" />
+    </node>
+</launch>
