@@ -12,22 +12,25 @@ class MoveBaseEvaluation:
 
         self.idx = 0
 
-        self.poses = self.generate_poses()
+        self.generate_poses()
 
     def generate_poses(self, travel_dist=1.0, num_loops=10):
-        for i in range(num_loops * 4):
-            n = i % 4
+        ref_poses = [[2, 0, 0], [4, 0, -math.pi/2], [4, -2, -math.pi], [2, -2, -3*math.pi/2]]
+
+        self.poses = [None for i in range(num_loops * len(ref_poses)):
+        for i in range(num_loops * len(ref_poses)):
+            n = i % len(ref_poses)
 
             tgt_pose = PoseStamped()
-            tgt_pose.pose.position.x = travel_dist * (((n & 2) >> 1) ^ (n & 1))
-            tgt_pose.pose.position.y = travel_dist * ((n & 2) >> 1)
-            tgt_pose.pose.orientation.w = math.cos(math.pi / 4 * n)
-            tgt_pose.pose.orientation.z = math.sin(math.pi / 4 * n)
+            tgt_pose.pose.position.x = ref_poses[n][0]
+            tgt_pose.pose.position.y = ref_poses[n][1]
+            tgt_pose.pose.orientation.w = math.cos(ref_poses[n][2] / 2)
+            tgt_pose.pose.orientation.z = math.sin(ref_poses[n][2] / 2)
             tgt_pose.header.seq = i
             tgt_pose.header.stamp = rospy.get_rostime()
             tgt_pose.frame_id = "/map"
 
-            self.poses.append(tgt_pose)
+            self.poses[i] = tgt_pose
 
     def start_tractor_mode(self):
         cfg_cmd = ConfigCmd()
