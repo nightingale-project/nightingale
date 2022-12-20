@@ -1,0 +1,12 @@
+name: Black_lint
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Run Black python linter
+        uses: psf/black@stable
