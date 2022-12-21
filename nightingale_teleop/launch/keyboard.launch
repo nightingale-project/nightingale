@@ -1,0 +1,10 @@
+<launch>
+    <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /movo/gp_command movo_msgs/ConfigCmd '{gp_cmd: 'GENERAL_PURPOSE_CMD_SET_OPERATIONAL_MODE', gp_param: 5}' --once"/>
+    <node name="teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen">
+        <remap from="/cmd_vel" to="/movo/cmd_vel"/>
+        <param name="speed" value="0.5"/>
+        <param name="turn" value="0.4"/>
+        <param name="repeat_rate" value="15.0"/>
+        <param name="key_timeout" value="0.5"/>
+    </node>
+</launch>
