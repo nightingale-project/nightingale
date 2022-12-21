@@ -2,6 +2,7 @@
 <launch>
     <env name="GAZEBO_MODEL_PATH" value="$(find movo_gazebo)/models:$(optenv GAZEBO_MODEL_PATH)" />
 
+    <!-- This brings up the robot with all its sensors and motors in a hospital world -->
     <include file="$(find movo_gazebo)/launch/movo.launch">
         <arg name="world" value="$(find aws_robomaker_hospital_world)/worlds/hospital.world"/>
         <arg name="limited" default="false"/>

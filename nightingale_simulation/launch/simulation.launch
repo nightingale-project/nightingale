@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!-- This launch file brings up the movo in a simulated hospital environment,
+     along with all its sensors. Furthermore, it also brings up moveit -->
+ <launch>
+ 	
+    <!-- Bring up the platform in sim with all models, controllers, sensors estimates -->
+    <node pkg="si_utils" type="timed_roslaunch"
+        args="1 nightingale_simulation hospital.launch"
+        name="sim_bringup" output="screen"/>
+        
+    <!-- Bring up moveit -->
+    <node pkg="si_utils" type="timed_roslaunch"
+        args="5 movo_7dof_moveit_config movo_moveit_planning_execution.launch sim:=true info:=true"
+        name="moveit_bringup" output="screen"/>
+
+    <!-- Run the simulation initialization procedure (ie tuck arms and more) -->
+    <node pkg="si_utils" type="timed_roslaunch"
+        args="10 movo_gazebo init_sim.xml"
+        name="init_sim_bringup" output="screen"/>
+
+    <!-- Bring up RVIZ -->
+    <node pkg="si_utils" type="timed_roslaunch"
+        args="15 nightingale_visualization viz.launch"
+        name="viz_bringup" output="screen"/>
+
+</launch>
