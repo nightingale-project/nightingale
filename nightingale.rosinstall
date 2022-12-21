@@ -1,0 +1,11 @@
+repositories:                                                                                        
+  kinova-movo:
+    type: git
+    url: git@github.com:nightingale-project/kinova-movo.git
+    version: master
+
+  aws-robomaker-hospital-world:
+    type: git
+    url: https://github.com/aws-robotics/aws-robomaker-hospital-world.git
+    version: ros1
+
