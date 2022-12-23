@@ -1,0 +1,24 @@
+<!-- launch file for point cloud laser scan conversion and filtering of robot body
+<launch>
+
+  <!-- Point cloud body filter node -->
+  <node name="pointcloud_filter" pkg="sensor_filters" type="pointcloud2_filter_chain">
+      <rosparam command="load" file="../config/movo_body_filter.yaml" />
+  
+      <remap from="~input" to="/camera/depth/color/points" />
+      <remap from="~output" to="/camera/depth/color/points_filtered" />
+  </node>
+
+  <!-- Point cloud to laser scan conversion -->
+  <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan_node">
+      <remap from="/cloud_in" to="/camera/depth/color/points_filtered"/>
+
+      <rosparam>
+          #target_frame: camera_link
+          min_height: 0.0
+          max_height: 2.0
+      </rosparam>
+  </node>
+
+
+</launch>
