@@ -1,0 +1,14 @@
+cloud_filter_chain:
+- name: movo_filter
+  type: robot_body_filter/RobotBodyFilterPointcloud2
+  params:
+     frames/fixed: "odom"
+     frames/sensor: "camera_link"
+     frames/filtering: "camera_link"
+     frames/output: "camera_link"
+     sensor/min_distance: 0.05
+     body_model/inflation/scale: 1.05
+     body_model/inflation/padding: 0.02
+     filter/do_shadow/test: True
+     #filter/model_pose_update_interval: 0.005 # arbitrary update interval selected for now
+     # only_links: [] LIST LINKS THAT ARE NEEDED TO BE CHECKED -> SHOULD ONLY BE ARM LINKS
