@@ -48,6 +48,7 @@ def articulate():
         msg = FollowJointTrajectoryAction()
         goal = msg.action_goal
         goal.header.stamp = rospy.Time.now() + rospy.Duration(0.5)
+
         goal.goal.trajectory.joint_names = joint_names
         point0 = JointTrajectoryPoint()
         point0.positions = cur_pos
@@ -74,3 +75,4 @@ if __name__ == "__main__":
         articulate()
     except rospy.ROSInterruptException:
         print("program interrupted before completion", file=sys.stderr)
+
