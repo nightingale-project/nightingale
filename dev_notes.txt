@@ -30,3 +30,7 @@ save the map with <rosrun map_server map_saver -f 'map'>
 launch the map server and amcl with <roslaunch nightingale_navigation localization.launch>
 the /particlecloud topic shows the estimated pose array. you can visualize it through rviz
 
+# Map Frame Visualizer
+This python script visualizes a map gotten with gmapping in the map frame. Use -h for usage
+Script is in nightingale_utils/src/map_frame_visualizer.py
+ 

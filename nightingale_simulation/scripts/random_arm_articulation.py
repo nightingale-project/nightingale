@@ -17,15 +17,20 @@ def articulate():
 
     # Waits until the action server has started up and started
     # listening for goals.
-    client.wait_for_server()
+    rospy.loginfo('Waiting for the server...')
+    if client.wait_for_server():
+        rospy.loginfo('Found the server!')
+    else:
+        rospy.loginfo('Could not find the server.')
+        return
 
     cur_pos = [0.0 for _ in range(len(joint_names))]
     while not rospy.is_shutdown():
         l,u = np.radians([-10,10])
         next_pos = np.random.uniform(low=l, high=u, size=(len(joint_names),)).tolist()
-        
+
         # Move the arm from cur to next
-        print(f'Moving arm to {next_pos}')
+        rospy.loginfo(f'Moving arm to {next_pos}')
         msg = FollowJointTrajectoryAction()
         goal = msg.action_goal
         goal.header.stamp = rospy.Time.now()+rospy.Duration(0.5)
@@ -42,18 +47,16 @@ def articulate():
         client.wait_for_result()
         cur_pos = next_pos
 
-        print(client.get_result())
         assert client.get_result().error_code == 0
 
         rospy.sleep(3)
 
-    return client.get_result()
-
 if __name__ == '__main__':
     try:
-        # Initializes a rospy node so that the SimpleActionClient can
-        # publish and subscribe over ROS.
-        rospy.init_node('articulate')
+        rospy.init_node('random_articulate')
+        rospy.loginfo('This node randomly articulates the left arm in a small range')
+        rospy.loginfo('This node should not be run on real hardware')
         articulate()
     except rospy.ROSInterruptException:
         print("program interrupted before completion", file=sys.stderr)
+
