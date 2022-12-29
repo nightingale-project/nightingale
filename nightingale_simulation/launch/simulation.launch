@@ -20,7 +20,7 @@
 
     <!-- Bring up RVIZ -->
     <node pkg="si_utils" type="timed_roslaunch"
-        args="15 nightingale_visualization viz.launch"
+        args="20 nightingale_visualization viz.launch"
         name="viz_bringup" output="screen"/>
 
 </launch>

@@ -9,8 +9,8 @@ transform_tolerance:        0.5
 footprint: [[0.39,0.3],[0.39,-0.3],[-0.39,-0.3],[-0.39,0.3]]
 
 ### Costmap definitions ###
-update_frequency: 20.0 # younes todo does laser output at 20 Hz
-publish_frequency: 20.0 # younes todo this defaults to 0 why?
+update_frequency: 15.0
+publish_frequency: 15.0
 inflation_radius: 0.55
 obstacle_layer/footprint_clearing_enabled: true
 

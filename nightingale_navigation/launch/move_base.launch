@@ -15,14 +15,6 @@
     <!-- Remap into correct namespace for mux -->
         <remap from="cmd_vel" to="/movo/navigation/cmd_vel" />
         
-        <!-- Change the name of the move_base; it is first checked and handled by the client that we're using -->
-		<remap from="move_base/goal" to="move_base_navi/goal" />
-		<remap from="move_base/result" to="move_base_navi/result" />
-		<remap from="move_base/feedback" to="move_base_navi/feedback" />
-		<remap from="move_base/status" to="move_base_navi/status" />
-		<remap from="move_base/cancel" to="move_base_navi/cancel" />
-		<remap from="move_base_simple/goal" to="move_base_navi_simple/goal"/>
-		
         <!-- Remap the odometry feedback topic -->
         <remap from="/odom" to="/movo/odometry/local_filtered" />
 
@@ -41,9 +33,6 @@
         <param name="base_global_planner" value="global_planner/GlobalPlanner" />
         
         <!-- <param name="global_costmap/map_topic" value="$(arg map_topic)"/> -->
-        
-        <!-- younes todo these are already defined in costmap_*.yaml files mentioned above <param name="local_costmap/global_frame" value="map"/>
-        <param name="global_costmap/global_frame" value="map"/> -->
 
         <param name="EBandPlannerROS/rotation_threshold_multiplier" value="$(arg eband_rotational_threshold_multiplier)" />
         <param name="EBandPlannerROS/disallow_hysteresis" value="$(arg eband_disallow_hysteresis)" />
