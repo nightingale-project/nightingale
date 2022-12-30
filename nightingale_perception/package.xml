@@ -9,7 +9,6 @@
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
   <maintainer email="felix.wongKH@outlook.com">felix</maintainer>
 
-
   <!-- One license tag required, multiple allowed, one license per tag -->
   <!-- Commonly used license strings: -->
   <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
@@ -64,7 +63,6 @@
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>robot_body_filter</exec_depend>
   <exec_depend>sensor_filters</exec_depend>
-
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->
