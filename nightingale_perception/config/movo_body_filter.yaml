@@ -1,9 +1,9 @@
 cloud_filter_chain:
-- name: movo_filter
-  type: robot_body_filter/RobotBodyFilterPointcloud2
+- name: body_filter
+  type: robot_body_filter/RobotBodyFilterPointCloud2
   params:
      frames/fixed: "odom"
-     frames/sensor: "camera_link"
+     frames/sensor: "camera_link" # might be camera_depth_optical_link
      frames/filtering: "camera_link"
      frames/output: "camera_link"
      sensor/min_distance: 0.05
@@ -11,4 +11,13 @@ cloud_filter_chain:
      body_model/inflation/padding: 0.02
      filter/do_shadow/test: True
      #filter/model_pose_update_interval: 0.005 # arbitrary update interval selected for now
-     # only_links: [] LIST LINKS THAT ARE NEEDED TO BE CHECKED -> SHOULD ONLY BE ARM LINKS
+     only_links: ["left_arm_half_2_link", "left_forearm_link", "left_gripper_base_link", 
+                  "left_gripper_finger1_finger_tip_link", "left_finger1_knuckle_link", 
+                  "left_gripper_finger2_finger_tip_link", "left_finger2_knuckle_link",
+                  "left_gripper_finger3_finger_tip_link", "left_finger3_knuckle_link", 
+                  "left_wrist_3_link", "left_wrist_spherical_1_link", "left_wrist_spherical_2_link",
+                  "right_arm_half_2_link", "right_forearm_link", "right_gripper_base_link", 
+                  "right_gripper_finger1_finger_tip_link", "right_finger1_knuckle_link", 
+                  "right_gripper_finger2_finger_tip_link", "right_finger2_knuckle_link",
+                  "right_gripper_finger3_finger_tip_link", "right_finger3_knuckle_link", 
+                  "right_wrist_3_link", "right_wrist_spherical_1_link", "right_wrist_spherical_2_link"] #LIST LINKS THAT ARE NEEDED TO BE CHECKED -> SHOULD ONLY BE ARM LINKS
