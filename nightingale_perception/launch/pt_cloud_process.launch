@@ -13,14 +13,12 @@
   <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan_node">
       <!--remap from="/cloud_in" to="/camera/depth/color/points_filtered"/-->
       <remap from="/cloud_in" to="/camera/depth/color/points"/>
-
-      <!--remap from="/scan" to="/movo/base_scan_filtered"-->
+      <remap from="/scan" to="/movo/camera_scan"/>
 
       <rosparam>
-          #target_frame: "camera_link"
           target_frame: "front_laser_link"
-          min_height: 0 
-          range_min: 0 
+          min_height: -1.4 #negative because front laser tf has Z+ downward. Max expected movo height 
+          max_height: 0.20 # determined using trial and error in sim to see which value gives points and not ground plane
       </rosparam>
   </node>
 
