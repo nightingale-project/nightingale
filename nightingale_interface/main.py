@@ -2,9 +2,8 @@ import asyncio
 import roslibpy
 
 from kivy.config import Config
-
-Config.set("graphics", "width", "1280")
-Config.set("graphics", "height", "800")
+Config.set('graphics', 'width', '1280')
+Config.set('graphics', 'height', '800')
 
 from kivymd.app import MDApp
 from kivy.uix.screenmanager import ScreenManager
@@ -37,8 +36,8 @@ class MainApp(MDApp, ScreenWrapper):
         self._other_task = asyncio.ensure_future(self.backend())
 
         async def run_wrapper():
-            await self.async_run(async_lib="asyncio")
-            print("App done")
+            await self.async_run(async_lib='asyncio')
+            print('App done')
             self._other_task.cancel()
 
         return asyncio.gather(run_wrapper(), self._other_task)
@@ -53,7 +52,6 @@ class MainApp(MDApp, ScreenWrapper):
         await asyncio.sleep(0.5)
         self.root.transition = kivy.uix.screenmanager.FadeTransition()
         self.root.current = "facescreen"
-
         try:
             while True:
 
