@@ -8,25 +8,40 @@ from kivy.uix.screenmanager import SlideTransition, NoTransition
 
 
 class HomeScreen:
-    def nurse_alert(self, button_data):
+    def estop(self, button_data):
+        button_data.parent.manager.transition = NoTransition()
+        button_data.parent.manager.current = 'estoppedscreen'
+
+    def to_nurse_alert(self, button_data):
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = 'left'
         button_data.parent.manager.current = 'nursealertscreen'
 
-    def home_next(self, button_data):
+    def to_video_call(self, button_data):
+        #publish to topic to tell robot not to move
+
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = 'left'
-        button_data.parent.manager.current = 'screen2'
+        button_data.parent.manager.current = 'videocallscreen'
 
+        #open web browser to specific size of scree
 
-    def home_back(self, button_data):
+    def to_item_select(self, button_data):
+        #publish to topic to tell robot not to move
+
         button_data.parent.manager.transition = SlideTransition()
+        button_data.parent.manager.transition.direction = 'left'
+        button_data.parent.manager.current = 'itemselectscreen'
+
+    def send_home(self, button_data):
+        button_data.parent.manager.transition = NoTransition()
         button_data.parent.manager.transition.direction = 'left'
         button_data.parent.manager.current = 'facescreen'
 
-    def estop(self, button_data):
+    def to_admin_control(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        button_data.parent.manager.current = 'estoppedscreen'
+        button_data.parent.manager.transition.direction = 'left'
+        button_data.parent.manager.current = 'adminscreen'
 
 
     def home_build(self):
@@ -48,7 +63,7 @@ class HomeScreen:
             MDRectangleFlatButton(
                 text='Admin Control',
                 pos_hint={"center_x": 0.15, "center_y": 0.85},
-                on_release=self.home_next
+                on_release=self.to_admin_control
             )
         )
 
@@ -58,7 +73,7 @@ class HomeScreen:
                 font_style="H4",
                 pos_hint={"center_x": 0.5, "center_y": 0.35},
                 size_hint=(0.4, 0.12),
-                on_release=self.home_back
+                on_release=self.to_item_select
             )
         )
         screen.add_widget(
@@ -67,7 +82,7 @@ class HomeScreen:
                 font_style="H4",
                 pos_hint={"center_x": 0.5, "center_y": 0.5},
                 size_hint=(0.4, 0.12),
-                on_release=self.home_next
+                on_release=self.to_video_call
             )
         )
 
@@ -77,7 +92,7 @@ class HomeScreen:
                 font_style="H4",
                 pos_hint={"center_x": 0.5, "center_y": 0.65},
                 size_hint=(0.4, 0.12),
-                on_release=self.nurse_alert
+                on_release=self.to_nurse_alert
             )
         )
 
@@ -87,7 +102,7 @@ class HomeScreen:
                 font_style="H4",
                 pos_hint={"center_x": 0.15, "center_y": 0.15},
                 size_hint=(0.4, 0.12),
-                on_release=self.home_back
+                on_release=self.send_home
             )
         )
 

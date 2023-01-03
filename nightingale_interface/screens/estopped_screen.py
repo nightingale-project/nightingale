@@ -8,7 +8,7 @@ from kivymd.uix.button import MDRectangleFlatButton
 from kivy.uix.screenmanager import NoTransition
 
 class EStoppedScreen:
-    def back(self, button_data):
+    def exit_estop(self, button_data):
         #returns to previous screen that came before estop pressed
         button_data.parent.manager.transition = NoTransition()
         # Insert functionality to hold the last screen name
@@ -38,7 +38,7 @@ class EStoppedScreen:
                 font_style="H4",
                 pos_hint={"center_x": 0.5, "center_y": 0.5},
                 size_hint=(0.5, 0.1),
-                on_release=self.back
+                on_release=self.exit_estop
             )
         )
 

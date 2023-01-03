@@ -11,10 +11,6 @@ class FaceScreen:
         button_data.parent.manager.transition = NoTransition()
         button_data.parent.manager.current = 'homescreen' # Should just be the "Home" screen
 
-    def facescreen_estop(self, button_data):
-        button_data.parent.manager.transition = NoTransition()
-        button_data.parent.manager.current = 'estopped' # Should just be the "Home" screen
-
     def face_build(self):
         screen = Screen(name='facescreen')
 
@@ -30,7 +26,7 @@ class FaceScreen:
             Button(
                 background_normal="images/Face.png",
                 pos_hint={"center_x": 0.5, "center_y": 0.5},
-                size=(100,100),
+                size=(50,50),
                 on_release=self.to_homescreen
             )
         )

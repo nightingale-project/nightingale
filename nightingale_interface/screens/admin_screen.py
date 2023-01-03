@@ -12,7 +12,7 @@ class AdminScreen:
         button_data.parent.manager.transition = NoTransition()
         button_data.parent.manager.current = 'estoppedscreen'
 
-    def exit_home(self, button_data):
+    def to_home(self, button_data):
         button_data.parent.manager.transition = NoTransition()
         button_data.parent.manager.current = 'homescreen'
 
@@ -35,7 +35,7 @@ class AdminScreen:
             MDRectangleFlatButton(
                 text='Exit',
                 pos_hint={"center_x": 0.15, "center_y": 0.85},
-                on_release=self.exit_home
+                on_release=self.to_home
             )
         )
 
