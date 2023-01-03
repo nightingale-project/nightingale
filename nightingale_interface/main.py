@@ -2,8 +2,9 @@ import asyncio
 import roslibpy
 
 from kivy.config import Config
-Config.set('graphics', 'width', '1280')
-Config.set('graphics', 'height', '800')
+
+Config.set("graphics", "width", "1280")
+Config.set("graphics", "height", "800")
 
 from kivymd.app import MDApp
 from kivy.uix.screenmanager import ScreenManager
@@ -29,8 +30,8 @@ class MainApp(MDApp, ScreenWrapper):
         self._other_task = asyncio.ensure_future(self.backend())
 
         async def run_wrapper():
-            await self.async_run(async_lib='asyncio')
-            print('App done')
+            await self.async_run(async_lib="asyncio")
+            print("App done")
             self._other_task.cancel()
 
         return asyncio.gather(run_wrapper(), self._other_task)
@@ -44,7 +45,7 @@ class MainApp(MDApp, ScreenWrapper):
     async def backend(self):
         await asyncio.sleep(0.5)
         self.root.transition = kivy.uix.screenmanager.FadeTransition()
-        self.root.current = 'facescreen'
+        self.root.current = "facescreen"
         try:
             while True:
 
@@ -69,15 +70,19 @@ class MainApp(MDApp, ScreenWrapper):
 
     def init_ros(self):
         # initialize the ros bridge client
-        self.client = roslibpy.Ros(MovoConfig.Config['Movo2']["IP"], MovoConfig.Config['port'])
+        self.client = roslibpy.Ros(
+            MovoConfig.Config["Movo2"]["IP"], MovoConfig.Config["port"]
+        )
         self.client.run()
         asyncio.sleep(0.5)
 
         # initialize the /qt_robot/speech/say topic and stop service
-        self.dummy_topic = roslibpy.Topic(self.client, '/qt_robot/behavior/talkText', 'std_msgs/String')
+        self.dummy_topic = roslibpy.Topic(
+            self.client, "/qt_robot/behavior/talkText", "std_msgs/String"
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # initialize the app and event loop
     loop = asyncio.get_event_loop()
     app = MainApp()

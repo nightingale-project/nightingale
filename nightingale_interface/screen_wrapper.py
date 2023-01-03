@@ -7,14 +7,26 @@ from screens.extend_arm_screen import ExtendArmScreen
 from screens.retract_arm_screen import RetractArmScreen
 from screens.wait_item_get_screen import WaitItemGetScreen
 from screens.video_call_screen import VideoCallScreen
-from screens.item_select_screen import ItemSelectionScreen
+from screens.item_select_screen import ItemSelectScreen
 from screens.item_fill_screen import ItemFillScreen
 
 
 from kivy.uix.screenmanager import ScreenManager
 
 
-class ScreenWrapper(HomeScreen, NurseAlertScreen, FaceScreen, EStoppedScreen, AdminScreen, ExtendArmScreen, RetractArmScreen, WaitItemGetScreen, VideoCallScreen, ItemSelectionScreen, ItemFillScreen):
+class ScreenWrapper(
+    HomeScreen,
+    NurseAlertScreen,
+    FaceScreen,
+    EStoppedScreen,
+    AdminScreen,
+    ExtendArmScreen,
+    RetractArmScreen,
+    WaitItemGetScreen,
+    VideoCallScreen,
+    ItemSelectScreen,
+    ItemFillScreen,
+):
     def get_screen(self, name):
         for i in range(len(self.root.screen_names)):
             if self.root.screen_names[i] == name:

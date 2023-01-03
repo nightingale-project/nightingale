@@ -10,11 +10,11 @@ from kivy.uix.screenmanager import SlideTransition, NoTransition
 class AdminScreen:
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        button_data.parent.manager.current = 'estoppedscreen'
+        button_data.parent.manager.current = "estoppedscreen"
 
     def to_home(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        button_data.parent.manager.current = 'homescreen'
+        button_data.parent.manager.current = "homescreen"
 
     def shutdown(self, button_data):
         # shutdown system, might not be useful since HW button exists
@@ -29,58 +29,55 @@ class AdminScreen:
         pass
 
     def admin_build(self):
-        screen = Screen(name='adminscreen')
+        screen = Screen(name="adminscreen")
 
         screen.add_widget(
             MDRectangleFlatButton(
-                text='Exit',
+                text="Exit",
                 pos_hint={"center_x": 0.15, "center_y": 0.85},
-                on_release=self.to_home
+                on_release=self.to_home,
             )
         )
 
         # estop button
         screen.add_widget(
             Image(
-                source='images/stop.png',
+                source="images/stop.png",
                 allow_stretch=True,
                 keep_ratio=True,
                 size_hint_x=0.15,
                 pos_hint={"center_x": 0.85, "center_y": 0.85},
-                on_release=self.estop
+                on_release=self.estop,
             )
         )
 
         # functionality
         screen.add_widget(
             MDRectangleFlatButton(
-                text='System Shutdown',
+                text="System Shutdown",
                 font_style="H4",
                 pos_hint={"center_x": 0.5, "center_y": 0.35},
                 size_hint=(0.4, 0.12),
-                on_release=self.shutdown
+                on_release=self.shutdown,
             )
         )
         screen.add_widget(
             MDRectangleFlatButton(
-                text='Release bin',
+                text="Release bin",
                 font_style="H4",
                 pos_hint={"center_x": 0.5, "center_y": 0.5},
                 size_hint=(0.4, 0.12),
-                on_release=self.release_bin
+                on_release=self.release_bin,
             )
         )
         screen.add_widget(
             MDRectangleFlatButton(
-                text='Grasp bin',
+                text="Grasp bin",
                 font_style="H4",
                 pos_hint={"center_x": 0.5, "center_y": 0.65},
                 size_hint=(0.4, 0.12),
-                on_release=self.grasp_bin
+                on_release=self.grasp_bin,
             )
         )
 
-
         return screen
-
-
