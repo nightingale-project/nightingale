@@ -4,29 +4,43 @@ from kivy.uix.image import Image
 from kivymd.uix.label import MDLabel
 from kivymd.uix.button import MDRectangleFlatButton
 
-from kivy.uix.screenmanager import SlideTransition
+from kivy.uix.screenmanager import SlideTransition, NoTransition
 
 
-class Screen1:
-    def screen1_next(self, button_data):
+class HomeScreen:
+    def nurse_alert(self, button_data):
+        button_data.parent.manager.transition = SlideTransition()
+        button_data.parent.manager.transition.direction = 'left'
+        button_data.parent.manager.current = 'nursealertscreen'
+
+    def home_next(self, button_data):
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = 'left'
         button_data.parent.manager.current = 'screen2'
 
 
-    def screen1_back(self, button_data):
-        pass
+    def home_back(self, button_data):
+        button_data.parent.manager.transition = SlideTransition()
+        button_data.parent.manager.transition.direction = 'left'
+        button_data.parent.manager.current = 'facescreen'
 
-    def screen1_build(self):
-        screen = Screen(name='screen1')
+    def estop(self, button_data):
+        button_data.parent.manager.transition = NoTransition()
+        button_data.parent.manager.current = 'estoppedscreen'
 
+
+    def home_build(self):
+        screen = Screen(name='homescreen')
+
+        # estop button
         screen.add_widget(
             Image(
                 source='images/stop.png',
                 allow_stretch=True,
                 keep_ratio=True,
                 size_hint_x=0.15,
-                pos_hint={"center_x": 0.85, "center_y": 0.85}
+                pos_hint={"center_x": 0.85, "center_y": 0.85},
+                on_release=self.estop
             )
         )
 
@@ -34,7 +48,7 @@ class Screen1:
             MDRectangleFlatButton(
                 text='Admin Control',
                 pos_hint={"center_x": 0.15, "center_y": 0.85},
-                on_release=self.screen1_next
+                on_release=self.home_next
             )
         )
 
@@ -44,7 +58,7 @@ class Screen1:
                 font_style="H4",
                 pos_hint={"center_x": 0.5, "center_y": 0.35},
                 size_hint=(0.4, 0.12),
-                on_release=self.screen1_back
+                on_release=self.home_back
             )
         )
         screen.add_widget(
@@ -53,7 +67,7 @@ class Screen1:
                 font_style="H4",
                 pos_hint={"center_x": 0.5, "center_y": 0.5},
                 size_hint=(0.4, 0.12),
-                on_release=self.screen1_next
+                on_release=self.home_next
             )
         )
 
@@ -63,9 +77,20 @@ class Screen1:
                 font_style="H4",
                 pos_hint={"center_x": 0.5, "center_y": 0.65},
                 size_hint=(0.4, 0.12),
-                on_release=self.screen1_next
+                on_release=self.nurse_alert
             )
         )
+
+        screen.add_widget(
+            MDRectangleFlatButton(
+                text='Send home',
+                font_style="H4",
+                pos_hint={"center_x": 0.15, "center_y": 0.15},
+                size_hint=(0.4, 0.12),
+                on_release=self.home_back
+            )
+        )
+
 
 
         return screen

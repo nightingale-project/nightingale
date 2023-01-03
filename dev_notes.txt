@@ -1,3 +1,7 @@
 # Robot Teleop
 run <roslaunch nightingale_teleop keyboard.launch> to move robot with keyboard
 this automatically sets the robot in tractor mode
+
+# Tablet interface
+To Run install all necessary packages and run <python main.py>
+

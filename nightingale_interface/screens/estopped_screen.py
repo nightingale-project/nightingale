@@ -1,8 +1,9 @@
 from kivy.uix.screenmanager import Screen
 from kivy.uix.image import Image
+from kivy.uix.label import Label
 
 from kivymd.uix.label import MDLabel
-from kivymd.uix.button import MDRectangleFlatButton, Button
+from kivymd.uix.button import MDRectangleFlatButton
 
 from kivy.uix.screenmanager import NoTransition
 
@@ -11,7 +12,8 @@ class EStoppedScreen:
         #returns to previous screen that came before estop pressed
         button_data.parent.manager.transition = NoTransition()
         # Insert functionality to hold the last screen name
-        button_data.parent.manager.current = "LAST_SCREEN"  
+        # for simplicity now just go back to face screen and restart interaction
+        button_data.parent.manager.current = "facescreen"  
         
 
     def force_stop(self, button_data):
@@ -20,25 +22,26 @@ class EStoppedScreen:
         button_data.parent.manager.current = "SHUTDOWN"  
 
     def estopped_build(self):
-        screen = Screen(name='facescreen')
+        screen = Screen(name='estoppedscreen')
 
         # ADD IMAGE FOR STOPPED STATE
         screen.add_widget(
-            Button(
-                background_normal="images/stop.png",
+            Label(
+                text="STOPPED",
                 pos_hint={"center_x": 0.5, "center_y": 0.5},
-                size=(100,100),
-                on_release=self.to_homescreen
+                size=(30,30),
             )
         )
         screen.add_widget(
-            MDRectangelFlatButton(
-                background_normal="images/stop.png",
+            MDRectangleFlatButton(
+                text='Restart',
+                font_style="H4",
                 pos_hint={"center_x": 0.5, "center_y": 0.5},
-                size=(100,100),
-                on_release=self.to_homescreen
+                size_hint=(0.5, 0.1),
+                on_release=self.back
             )
         )
+
 
 
         return screen
