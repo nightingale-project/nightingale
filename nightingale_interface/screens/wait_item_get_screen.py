@@ -55,3 +55,4 @@ class WaitItemGetScreen:
         # )
 
         return screen
+

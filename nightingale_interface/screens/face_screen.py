@@ -34,6 +34,7 @@ class FaceScreen:
                 },
                 size_hint=(0.7, 1),
                 on_release=self.to_homescreen,
+
             )
         )
 

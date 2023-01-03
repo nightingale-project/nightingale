@@ -41,6 +41,7 @@ class EStoppedScreen:
                 pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.2},
                 size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
                 on_release=self.exit_estop,
+
             )
         )
 
