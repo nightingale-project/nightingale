@@ -11,6 +11,7 @@ from screens.screen_config import ScreenConfig as cfg
 from kivy.app import App
 
 
+
 class ItemSelectScreen:
     # below are the idx for the labels in the children array
     water_count_label_idx = 2
@@ -274,4 +275,3 @@ class ItemSelectScreen:
         screen.add_widget(blanket_counter_label)
 
         return screen
-

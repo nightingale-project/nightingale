@@ -10,6 +10,7 @@ from kivy.uix.screenmanager import NoTransition
 from screens.screen_config import ScreenConfig as cfg
 
 
+
 class FaceScreen:
     face_name = "facescreen"
 

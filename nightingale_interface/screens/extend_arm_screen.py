@@ -10,6 +10,7 @@ from kivy.uix.screenmanager import SlideTransition, NoTransition
 from screens.screen_config import ScreenConfig as cfg
 
 
+
 class ExtendArmScreen:
     extend_arm_name = "extendarmscreen"
 
@@ -75,4 +76,3 @@ class ExtendArmScreen:
         # )
 
         return screen
-

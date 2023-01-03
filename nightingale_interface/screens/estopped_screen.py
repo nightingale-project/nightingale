@@ -10,6 +10,7 @@ from kivy.uix.screenmanager import NoTransition
 from screens.screen_config import ScreenConfig as cfg
 
 
+
 class EStoppedScreen:
     estopped_name = "estoppedscreen"
 

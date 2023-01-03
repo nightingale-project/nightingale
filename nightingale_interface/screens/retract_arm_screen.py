@@ -39,4 +39,3 @@ class RetractArmScreen:
         # )
 
         return screen
-

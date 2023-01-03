@@ -16,6 +16,7 @@ class AdminScreen:
     def to_home(self, button_data):
         button_data.parent.manager.transition = NoTransition()
         cfg.last_screen = button_data.parent.manager.current
+
         button_data.parent.manager.current = "homescreen"
 
     def shutdown(self, button_data):
@@ -87,4 +88,3 @@ class AdminScreen:
         )
 
         return screen
-

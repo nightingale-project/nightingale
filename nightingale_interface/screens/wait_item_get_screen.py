@@ -10,6 +10,7 @@ from kivy.uix.screenmanager import SlideTransition, NoTransition
 from screens.screen_config import ScreenConfig as cfg
 
 
+
 class WaitItemGetScreen:
     wait_get_name = "waitgetitemscreen"
 
@@ -55,4 +56,3 @@ class WaitItemGetScreen:
         # )
 
         return screen
-
