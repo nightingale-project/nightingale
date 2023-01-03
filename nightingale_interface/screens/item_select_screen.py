@@ -6,7 +6,7 @@ from kivymd.uix.button import MDRectangleFlatButton
 
 from kivy.uix.screenmanager import SlideTransition, NoTransition
 
-class ItemSelectionScreen:
+class ItemSelectScreen:
     # way to have a single item to add or subtract? Use button data?
     def add_item1(self, button_data):
         # water bottle
