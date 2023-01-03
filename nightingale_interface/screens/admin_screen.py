@@ -87,3 +87,4 @@ class AdminScreen:
         )
 
         return screen
+

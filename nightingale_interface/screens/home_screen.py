@@ -120,5 +120,4 @@ class HomeScreen:
         #        on_release=self.to_nurse_alert,
         #    )
         # )
-
         return screen

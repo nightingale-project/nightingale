@@ -24,6 +24,7 @@ class FaceScreen:
         screen = Screen(name=self.face_name)
 
         # remove press color animation
+
         screen.add_widget(
             Button(
                 background_normal="images/Face.png",

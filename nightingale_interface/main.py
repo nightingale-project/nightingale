@@ -51,7 +51,7 @@ class MainApp(MDApp, ScreenWrapper):
     async def backend(self):
         await asyncio.sleep(0.5)
         self.root.transition = kivy.uix.screenmanager.FadeTransition()
-        self.root.current = "facescreen"
+        self.root.current = 'facescreen'
         try:
             while True:
 
