@@ -274,3 +274,4 @@ class ItemSelectScreen:
         screen.add_widget(blanket_counter_label)
 
         return screen
+
