@@ -4,8 +4,10 @@ from kivy.uix.videoplayer import VideoPlayer
 
 from kivymd.uix.label import MDLabel
 from kivymd.uix.button import MDRectangleFlatButton
+from kivy.uix.button import Button
 
 from kivy.uix.screenmanager import SlideTransition, NoTransition
+from screens.screen_config import ScreenConfig as cfg
 
 
 class WaitItemGetScreen:
@@ -23,12 +25,11 @@ class WaitItemGetScreen:
 
         # estop button
         screen.add_widget(
-            Image(
-                source="images/stop.png",
-                allow_stretch=True,
-                keep_ratio=True,
-                size_hint_x=0.15,
-                pos_hint={"center_x": 0.85, "center_y": 0.85},
+            Button(
+                background_normal="images/stop.png",
+                size_hint_x=cfg.ESTOP_XHINT,
+                size_hint_y=cfg.ESTOP_YHINT,
+                pos_hint={"center_x": cfg.ESTOP_XPOS, "center_y": cfg.ESTOP_YPOS},
                 on_release=self.estop,
             )
         )
