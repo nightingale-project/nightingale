@@ -32,6 +32,7 @@ class NurseAlertScreen:
                 on_release=self.estop,
             )
         )
+
         # For MDlabel the label must be created before font size can be changed
         alert_label = MDLabel(
             text="A nurse has been alerted",
