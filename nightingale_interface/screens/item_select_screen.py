@@ -116,6 +116,17 @@ class ItemSelectScreen:
             )
         )
 
+        # estop button
+        screen.add_widget(
+            Image(
+                source="images/waterbottle.png",
+                allow_stretch=True,
+                keep_ratio=True,
+                size_hint_x=0.05,
+                pos_hint={"center_x": 0.2, "center_y": 0.7},
+            )
+        )
+
         # water bottle
         screen.add_widget(
             Image(
