@@ -5,6 +5,7 @@ from kivymd.uix.label import MDLabel
 from kivymd.uix.button import MDRectangleFlatButton
 
 from kivy.uix.screenmanager import SlideTransition
+from screens.screen_config import ScreenConfig as cfg
 
 
 class NurseAlertScreen:
@@ -32,23 +33,26 @@ class NurseAlertScreen:
                 allow_stretch=True,
                 keep_ratio=True,
                 size_hint_x=0.15,
-                pos_hint={"center_x": 0.85, "center_y": 0.85},
+                pos_hint={"center_x": cfg.ESTOP_XPOS, "center_y": cfg.ESTOP_YPOS},
                 on_release=self.estop,
             )
         )
-        screen.add_widget(
-            MDLabel(
-                text="A nurse has been alerted",
-                font_style="H4",
-                halign="center",
-                pos_hint={"center_x": 0.5, "center_y": 0.6},
-            )
+        # For MDlabel the label must be created before font size can be changed
+        alert_label = MDLabel(
+            text="A nurse has been alerted",
+            font_style="H4",
+            halign="center",
+            pos_hint={"center_x": 0.5, "center_y": 0.6},
         )
+        alert_label.font_size = "100sp"
+
+        screen.add_widget(alert_label)
         screen.add_widget(
             MDRectangleFlatButton(
                 text="Cancel Alert",
-                pos_hint={"center_x": 0.2, "center_y": 0.2},
-                size_hint=(0.7, 0.12),
+                font_size=cfg.CANCEL_BUTTON_FONT_SIZE,
+                pos_hint={"center_x": 0.125, "center_y": 0.1},
+                size_hint=(0.2, 0.1),
                 on_release=self.nurse_alert_cancel,
             )
         )

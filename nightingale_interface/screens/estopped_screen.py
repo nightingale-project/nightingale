@@ -25,13 +25,14 @@ class EStoppedScreen:
         screen = Screen(name="estoppedscreen")
 
         # ADD IMAGE FOR STOPPED STATE
-        screen.add_widget(
-            Label(
-                text="STOPPED",
-                pos_hint={"center_x": 0.5, "center_y": 0.5},
-                size=(30, 30),
-            )
+        stopped_label = MDLabel(
+            text="STOPPED",
+            pos_hint={"center_x": 0.5, "center_y": 0.5},
+            size=(30, 30),
         )
+        stopped_label.font_size = "100sp"
+
+        screen.add_widget(stopped_label)
         screen.add_widget(
             MDRectangleFlatButton(
                 text="Restart",

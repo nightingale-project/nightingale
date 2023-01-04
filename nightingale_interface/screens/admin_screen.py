@@ -6,6 +6,8 @@ from kivymd.uix.button import MDRectangleFlatButton
 
 from kivy.uix.screenmanager import SlideTransition, NoTransition
 
+from screens.screen_config import ScreenConfig as cfg
+
 
 class AdminScreen:
     def estop(self, button_data):
@@ -31,14 +33,6 @@ class AdminScreen:
     def admin_build(self):
         screen = Screen(name="adminscreen")
 
-        screen.add_widget(
-            MDRectangleFlatButton(
-                text="Exit",
-                pos_hint={"center_x": 0.15, "center_y": 0.85},
-                on_release=self.to_home,
-            )
-        )
-
         # estop button
         screen.add_widget(
             Image(
@@ -46,8 +40,18 @@ class AdminScreen:
                 allow_stretch=True,
                 keep_ratio=True,
                 size_hint_x=0.15,
-                pos_hint={"center_x": 0.85, "center_y": 0.85},
+                pos_hint={"center_x": cfg.ESTOP_XPOS, "center_y": cfg.ESTOP_YPOS},
                 on_release=self.estop,
+            )
+        )
+
+        screen.add_widget(
+            MDRectangleFlatButton(
+                text="Exit",
+                font_size=cfg.CANCEL_BUTTON_FONT_SIZE,
+                pos_hint={"center_x": 0.125, "center_y": 0.9},
+                size_hint=(0.2, 0.1),
+                on_release=self.to_home,
             )
         )
 

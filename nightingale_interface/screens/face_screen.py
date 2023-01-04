@@ -3,8 +3,10 @@ from kivy.uix.image import Image
 
 from kivymd.uix.label import MDLabel
 from kivy.uix.button import Button
+from kivy.uix.label import Label
 
 from kivy.uix.screenmanager import NoTransition
+from screens.screen_config import ScreenConfig as cfg
 
 
 class FaceScreen:
@@ -17,19 +19,22 @@ class FaceScreen:
     def face_build(self):
         screen = Screen(name="facescreen")
 
-        screen.add_widget(
-            MDLabel(
-                text="CURRENT_ACTION",
-                font_style="H4",
-                halign="center",
-                pos_hint={"center_x": 0.4, "center_y": 0.85},
-            )
+        current_action_label = Label(
+            text="CURRENT_ACTION",
+            # font_style="H4",
+            halign="center",
+            pos_hint={"center_x": 0.5, "center_y": 0.9},
         )
+        current_action_label.font_size = "50sp"
+
+        screen.add_widget(current_action_label)
+
+        # remove press color animation
         screen.add_widget(
             Button(
                 background_normal="images/Face.png",
                 pos_hint={"center_x": 0.5, "center_y": 0.5},
-                size=(50, 50),
+                size_hint=(0.5, 0.5),
                 on_release=self.to_homescreen,
             )
         )
