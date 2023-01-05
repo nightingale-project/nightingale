@@ -1,3 +1,10 @@
 # Robot Teleop
 run <roslaunch nightingale_teleop keyboard.launch> to move robot with keyboard
 this automatically sets the robot in tractor mode
+
+# Code Formatting
+To format code install black formatter for python and clang for cpp.
+Remember to use google style with Clang
+Black - install: <pip install black> usage: <black [file or directory]>
+Clang - install: <sudo apt install clang-format> usage: <clang-format --style=Google -i [filename]>
+Clang info here: https://clang.llvm.org/docs/ClangFormatStyleOptions.html
