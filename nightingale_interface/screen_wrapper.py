@@ -9,7 +9,7 @@ from screens.wait_item_get_screen import WaitItemGetScreen
 from screens.video_call_screen import VideoCallScreen
 from screens.item_select_screen import ItemSelectScreen
 from screens.item_fill_screen import ItemFillScreen
-
+from screens.confirmation_screen import ConfirmationScreen
 
 from kivy.uix.screenmanager import ScreenManager
 
@@ -26,6 +26,7 @@ class ScreenWrapper(
     VideoCallScreen,
     ItemSelectScreen,
     ItemFillScreen,
+    ConfirmationScreen
 ):
     def get_screen(self, name):
         for i in range(len(self.root.screen_names)):
@@ -45,6 +46,7 @@ class ScreenWrapper(
         videocallscreen = self.video_call_build()
         itemselectionscreen = self.item_select_build()
         itemfillscreen = self.item_fill_build()
+        confirmationscreen = self.confirmation_build()
 
         sm = ScreenManager()
         sm.add_widget(facescreen)
@@ -58,5 +60,6 @@ class ScreenWrapper(
         sm.add_widget(videocallscreen)
         sm.add_widget(itemselectionscreen)
         sm.add_widget(itemfillscreen)
+        sm.add_widget(confirmationscreen)
 
         return sm

@@ -16,7 +16,9 @@ class VideoCallScreen:
 
     def exit_call(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        button_data.parent.manager.current = button_data.parent.manager.previous()
+        #button_data.parent.manager.current = button_data.parent.manager.previous()
+        button_data.parent.manager.current = 'homescreen' 
+
 
     def video_call_build(self):
         screen = Screen(name="videocallscreen")

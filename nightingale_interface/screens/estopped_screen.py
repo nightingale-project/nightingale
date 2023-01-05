@@ -13,7 +13,8 @@ class EStoppedScreen:
     def exit_estop(self, button_data):
         # returns to previous screen that came before estop pressed
         button_data.parent.manager.transition = NoTransition()
-        button_data.parent.manager.current = button_data.parent.manager.previous()
+        button_data.parent.manager.current = 'confirmationscreen' 
+        #button_data.parent.manager.current = button_data.parent.manager.previous()
 
     def force_stop(self, button_data):
         # kill robot in emergency if pressed
