@@ -12,7 +12,7 @@ from screens.screen_config import ScreenConfig as cfg
 class FaceScreen:
     def to_homescreen(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = 'facescreen'
+        cfg.LAST_SCREEN = "facescreen"
         button_data.parent.manager.current = (
             "homescreen"  # Should just be the "Home" screen
         )

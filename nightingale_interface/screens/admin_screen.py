@@ -13,12 +13,12 @@ from screens.screen_config import ScreenConfig as cfg
 class AdminScreen:
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = 'adminscreen'
+        cfg.LAST_SCREEN = "adminscreen"
         button_data.parent.manager.current = "estoppedscreen"
 
     def to_home(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = 'adminscreen'
+        cfg.LAST_SCREEN = "adminscreen"
         button_data.parent.manager.current = "homescreen"
 
     def shutdown(self, button_data):

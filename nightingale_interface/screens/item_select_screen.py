@@ -42,33 +42,39 @@ class ItemSelectScreen:
 
     # functions to update text on count change
     def on_water_count(self, *args):
-        self.root.screens[self.item_select_screen_id].children[self.water_count_label_idx].text =str(self.water_count)
+        self.root.screens[self.item_select_screen_id].children[
+            self.water_count_label_idx
+        ].text = str(self.water_count)
 
     def on_ice_count(self, *args):
-        self.root.screens[self.item_select_screen_id].children[self.ice_count_label_idx].text =str(self.ice_count)
+        self.root.screens[self.item_select_screen_id].children[
+            self.ice_count_label_idx
+        ].text = str(self.ice_count)
 
     def on_blanket_count(self, *args):
-        self.root.screens[self.item_select_screen_id].children[self.blanket_count_label_idx].text =str(self.blanket_count)
+        self.root.screens[self.item_select_screen_id].children[
+            self.blanket_count_label_idx
+        ].text = str(self.blanket_count)
 
     def send_request(self, button_data):
         # send to ROS topic and return to homescren
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "right"
-        cfg.LAST_SCREEN='itemselectscreen'
+        cfg.LAST_SCREEN = "itemselectscreen"
         cfg.PENDING_ACTION = cfg.STOCK
-        button_data.parent.manager.current = 'confirmationscreen' 
+        button_data.parent.manager.current = "confirmationscreen"
 
     def cancel_request(self, button_data):
         # return to homescreen
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "right"
-        cfg.LAST_SCREEN='itemselectscreen'
+        cfg.LAST_SCREEN = "itemselectscreen"
         cfg.PENDING_ACTION = cfg.NO_ROS_ACTION
-        button_data.parent.manager.current = 'confirmationscreen' 
+        button_data.parent.manager.current = "confirmationscreen"
 
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN='itemselectscreen'
+        cfg.LAST_SCREEN = "itemselectscreen"
         button_data.parent.manager.current = "estoppedscreen"
 
     def item_select_build(self):
@@ -105,7 +111,6 @@ class ItemSelectScreen:
                 on_release=self.send_request,
             )
         )
-
 
         # water bottle
         screen.add_widget(

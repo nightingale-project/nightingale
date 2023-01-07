@@ -33,7 +33,6 @@ class MainApp(MDApp, ScreenWrapper):
     ice_count = NumericProperty(0)
     blanket_count = NumericProperty(0)
 
-
     def main(self):
         self._other_task = asyncio.ensure_future(self.backend())
 

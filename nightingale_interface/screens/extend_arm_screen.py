@@ -13,19 +13,19 @@ from screens.screen_config import ScreenConfig as cfg
 class ExtendArmScreen:
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = 'extendarmscreen'
+        cfg.LAST_SCREEN = "extendarmscreen"
         button_data.parent.manager.current = "estoppedscreen"
 
     def to_item_get_screen(self):
         # goes to next screen to tell user to take items
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = 'extendarmscreen'
+        cfg.LAST_SCREEN = "extendarmscreen"
         button_data.parent.manager.current = "waititemgetscreen"
 
     def retract_arm(self, button_data):
         # publishes message to stop to retract arm
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = 'extendarmscreen'
+        cfg.LAST_SCREEN = "extendarmscreen"
         button_data.parent.manager.current = "retractarmscreen"
 
     def extend_arm_build(self):

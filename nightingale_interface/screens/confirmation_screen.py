@@ -10,10 +10,9 @@ from screens.screen_config import ScreenConfig as cfg
 
 
 class ConfirmationScreen:
-
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = 'confirmationscreen'
+        cfg.LAST_SCREEN = "confirmationscreen"
         button_data.parent.manager.current = "estoppedscreen"
 
     def reset_counts(self):
@@ -24,16 +23,16 @@ class ConfirmationScreen:
             self.blanket_count = 0
 
     def press(self, button_data):
-        if button_data.id == 'yes':
+        if button_data.id == "yes":
             # do yes and return home
             button_data.parent.manager.transition = NoTransition()
-            cfg.LAST_SCREEN = 'confirmationscreen'
-            
+            cfg.LAST_SCREEN = "confirmationscreen"
+
             def execute_action():
                 # state machine to do things based on the executed action
                 # if given a 'yes' confirmation
-                cfg.CURRENT_ACTION = cfg.PENDING_ACTION 
-                cfg.PENDING_ACTION = ''
+                cfg.CURRENT_ACTION = cfg.PENDING_ACTION
+                cfg.PENDING_ACTION = ""
                 print(f"CUR ACTION {cfg.CURRENT_ACTION}")
 
                 # reset counters regardless of cancel or send
@@ -62,11 +61,10 @@ class ConfirmationScreen:
 
             execute_action()
 
-
-        elif button_data.id == 'no':
-            #do nothing and return to previous screen
+        elif button_data.id == "no":
+            # do nothing and return to previous screen
             button_data.parent.manager.transition = NoTransition()
-            button_data.parent.manager.current = cfg.LAST_SCREEN 
+            button_data.parent.manager.current = cfg.LAST_SCREEN
 
     def confirmation_build(self):
         screen = Screen(name="confirmationscreen")
@@ -82,7 +80,7 @@ class ConfirmationScreen:
             )
         )
 
-        # add label asking to confirm 
+        # add label asking to confirm
         confirmation_label = MDLabel(
             text="Confirm selection",
             font_style="H4",
@@ -99,7 +97,7 @@ class ConfirmationScreen:
                 font_style="H4",
                 pos_hint={"center_x": 0.25, "center_y": 0.5},
                 size_hint=(0.4, 0.12),
-                on_release=self.press
+                on_release=self.press,
             )
         )
 
@@ -114,6 +112,4 @@ class ConfirmationScreen:
             )
         )
 
-
         return screen
-
