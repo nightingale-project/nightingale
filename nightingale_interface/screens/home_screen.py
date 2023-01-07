@@ -22,6 +22,7 @@ class HomeScreen:
         button_data.parent.manager.transition.direction = "left"
         cfg.last_screen = button_data.parent.manager.current
         button_data.parent.manager.current = "nursealertscreen"
+        #cfg.LAST_SCREEN = self.screen_name
 
     def to_video_call(self, button_data):
         # publish to topic to tell robot not to move

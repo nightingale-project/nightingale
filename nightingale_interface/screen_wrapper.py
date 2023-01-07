@@ -29,6 +29,7 @@ class ScreenWrapper(
     ItemFillScreen,
     ConfirmationScreen,
 ):
+
     def get_screen(self, name):
         for i in range(len(self.root.screen_names)):
             if self.root.screen_names[i] == name:

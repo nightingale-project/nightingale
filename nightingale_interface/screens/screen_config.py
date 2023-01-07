@@ -1,3 +1,4 @@
+
 class ScreenConfig:
     CANCEL_BUTTON_FONTSIZE = 40
 
@@ -36,3 +37,4 @@ class ScreenConfig:
     last_screen = "facescreen"
 
     payload = ""
+
