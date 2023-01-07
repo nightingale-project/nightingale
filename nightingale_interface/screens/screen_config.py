@@ -1,4 +1,3 @@
-
 class ScreenConfig:
     CANCEL_BUTTON_FONTSIZE = 40
     ESTOP_XPOS = 0.925
@@ -10,7 +9,19 @@ class ScreenConfig:
     INCR_BUTTON_XPOS = 0.75
     INCR_BUTTON_FONTSIZE = 50
 
-    CURRENT_ACTION = 'IDLE'
+    CURRENT_ACTION = 'Waiting'
+    PENDING_ACTION = 'Waiting'
     LAST_SCREEN = 'facescreen'
+
+    # action enums for user buttons
+    NO_ROS_ACTION = 0
+    ESTOP_CANCEL = 1
+    STOCK = 2
+    DELIVER = 3
+    GO_HOME = 4
+    ITEM_DELIVERED = 5
+
+
+
 
 

@@ -55,6 +55,7 @@ class ItemSelectScreen:
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "right"
         cfg.LAST_SCREEN='itemselectscreen'
+        cfg.PENDING_ACTION = cfg.STOCK
         button_data.parent.manager.current = 'confirmationscreen' 
 
     def cancel_request(self, button_data):
@@ -62,6 +63,7 @@ class ItemSelectScreen:
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "right"
         cfg.LAST_SCREEN='itemselectscreen'
+        cfg.PENDING_ACTION = cfg.NO_ROS_ACTION
         button_data.parent.manager.current = 'confirmationscreen' 
 
     def estop(self, button_data):

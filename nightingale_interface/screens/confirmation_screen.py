@@ -20,7 +20,37 @@ class ConfirmationScreen:
             # do yes and return home
             button_data.parent.manager.transition = NoTransition()
             cfg.LAST_SCREEN = 'confirmationscreen'
-            button_data.parent.manager.current = "homescreen"
+            
+            def execute_action():
+                # state machine to do things based on the executed action
+                # if given a 'yes' confirmation
+                cfg.CURRENT_ACTION = cfg.PENDING_ACTION 
+                cfg.PENDING_ACTION = ''
+                print(f"CUR ACTION {cfg.CURRENT_ACTION}")
+
+                if cfg.CURRENT_ACTION == cfg.NO_ROS_ACTION:
+                    # cancel and wait for other inputs. No ROS funcs
+                    button_data.parent.manager.current = "homescreen"
+                elif cfg.CURRENT_ACTION == cfg.ESTOP_CANCEL:
+                    # estop cancel
+                    # send ROS message to resume
+                    button_data.parent.manager.current = "homescreen"
+                elif cfg.CURRENT_ACTION == cfg.STOCK:
+                    # get items
+                    # send ros message to move to stock room
+                    button_data.parent.manager.current = "facescreen"
+                elif cfg.CURRENT_ACTION == cfg.DELIVER:
+                    # deliver items
+                    # send ros message to move to patient
+                    button_data.parent.manager.current = "facescreen"
+                elif cfg.CURRENT_ACTION == cfg.GO_HOME:
+                    # deliver items
+                    # send ros message to move to patient
+                    button_data.parent.manager.current = "facescreen"
+
+            execute_action()
+
+
         elif button_data.id == 'no':
             #do nothing and return to previous screen
             button_data.parent.manager.transition = NoTransition()

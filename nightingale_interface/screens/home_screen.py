@@ -22,11 +22,9 @@ class HomeScreen:
         button_data.parent.manager.transition.direction = "left"
         cfg.LAST_SCREEN = 'homescreen' 
         button_data.parent.manager.current = "nursealertscreen"
-        #cfg.LAST_SCREEN = self.screen_name
 
     def to_video_call(self, button_data):
         # publish to topic to tell robot not to move
-
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "left"
         cfg.LAST_SCREEN = 'homescreen' 
@@ -35,7 +33,6 @@ class HomeScreen:
 
     def to_item_select(self, button_data):
         # publish to topic to tell robot not to move
-
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "left"
         cfg.LAST_SCREEN = 'homescreen' 
@@ -45,7 +42,8 @@ class HomeScreen:
         button_data.parent.manager.transition = NoTransition()
         button_data.parent.manager.transition.direction = "left"
         cfg.LAST_SCREEN = 'homescreen' 
-        button_data.parent.manager.current = "facescreen"
+        cfg.PENDING_ACTION= cfg.GO_HOME
+        button_data.parent.manager.current = "confirmationscreen"
 
     def to_admin_control(self, button_data):
         button_data.parent.manager.transition = NoTransition()
