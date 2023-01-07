@@ -1,4 +1,3 @@
-
 class ScreenConfig:
     CANCEL_BUTTON_FONTSIZE = 40
 
