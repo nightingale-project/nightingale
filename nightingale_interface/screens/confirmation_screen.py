@@ -10,10 +10,18 @@ from screens.screen_config import ScreenConfig as cfg
 
 
 class ConfirmationScreen:
+
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
         cfg.LAST_SCREEN = 'confirmationscreen'
         button_data.parent.manager.current = "estoppedscreen"
+
+    def reset_counts(self):
+        # only reset if starting new selection
+        if cfg.LAST_SCREEN == "itemfillscreen":
+            self.water_count = 0
+            self.ice_count = 0
+            self.blanket_count = 0
 
     def press(self, button_data):
         if button_data.id == 'yes':
@@ -28,8 +36,12 @@ class ConfirmationScreen:
                 cfg.PENDING_ACTION = ''
                 print(f"CUR ACTION {cfg.CURRENT_ACTION}")
 
+                # reset counters regardless of cancel or send
+                self.reset_counts()
+
                 if cfg.CURRENT_ACTION == cfg.NO_ROS_ACTION:
                     # cancel and wait for other inputs. No ROS funcs
+
                     button_data.parent.manager.current = "homescreen"
                 elif cfg.CURRENT_ACTION == cfg.ESTOP_CANCEL:
                     # estop cancel

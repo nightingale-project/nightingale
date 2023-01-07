@@ -51,6 +51,7 @@ class ScreenWrapper(
         confirmationscreen = self.confirmation_build()
 
         sm = ScreenManager()
+        # id's of screens are in the order they are added, facescreen = 0, last is -1
         sm.add_widget(facescreen)
         sm.add_widget(homescreen)
         sm.add_widget(nursealertscreen)

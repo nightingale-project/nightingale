@@ -7,19 +7,22 @@ from kivy.uix.button import Button
 
 from kivy.uix.screenmanager import SlideTransition, NoTransition
 from screens.screen_config import ScreenConfig as cfg
-from kivy.properties import NumericProperty
+
+from kivy.app import App
 
 
 class ItemSelectScreen:
-    water_count = NumericProperty(0)
-    ice_count = NumericProperty(0)
-    blanket_count = NumericProperty(0)
+    # below are the idx for the labels in the children array
+    water_count_label_idx = 2
+    ice_count_label_idx = 1
+    blanket_count_label_idx = 0
 
-    def __init__(self, **kwargs):
-        self.water_count = 0
-        self.ice_count = 0
-        self.blanket_count = 0
-        self.water_count_text = "0"
+    # screen id from the screen manager
+    item_select_screen_id = 9
+
+    def on_enter(self, *args):
+        print("CALLED")
+        self.reset_counts()
 
     def add_item(self, button_data):
         if button_data.id == "water" and self.water_count < 3:
@@ -39,16 +42,13 @@ class ItemSelectScreen:
 
     # functions to update text on count change
     def on_water_count(self, *args):
-        print("here")
-        self.water_count_text = str(self.water_count)
-        print(vars(self.root.parent.children[0].screens[-2]))
-        print(self.root.parent.children[0].screens[-2].ids)
+        self.root.screens[self.item_select_screen_id].children[self.water_count_label_idx].text =str(self.water_count)
 
     def on_ice_count(self, *args):
-        pass
+        self.root.screens[self.item_select_screen_id].children[self.ice_count_label_idx].text =str(self.ice_count)
 
     def on_blanket_count(self, *args):
-        pass
+        self.root.screens[self.item_select_screen_id].children[self.blanket_count_label_idx].text =str(self.blanket_count)
 
     def send_request(self, button_data):
         # send to ROS topic and return to homescren
@@ -84,6 +84,28 @@ class ItemSelectScreen:
                 on_release=self.estop,
             )
         )
+
+        # Cancel and send request buttons
+        screen.add_widget(
+            MDRectangleFlatButton(
+                text="Cancel",
+                font_size=cfg.CANCEL_BUTTON_FONTSIZE,
+                pos_hint={"center_x": 0.125, "center_y": 0.9},
+                size_hint=(0.2, 0.1),
+                on_release=self.cancel_request,
+            )
+        )
+
+        screen.add_widget(
+            MDRectangleFlatButton(
+                text="Send",
+                font_style="H4",
+                pos_hint={"center_x": 0.9, "center_y": 0.1},
+                size_hint=(0.2, 0.1),
+                on_release=self.send_request,
+            )
+        )
+
 
         # water bottle
         screen.add_widget(
@@ -209,55 +231,38 @@ class ItemSelectScreen:
             )
         )
 
-        # counters for each item
-        water_counter = MDLabel(
-            text=self.water_count_text,
+        # counters for each item placed at end so indexes in children array are easy to find
+        water_counter_label = MDLabel(
+            text="0",
             id="water_count",
             font_style="H4",
             halign="center",
             pos_hint={"center_x": 0.9, "center_y": 0.7},
         )
-        water_counter.font_size = "70sp"
+        water_counter_label.font_size = "70sp"
 
-        ice_counter = MDLabel(
-            text="Ice",
+        screen.add_widget(water_counter_label)
+
+        ice_counter_label = MDLabel(
+            text="0",
+            id="ice_count",
             font_style="H4",
             halign="center",
             pos_hint={"center_x": 0.9, "center_y": 0.5},
         )
-        ice_counter.font_size = "70sp"
+        ice_counter_label.font_size = "70sp"
 
-        blanket_counter = MDLabel(
-            text="Blanket",
+        screen.add_widget(ice_counter_label)
+
+        blanket_counter_label = MDLabel(
+            text="0",
+            id="blanket_count",
             font_style="H4",
             halign="center",
             pos_hint={"center_x": 0.9, "center_y": 0.3},
         )
-        blanket_counter.font_size = "70sp"
+        blanket_counter_label.font_size = "70sp"
 
-        screen.add_widget(water_counter)
-        screen.add_widget(ice_counter)
-        screen.add_widget(blanket_counter)
-
-        # Cancel and send request buttons
-        screen.add_widget(
-            MDRectangleFlatButton(
-                text="Cancel",
-                font_size=cfg.CANCEL_BUTTON_FONTSIZE,
-                pos_hint={"center_x": 0.125, "center_y": 0.9},
-                size_hint=(0.2, 0.1),
-                on_release=self.cancel_request,
-            )
-        )
-
-        screen.add_widget(
-            MDRectangleFlatButton(
-                text="Send",
-                font_style="H4",
-                pos_hint={"center_x": 0.9, "center_y": 0.1},
-                size_hint=(0.2, 0.1),
-                on_release=self.send_request,
-            )
-        )
+        screen.add_widget(blanket_counter_label)
 
         return screen

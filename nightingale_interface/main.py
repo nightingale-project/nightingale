@@ -9,9 +9,11 @@ Config.set("graphics", "height", "800")
 from kivymd.app import MDApp
 from kivy.uix.screenmanager import ScreenManager
 import kivy
+from kivy.properties import NumericProperty
 
 import MovoConfig
 from screen_wrapper import ScreenWrapper
+from screens.screen_config import ScreenConfig as cfg
 
 
 class MainApp(MDApp, ScreenWrapper):
@@ -25,6 +27,12 @@ class MainApp(MDApp, ScreenWrapper):
     # task queue things
     queue_task = []
     queue_delay = []
+
+    # counters for items
+    water_count = NumericProperty(0)
+    ice_count = NumericProperty(0)
+    blanket_count = NumericProperty(0)
+
 
     def main(self):
         self._other_task = asyncio.ensure_future(self.backend())
@@ -46,6 +54,7 @@ class MainApp(MDApp, ScreenWrapper):
         await asyncio.sleep(0.5)
         self.root.transition = kivy.uix.screenmanager.FadeTransition()
         self.root.current = "facescreen"
+
         try:
             while True:
 
@@ -80,6 +89,10 @@ class MainApp(MDApp, ScreenWrapper):
         self.dummy_topic = roslibpy.Topic(
             self.client, "/qt_robot/behavior/talkText", "std_msgs/String"
         )
+
+    def listen_ros_master(self):
+        # function to wait for responses from the master
+        pass
 
 
 if __name__ == "__main__":
