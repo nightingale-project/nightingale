@@ -13,11 +13,13 @@ from screens.screen_config import ScreenConfig as cfg
 class WaitItemGetScreen:
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
+        cfg.LAST_SCREEN='waititemgetscreen'
         button_data.parent.manager.current = "estoppedscreen"
 
     def retract_arm(self, button_data):
         # publishes message to stop to retract arm
         button_data.parent.manager.transition = NoTransition()
+        cfg.LAST_SCREEN='waititemgetscreen'
         button_data.parent.manager.current = "retractarmscreen"
 
     def wait_item_get_build(self):

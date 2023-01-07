@@ -12,16 +12,21 @@ from screens.screen_config import ScreenConfig as cfg
 class ItemFillScreen:
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
+        cfg.LAST_SCREEN='itemfillscreen'
         button_data.parent.manager.current = "estoppedscreen"
 
     def fill_done(self, button_data):
         # publish to ROS topic to let robot go away
-        pass
+        cfg.LAST_SCREEN='itemfillscreen'
+        button_data.parent.manager.transition = NoTransition()
+        button_data.parent.manager.current = "facescreen"
 
     def fill_cancel(self, button_data):
         # cancel and publish topic to go to home
-        pass
-
+        cfg.LAST_SCREEN='itemfillscreen'
+        button_data.parent.manager.transition = NoTransition()
+        button_data.parent.manager.current = "confirmationscreen"
+ 
     def item_fill_build(self):
         screen = Screen(name="itemfillscreen")
 

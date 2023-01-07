@@ -54,17 +54,19 @@ class ItemSelectScreen:
         # send to ROS topic and return to homescren
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "right"
-        #button_data.parent.manager.current = button_data.parent.manager.previous()
+        cfg.LAST_SCREEN='itemselectscreen'
         button_data.parent.manager.current = 'confirmationscreen' 
 
     def cancel_request(self, button_data):
         # return to homescreen
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "right"
-        button_data.parent.manager.current = button_data.parent.manager.previous()
+        cfg.LAST_SCREEN='itemselectscreen'
+        button_data.parent.manager.current = 'confirmationscreen' 
 
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
+        cfg.LAST_SCREEN='itemselectscreen'
         button_data.parent.manager.current = "estoppedscreen"
 
     def item_select_build(self):

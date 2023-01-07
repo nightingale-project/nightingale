@@ -12,6 +12,7 @@ from screens.screen_config import ScreenConfig as cfg
 class FaceScreen:
     def to_homescreen(self, button_data):
         button_data.parent.manager.transition = NoTransition()
+        cfg.LAST_SCREEN = 'facescreen'
         button_data.parent.manager.current = (
             "homescreen"  # Should just be the "Home" screen
         )
@@ -20,7 +21,7 @@ class FaceScreen:
         screen = Screen(name="facescreen")
 
         current_action_label = Label(
-            text="CURRENT_ACTION",
+            text=cfg.CURRENT_ACTION,
             # font_style="H4",
             halign="center",
             pos_hint={"center_x": 0.5, "center_y": 0.9},

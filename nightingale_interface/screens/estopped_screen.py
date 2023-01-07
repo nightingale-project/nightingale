@@ -7,22 +7,27 @@ from kivymd.uix.button import MDRectangleFlatButton
 from kivy.uix.button import Button
 
 from kivy.uix.screenmanager import NoTransition
+from screens.screen_config import ScreenConfig as cfg
 
 
 class EStoppedScreen:
+    screen_name = 'estoppedscreen'
+
     def exit_estop(self, button_data):
         # returns to previous screen that came before estop pressed
         button_data.parent.manager.transition = NoTransition()
+        #cfg.LAST_SCREEN = self.screen_name 
+        cfg.LAST_SCREEN = 'estoppedscreen' 
         button_data.parent.manager.current = 'confirmationscreen' 
-        #button_data.parent.manager.current = button_data.parent.manager.previous()
 
     def force_stop(self, button_data):
         # kill robot in emergency if pressed
         button_data.parent.manager.transition = NoTransition()
         button_data.parent.manager.current = "SHUTDOWN"
+        cfg.LAST_SCREEN = self.screen_name 
 
     def estopped_build(self):
-        screen = Screen(name="estoppedscreen")
+        screen = Screen(name='estoppedscreen')
 
         # ADD IMAGE FOR STOPPED STATE
         stopped_label = MDLabel(

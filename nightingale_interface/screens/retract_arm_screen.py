@@ -13,12 +13,14 @@ from screens.screen_config import ScreenConfig as cfg
 class RetractArmScreen:
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
+        cfg.LAST_SCREEN='retractarmscreen'
         button_data.parent.manager.current = "estoppedscreen"
 
     def to_home(self):
         # goes to next screen to tell user to take items
         button_data.parent.manager.transition = NoTransition()
-        button_data.parent.manager.current = "home"
+        cfg.LAST_SCREEN='retractarmscreen'
+        button_data.parent.manager.current = "homescreen"
 
     def retract_arm_build(self):
         screen = Screen(name="retractarmscreen")

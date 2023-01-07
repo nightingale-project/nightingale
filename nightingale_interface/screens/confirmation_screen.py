@@ -12,18 +12,19 @@ from screens.screen_config import ScreenConfig as cfg
 class ConfirmationScreen:
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
+        cfg.LAST_SCREEN = 'confirmationscreen'
         button_data.parent.manager.current = "estoppedscreen"
 
     def press(self, button_data):
         if button_data.id == 'yes':
             # do yes and return home
             button_data.parent.manager.transition = NoTransition()
+            cfg.LAST_SCREEN = 'confirmationscreen'
             button_data.parent.manager.current = "homescreen"
         elif button_data.id == 'no':
             #do nothing and return to previous screen
             button_data.parent.manager.transition = NoTransition()
-            button_data.parent.manager.current = button_data.parent.manager.previous()
- 
+            button_data.parent.manager.current = cfg.LAST_SCREEN 
 
     def confirmation_build(self):
         screen = Screen(name="confirmationscreen")

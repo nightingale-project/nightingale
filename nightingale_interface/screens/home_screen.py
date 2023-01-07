@@ -10,22 +10,27 @@ from screens.screen_config import ScreenConfig as cfg
 
 
 class HomeScreen:
+    screen_name = 'homescreen'
+
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
+        cfg.LAST_SCREEN = 'homescreen' 
         button_data.parent.manager.current = "estoppedscreen"
 
     def to_nurse_alert(self, button_data):
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "left"
+        cfg.LAST_SCREEN = 'homescreen' 
         button_data.parent.manager.current = "nursealertscreen"
+        #cfg.LAST_SCREEN = self.screen_name
 
     def to_video_call(self, button_data):
         # publish to topic to tell robot not to move
 
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "left"
+        cfg.LAST_SCREEN = 'homescreen' 
         button_data.parent.manager.current = "videocallscreen"
-
         # open web browser to specific size of scree
 
     def to_item_select(self, button_data):
@@ -33,20 +38,22 @@ class HomeScreen:
 
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "left"
+        cfg.LAST_SCREEN = 'homescreen' 
         button_data.parent.manager.current = "itemselectscreen"
 
     def send_home(self, button_data):
         button_data.parent.manager.transition = NoTransition()
         button_data.parent.manager.transition.direction = "left"
+        cfg.LAST_SCREEN = 'homescreen' 
         button_data.parent.manager.current = "facescreen"
 
     def to_admin_control(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        button_data.parent.manager.transition.direction = "left"
+        cfg.LAST_SCREEN = 'homescreen' 
         button_data.parent.manager.current = "adminscreen"
 
     def home_build(self):
-        screen = Screen(name="homescreen")
+        screen = Screen(name='homescreen')
 
         # estop button
         screen.add_widget(

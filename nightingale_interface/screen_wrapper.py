@@ -12,6 +12,7 @@ from screens.item_fill_screen import ItemFillScreen
 from screens.confirmation_screen import ConfirmationScreen
 
 from kivy.uix.screenmanager import ScreenManager
+from kivy.properties import ListProperty
 
 
 class ScreenWrapper(
@@ -28,6 +29,7 @@ class ScreenWrapper(
     ItemFillScreen,
     ConfirmationScreen
 ):
+
     def get_screen(self, name):
         for i in range(len(self.root.screen_names)):
             if self.root.screen_names[i] == name:

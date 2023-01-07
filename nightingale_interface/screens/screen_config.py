@@ -1,3 +1,4 @@
+
 class ScreenConfig:
     CANCEL_BUTTON_FONTSIZE = 40
     ESTOP_XPOS = 0.925
@@ -8,3 +9,8 @@ class ScreenConfig:
     INCR_BUTTON_WIDTH = 0.1
     INCR_BUTTON_XPOS = 0.75
     INCR_BUTTON_FONTSIZE = 50
+
+    CURRENT_ACTION = 'IDLE'
+    LAST_SCREEN = 'facescreen'
+
+
