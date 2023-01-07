@@ -19,6 +19,13 @@ class ConfirmationScreen:
             self.ice_count = 0
             self.blanket_count = 0
 
+    def reset_counts(self):
+        # only reset if starting new selection
+        if cfg.LAST_SCREEN == "itemfillscreen":
+            self.water_count = 0
+            self.ice_count = 0
+            self.blanket_count = 0
+
     def press(self, button_data):
         if button_data.id == "yes":
             # do yes and return home
@@ -37,6 +44,7 @@ class ConfirmationScreen:
 
                 if cfg.current_action == cfg.NO_ROS_ACTION:
                     # cancel and wait for other inputs. No ROS funcs
+
                     button_data.parent.manager.current = "homescreen"
                 elif cfg.current_action == cfg.ESTOP_CANCEL:
                     # estop cancel
