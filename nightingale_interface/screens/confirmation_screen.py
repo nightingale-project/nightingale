@@ -10,9 +10,11 @@ from screens.screen_config import ScreenConfig as cfg
 
 
 class ConfirmationScreen:
+    confirmation_name = 'confirmationscreen'
+
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = "confirmationscreen"
+        cfg.LAST_SCREEN = self.confirmation_name
         button_data.parent.manager.current = "estoppedscreen"
 
     def reset_counts(self):
@@ -26,7 +28,7 @@ class ConfirmationScreen:
         if button_data.id == "yes":
             # do yes and return home
             button_data.parent.manager.transition = NoTransition()
-            cfg.LAST_SCREEN = "confirmationscreen"
+            cfg.LAST_SCREEN = self.confirmation_name
 
             def execute_action():
                 # state machine to do things based on the executed action
@@ -67,7 +69,7 @@ class ConfirmationScreen:
             button_data.parent.manager.current = cfg.LAST_SCREEN
 
     def confirmation_build(self):
-        screen = Screen(name="confirmationscreen")
+        screen = Screen(name=self.confirmation_name)
 
         # estop button
         screen.add_widget(

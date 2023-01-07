@@ -10,15 +10,17 @@ from screens.screen_config import ScreenConfig as cfg
 
 
 class FaceScreen:
+    face_name = 'facescreen'
+
     def to_homescreen(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = "facescreen"
+        cfg.LAST_SCREEN = self.face_name 
         button_data.parent.manager.current = (
             "homescreen"  # Should just be the "Home" screen
         )
 
     def face_build(self):
-        screen = Screen(name="facescreen")
+        screen = Screen(name=self.face_name)
 
         current_action_label = Label(
             text=cfg.CURRENT_ACTION,

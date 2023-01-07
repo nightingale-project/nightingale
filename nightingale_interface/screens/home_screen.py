@@ -10,24 +10,24 @@ from screens.screen_config import ScreenConfig as cfg
 
 
 class HomeScreen:
-    screen_name = "homescreen"
+    home_name = 'homescreen'
 
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = "homescreen"
+        cfg.LAST_SCREEN = self.home_name
         button_data.parent.manager.current = "estoppedscreen"
 
     def to_nurse_alert(self, button_data):
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "left"
-        cfg.LAST_SCREEN = "homescreen"
+        cfg.LAST_SCREEN = self.home_name
         button_data.parent.manager.current = "nursealertscreen"
 
     def to_video_call(self, button_data):
         # publish to topic to tell robot not to move
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "left"
-        cfg.LAST_SCREEN = "homescreen"
+        cfg.LAST_SCREEN = self.home_name
         button_data.parent.manager.current = "videocallscreen"
         # open web browser to specific size of scree
 
@@ -35,23 +35,23 @@ class HomeScreen:
         # publish to topic to tell robot not to move
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "left"
-        cfg.LAST_SCREEN = "homescreen"
+        cfg.LAST_SCREEN = self.home_name
         button_data.parent.manager.current = "itemselectscreen"
 
     def send_home(self, button_data):
         button_data.parent.manager.transition = NoTransition()
         button_data.parent.manager.transition.direction = "left"
-        cfg.LAST_SCREEN = "homescreen"
+        cfg.LAST_SCREEN = self.home_name
         cfg.PENDING_ACTION = cfg.GO_HOME
         button_data.parent.manager.current = "confirmationscreen"
 
     def to_admin_control(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = "homescreen"
+        cfg.LAST_SCREEN = self.home_name
         button_data.parent.manager.current = "adminscreen"
 
     def home_build(self):
-        screen = Screen(name="homescreen")
+        screen = Screen(name=self.home_name)
 
         # estop button
         screen.add_widget(

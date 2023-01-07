@@ -11,22 +11,25 @@ from screens.screen_config import ScreenConfig as cfg
 
 
 class EStoppedScreen:
+    estopped_name = "estoppedscreen"
+
     def exit_estop(self, button_data):
         # returns to previous screen that came before estop pressed
         button_data.parent.manager.transition = NoTransition()
         # cfg.LAST_SCREEN = self.screen_name
-        cfg.LAST_SCREEN = "estoppedscreen"
+        cfg.LAST_SCREEN = self.estopped_name
         cfg.PENDING_ACTION = cfg.ESTOP_CANCEL
         button_data.parent.manager.current = "confirmationscreen"
 
     def force_stop(self, button_data):
         # kill robot in emergency if pressed
+        # UNUSED
         button_data.parent.manager.transition = NoTransition()
         button_data.parent.manager.current = "SHUTDOWN"
         cfg.LAST_SCREEN = self.screen_name
 
     def estopped_build(self):
-        screen = Screen(name="estoppedscreen")
+        screen = Screen(name=self.estopped_name)
 
         # ADD IMAGE FOR STOPPED STATE
         stopped_label = MDLabel(

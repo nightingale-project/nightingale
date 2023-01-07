@@ -20,9 +20,8 @@ class ItemSelectScreen:
     # screen id from the screen manager
     item_select_screen_id = 9
 
-    def on_enter(self, *args):
-        print("CALLED")
-        self.reset_counts()
+    # screenname
+    item_select_name = 'itemselectscreen'
 
     def add_item(self, button_data):
         if button_data.id == "water" and self.water_count < 3:
@@ -45,22 +44,34 @@ class ItemSelectScreen:
         self.root.screens[self.item_select_screen_id].children[
             self.water_count_label_idx
         ].text = str(self.water_count)
+        self.root.screens[self.item_fill_screen_id].children[
+            self.water_count_label_idx
+        ].text = str(self.water_count)
+
 
     def on_ice_count(self, *args):
         self.root.screens[self.item_select_screen_id].children[
             self.ice_count_label_idx
         ].text = str(self.ice_count)
+        self.root.screens[self.item_fill_screen_id].children[
+            self.ice_count_label_idx
+        ].text = str(self.ice_count)
+
 
     def on_blanket_count(self, *args):
         self.root.screens[self.item_select_screen_id].children[
             self.blanket_count_label_idx
         ].text = str(self.blanket_count)
+        self.root.screens[self.item_fill_screen_id].children[
+            self.blanket_count_label_idx
+        ].text = str(self.blanket_count)
+
 
     def send_request(self, button_data):
         # send to ROS topic and return to homescren
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "right"
-        cfg.LAST_SCREEN = "itemselectscreen"
+        cfg.LAST_SCREEN = self.item_select_name 
         cfg.PENDING_ACTION = cfg.STOCK
         button_data.parent.manager.current = "confirmationscreen"
 
@@ -68,17 +79,17 @@ class ItemSelectScreen:
         # return to homescreen
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "right"
-        cfg.LAST_SCREEN = "itemselectscreen"
+        cfg.LAST_SCREEN = self.item_select_name
         cfg.PENDING_ACTION = cfg.NO_ROS_ACTION
         button_data.parent.manager.current = "confirmationscreen"
 
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = "itemselectscreen"
+        cfg.LAST_SCREEN = self.item_select_name
         button_data.parent.manager.current = "estoppedscreen"
 
     def item_select_build(self):
-        screen = Screen(name="itemselectscreen")
+        screen = Screen(name=self.item_select_name)
 
         # estop button
         screen.add_widget(

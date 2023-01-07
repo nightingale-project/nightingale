@@ -10,14 +10,19 @@ from screens.screen_config import ScreenConfig as cfg
 
 
 class ItemFillScreen:
+    item_fill_name = 'itemfillscreen'
+
+    # screen id from the screen manager
+    item_fill_screen_id = 10 
+
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = "itemfillscreen"
+        cfg.LAST_SCREEN = self.item_fill_name
         button_data.parent.manager.current = "estoppedscreen"
 
     def fill_done(self, button_data):
         # publish to ROS topic to let robot go away
-        cfg.LAST_SCREEN = "itemfillscreen"
+        cfg.LAST_SCREEN = self.item_fill_name
         cfg.PENDING_ACTION = cfg.DELIVER
         button_data.parent.manager.transition = NoTransition()
         button_data.parent.manager.current = "confirmationscreen"
@@ -25,12 +30,12 @@ class ItemFillScreen:
     def fill_cancel(self, button_data):
         # cancel and publish topic to go to home
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = "itemfillscreen"
+        cfg.LAST_SCREEN = self.item_fill_name
         cfg.PENDING_ACTION = cfg.NO_ROS_ACTION
         button_data.parent.manager.current = "confirmationscreen"
 
     def item_fill_build(self):
-        screen = Screen(name="itemfillscreen")
+        screen = Screen(name=self.item_fill_name)
 
         # estop button
         screen.add_widget(

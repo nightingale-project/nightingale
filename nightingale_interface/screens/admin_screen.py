@@ -11,14 +11,16 @@ from screens.screen_config import ScreenConfig as cfg
 
 
 class AdminScreen:
+    admin_name = 'adminscreen'
+
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = "adminscreen"
+        cfg.LAST_SCREEN = self.admin_name 
         button_data.parent.manager.current = "estoppedscreen"
 
     def to_home(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = "adminscreen"
+        cfg.LAST_SCREEN = self.admin_name
         button_data.parent.manager.current = "homescreen"
 
     def shutdown(self, button_data):
@@ -34,7 +36,7 @@ class AdminScreen:
         pass
 
     def admin_build(self):
-        screen = Screen(name="adminscreen")
+        screen = Screen(name=self.admin_name)
 
         # estop button
         screen.add_widget(

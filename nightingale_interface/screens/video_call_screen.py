@@ -10,18 +10,20 @@ from screens.screen_config import ScreenConfig as cfg
 
 
 class VideoCallScreen:
+    video_call_name = "videocallscreen"
+
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = "videocallscreen"
+        cfg.LAST_SCREEN = self.video_call_name 
         button_data.parent.manager.current = "estoppedscreen"
 
     def exit_call(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = "videocallscreen"
+        cfg.LAST_SCREEN = self.video_call_name
         button_data.parent.manager.current = "homescreen"
 
     def video_call_build(self):
-        screen = Screen(name="videocallscreen")
+        screen = Screen(name=self.video_call_name)
 
         # estop button
         screen.add_widget(
