@@ -3,7 +3,7 @@ class ScreenConfig:
     ESTOP_XPOS = 0.925
     ESTOP_YPOS = 0.9
     ESTOP_XHINT = 0.15
-    ESTOP_YHINT = 0.15
+    ESTOP_YHINT = 0.2
     INCR_BUTTON_HEIGHT = 0.05
     INCR_BUTTON_WIDTH = 0.1
     INCR_BUTTON_XPOS = 0.75
