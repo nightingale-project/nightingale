@@ -6,8 +6,8 @@ cloud_filter_chain:
      frames/sensor: "camera_link" # might be camera_depth_optical_link
      sensor/point_by_point: False
      sensor/min_distance: 0.05
-     body_model/inflation/scale: 1.05
-     body_model/inflation/padding: 0.02
+     body_model/inflation/scale: 1.07
+     body_model/inflation/padding: 0.03
      filter/do_shadow/test: True
      transforms/buffer_length: 15.0
      transforms/timeout/reachable: 0.2
