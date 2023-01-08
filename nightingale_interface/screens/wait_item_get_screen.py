@@ -22,7 +22,8 @@ class WaitItemGetScreen:
         # publishes message to stop to retract arm
         button_data.parent.manager.transition = NoTransition()
         cfg.LAST_SCREEN = self.wait_get_name
-        button_data.parent.manager.current = "retractarmscreen"
+        cfg.PENDING_ACTION = cfg.RETRACT_ARM
+        button_data.parent.manager.current = "confirmationscreen"
 
     def wait_item_get_build(self):
         screen = Screen(name=self.wait_get_name)
@@ -44,7 +45,7 @@ class WaitItemGetScreen:
                 text="Finish",
                 font_style="H4",
                 pos_hint={"center_x": 0.85, "center_y": 0.15},
-                size_hint=(0.4, 0.12),
+                size_hint=(0.2, 0.12),
                 on_release=self.retract_arm,
             )
         )

@@ -10,11 +10,11 @@ from screens.screen_config import ScreenConfig as cfg
 
 
 class FaceScreen:
-    face_name = 'facescreen'
+    face_name = "facescreen"
 
     def to_homescreen(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = self.face_name 
+        cfg.LAST_SCREEN = self.face_name
         button_data.parent.manager.current = (
             "homescreen"  # Should just be the "Home" screen
         )

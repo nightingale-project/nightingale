@@ -10,7 +10,7 @@ from screens.screen_config import ScreenConfig as cfg
 
 
 class ConfirmationScreen:
-    confirmation_name = 'confirmationscreen'
+    confirmation_name = "confirmationscreen"
 
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
@@ -60,6 +60,12 @@ class ConfirmationScreen:
                     # deliver items
                     # send ros message to move to patient
                     button_data.parent.manager.current = "facescreen"
+                elif cfg.CURRENT_ACTION == cfg.EXTEND_ARM:
+                    # start arm movement with ROs and go back to screen
+                    button_data.parent.manager.current = "extendarmscreen"
+                elif cfg.CURRENT_ACTION == cfg.RETRACT_ARM:
+                    # start arm movement with ROs and go to retract arm screen
+                    button_data.parent.manager.current = "retractarmscreen"
 
             execute_action()
 

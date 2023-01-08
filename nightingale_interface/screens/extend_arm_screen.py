@@ -18,17 +18,21 @@ class ExtendArmScreen:
         cfg.LAST_SCREEN = self.extend_arm_name
         button_data.parent.manager.current = "estoppedscreen"
 
-    def to_item_get_screen(self):
-        # goes to next screen to tell user to take items
-        button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = self.extend_arm_name
-        button_data.parent.manager.current = "waititemgetscreen"
+    # when arm is extended to goal rostopic should publish to tell interface to switch to waititemget screen
 
     def retract_arm(self, button_data):
         # publishes message to stop to retract arm
         button_data.parent.manager.transition = NoTransition()
         cfg.LAST_SCREEN = self.extend_arm_name
-        button_data.parent.manager.current = "retractarmscreen"
+        cfg.PENDING_ACTION = cfg.RETRACT_ARM
+        button_data.parent.manager.current = "confirmation_screen"
+
+    def extend_arm(self, button_data):
+        # starts robot arm extend when patient is ready
+        button_data.parent.manager.transition = NoTransition()
+        cfg.LAST_SCREEN = self.extend_arm_name
+        cfg.PENDING_ACTION = cfg.EXTEND_ARM
+        button_data.parent.manager.current = "confirmationscreen"
 
     def extend_arm_build(self):
         screen = Screen(name=self.extend_arm_name)
@@ -52,6 +56,17 @@ class ExtendArmScreen:
                 pos_hint={"center_x": 0.85, "center_y": 0.15},
                 size_hint=(0.4, 0.12),
                 on_release=self.retract_arm,
+            )
+        )
+
+        # start extend arm
+        screen.add_widget(
+            MDRectangleFlatButton(
+                text="Start",
+                font_style="H4",
+                pos_hint={"center_x": 0.85, "center_y": 0.15},
+                size_hint=(0.4, 0.12),
+                on_release=self.extend_arm,
             )
         )
 

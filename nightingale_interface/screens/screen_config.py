@@ -20,3 +20,5 @@ class ScreenConfig:
     DELIVER = 3
     GO_HOME = 4
     ITEM_DELIVERED = 5
+    EXTEND_ARM = 6
+    RETRACT_ARM = 7

@@ -10,7 +10,7 @@ from screens.screen_config import ScreenConfig as cfg
 
 
 class HomeScreen:
-    home_name = 'homescreen'
+    home_name = "homescreen"
 
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()

@@ -12,17 +12,13 @@ from screens.screen_config import ScreenConfig as cfg
 
 class RetractArmScreen:
     retract_arm_name = "retractarmscreen"
+    # wait for rostopic published of when arm is normal state
+    # and switch screens on that
 
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
         cfg.LAST_SCREEN = self.retract_arm_name
         button_data.parent.manager.current = "estoppedscreen"
-
-    def to_home(self):
-        # goes to next screen to tell user to take items
-        button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = self.retract_arm_name
-        button_data.parent.manager.current = "homescreen"
 
     def retract_arm_build(self):
         screen = Screen(name=self.retract_arm_name)

@@ -10,10 +10,10 @@ from screens.screen_config import ScreenConfig as cfg
 
 
 class ItemFillScreen:
-    item_fill_name = 'itemfillscreen'
+    item_fill_name = "itemfillscreen"
 
     # screen id from the screen manager
-    item_fill_screen_id = 10 
+    item_fill_screen_id = 10
 
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
