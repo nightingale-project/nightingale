@@ -19,6 +19,10 @@
 
       <rosparam>
           target_frame: "front_laser_link" #front laser link chosen for 
+          angle_min: -2.0 # value choosen to match front laser scan
+          angle_max: 2.0
+          angle_increment: 0.005563282407820225 # resolution to match front laser
+          range_min: 0.10000000149011612 # same as front laser
           min_height: -1.4 #negative because front laser tf has Z+ downward. Max expected movo height 
           max_height: 0.20 # determined using trial and error in sim to see which value gives points and not ground plane
       </rosparam>
