@@ -1,5 +1,6 @@
 import asyncio
 import roslibpy
+import json
 
 from kivy.config import Config
 
@@ -22,7 +23,8 @@ class MainApp(MDApp, ScreenWrapper):
 
     # ros things
     client = None
-    dummy_topic = None
+    ros_action_topic = None
+    interface_screen_topic = None
 
     # task queue things
     queue_task = []
@@ -84,14 +86,28 @@ class MainApp(MDApp, ScreenWrapper):
         self.client.run()
         asyncio.sleep(0.5)
 
-        # initialize the /qt_robot/speech/say topic and stop service
-        self.dummy_topic = roslibpy.Topic(
-            self.client, "/qt_robot/behavior/talkText", "std_msgs/String"
-        )
+        self.ros_action_topic = roslibpy.Topic(self.client, "INSERT/TOPIC/HERE", "std_msgs/String")
 
-    def listen_ros_master(self):
-        # function to wait for responses from the master
-        pass
+        self.interface_screen_topic = roslibpy.Topic(self.client, "interface/set_screen", "std_msgs/String")
+        self.interface_screen_topic.subscribe(self.set_screen_callback)
+
+    # override
+    def call_ros_action(self, action: int, args: dict = {}) -> bool:
+        """
+        :param action: Enum for which action to be called
+        :param args: optional additional arguments
+        :return: True if successful
+        """
+        if not type(args) is dict:
+            args = {}
+        args['action'] = str(action)
+        json_str = json.dumps(args)
+        msg = roslibpy.Message({"data": json_str})
+        return self.ros_action_topic.publish(msg)
+
+    def set_screen_callback(self, msg):
+        # self.root.manager.current = msg['data']
+        return True
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+# TODO: need to potentially make cfg a thread safe class
 class ScreenConfig:
     CANCEL_BUTTON_FONTSIZE = 40
 
@@ -19,6 +20,10 @@ class ScreenConfig:
 
     SHORT_RECT_WIDTH = 0.2
     SHORT_RECT_HEIGHT = 0.1
+
+    CURRENT_ACTION = 0
+    PENDING_ACTION = 0
+    LAST_SCREEN = "facescreen"
 
     # action enums for user buttons
     NO_ROS_ACTION = 0
