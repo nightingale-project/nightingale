@@ -13,8 +13,8 @@
 
   <!-- Point cloud to laser scan conversion -->
   <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan_node">
-      <!--remap from="/cloud_in" to="$(arg filtered_points_topic)"/-->
-      <remap from="/cloud_in" to="/camera/depth/color/points"/>
+      <remap from="/cloud_in" to="$(arg filtered_points_topic)"/>
+      <!--remap from="/cloud_in" to="/camera/depth/color/points"/-->
       <remap from="/scan" to="/movo/camera_scan"/>
 
       <rosparam>
