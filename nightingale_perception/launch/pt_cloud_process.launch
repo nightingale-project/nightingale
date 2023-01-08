@@ -4,7 +4,7 @@
   <arg name="filtered_points_topic" default="/camera/depth/color/points_body_filtered"/>
 
   <!-- Point cloud body filter node -->
-  <node name="pointcloud_filter" pkg="sensor_filters" type="pointcloud2_filter_chain">
+  <node name="pointcloud_filter" pkg="sensor_filters" type="pointcloud2_filter_chain" output="screen">
       <rosparam command="load" file="$(find nightingale_perception)/config/movo_body_filter.yaml" />
   
       <remap from="~input" to="/camera/depth/color/points" />
@@ -12,7 +12,7 @@
   </node>
 
   <!-- Point cloud to laser scan conversion -->
-  <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan_node">
+  <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan_node" output="screen">
       <remap from="/cloud_in" to="$(arg filtered_points_topic)"/>
       <!--remap from="/cloud_in" to="/camera/depth/color/points"/-->
       <remap from="/scan" to="/movo/camera_scan"/>
