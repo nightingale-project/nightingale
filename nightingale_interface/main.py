@@ -86,7 +86,7 @@ class MainApp(MDApp, ScreenWrapper):
         self.client.run()
         asyncio.sleep(0.5)
 
-        self.ros_action_topic = roslibpy.Topic(self.client, "INSERT/TOPIC/HERE", "std_msgs/String")
+        self.ros_action_topic = roslibpy.Topic(self.client, "interface/action", "std_msgs/String")
 
         self.interface_screen_topic = roslibpy.Topic(self.client, "interface/set_screen", "std_msgs/String")
         self.interface_screen_topic.subscribe(self.set_screen_callback)
