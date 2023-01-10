@@ -19,7 +19,7 @@ from screens.screen_config import ScreenConfig as cfg
 
 class MainApp(MDApp, ScreenWrapper):
     _other_task = None
-    coms_enabled = False
+    coms_enabled = True
 
     # ros things
     client = None
@@ -81,8 +81,9 @@ class MainApp(MDApp, ScreenWrapper):
     def init_ros(self):
         # initialize the ros bridge client
         self.client = roslibpy.Ros(
-            MovoConfig.Config["Movo2"]["IP"], MovoConfig.Config["port"]
+            "localhost", MovoConfig.Config["RosBridgePort"]
         )
+        #MovoConfig.Config["Movo2"]["IP"]
         self.client.run()
         asyncio.sleep(0.5)
 
@@ -102,8 +103,13 @@ class MainApp(MDApp, ScreenWrapper):
             args = {}
         args['action'] = str(action)
         json_str = json.dumps(args)
+        print(str(json_str))
         msg = roslibpy.Message({"data": json_str})
-        return self.ros_action_topic.publish(msg)
+        try:
+            self.ros_action_topic.publish(msg)
+            return True
+        except:
+            return False
 
     def set_screen_callback(self, msg):
         # self.root.manager.current = msg['data']
