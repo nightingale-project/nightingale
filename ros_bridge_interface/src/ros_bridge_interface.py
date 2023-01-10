@@ -19,9 +19,9 @@ class RosBridgeInterface:
 
 
 def main():
+    interface = RosBridgeInterface()
     rospy.spin()
 
 
 if __name__ == '__main__':
-    interface = RosBridgeInterface()
     main()
