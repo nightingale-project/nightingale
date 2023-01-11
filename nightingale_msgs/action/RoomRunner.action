@@ -1,0 +1,16 @@
+# Input is the room number as string
+# and a sublocation.
+# for rooms sublocaiton is one of {doorside,bedside}
+# for home sublocation is empty
+string room_number
+string sublocation
+---
+# move base doesnt provide a result
+# so its a little hard to determine what could've
+# gone wrong with the action and return a useful error code
+# could be improved.
+---
+# Feedback is euclidean distance to goal
+# current phase describes is a descriptive string
+float64 euclidean_distance_to_goal
+
