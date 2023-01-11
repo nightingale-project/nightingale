@@ -1,0 +1,8 @@
+# Define the goal
+# geometry_msgs/Pose ee  # end-effector goal pose in base_link frame
+---
+# maybe dont need a result. actions already tell u if success or not.
+# could make this an error code to be more specific as to why failed
+---
+# Define a feedback message
+# float32 percent_complete
