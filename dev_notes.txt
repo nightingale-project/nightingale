@@ -5,24 +5,9 @@ Black - install: <pip install black> usage: <black [file or directory]>
 Clang - install: <sudo apt install clang-format> usage: <clang-format --style=Google -i [filename]>
 Clang info here: https://clang.llvm.org/docs/ClangFormatStyleOptions.html
 
-# Robot Teleop
-run <roslaunch nightingale_teleop keyboard.launch> to move robot with keyboard
-this automatically sets the robot in tractor mode
-
 # ROS Install
 This metapackage uses vcstool to keep track of 3rd party packages that must be built from source
 See ROS page on vcstool for context
 Repositories can be imported with "vcs import src/ < src/nightingale/nightingale.rosinstall && vcs import src/ < src/kinova-movo/movo.rosinstall" from the root of the ws
 
 For more details of each pkg, see individual READMEs'
- 
-
-# Perception
-launch point cloud body filtering and point cloud to laser scan conversion with <roslaunch nightingale_perception pt_cloud_process.launch>
-body filtered points topic is /camera/depth/color/points_body_filtered
-point cloud converted to laser scan topic is /movo/camera_scan
-
-# Map Frame Visualizer
-This python script visualizes a map gotten with gmapping in the map frame. Use -h for usage
-Script is in nightingale_utils/src/map_frame_visualizer.py
- 
