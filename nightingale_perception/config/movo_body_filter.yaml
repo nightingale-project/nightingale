@@ -7,7 +7,8 @@ cloud_filter_chain:
      sensor/min_distance: 0.05
      body_model/inflation/scale: 1.07
      body_model/inflation/padding: 0.03
-     filter/do_shadow/test: False
+     filter/do_shadow_test: False
+     filter/max_shadow_distance: 2.0
      transforms/buffer_length: 15.0
      transforms/timeout/reachable: 0.2
      transforms/timeout/unreachable: 0.2
