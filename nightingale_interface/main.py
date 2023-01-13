@@ -29,6 +29,7 @@ class MainApp(MDApp, ScreenWrapper):
     # task queue things
     queue_task = []
     queue_delay = []
+    queue_args = []
 
     # counters for items
     water_count = NumericProperty(0)
@@ -46,14 +47,17 @@ class MainApp(MDApp, ScreenWrapper):
         return asyncio.gather(run_wrapper(), self._other_task)
 
     # add a task to do after a delay
-    def queue(self, task, delay=0):
+    def queue(self, task, delay=0, args=None):
         self.queue_delay.append(delay)
         self.queue_task.append(task)
+        self.queue_args.append(args)
 
     # backend polling to read from ros coms
     async def backend(self):
         await asyncio.sleep(0.5)
         self.root.transition = kivy.uix.screenmanager.FadeTransition()
+
+        # set the initial screen
         self.root.current = "facescreen"
 
         try:
@@ -63,7 +67,11 @@ class MainApp(MDApp, ScreenWrapper):
                 if len(self.queue_task):
                     func = self.queue_task.pop()
                     await asyncio.sleep(self.queue_delay.pop())
-                    func()
+                    args = self.queue_args.pop()
+                    if args:
+                        func(args)
+                    else:
+                        func()
 
                 await asyncio.sleep(0.2)
 
@@ -81,15 +89,14 @@ class MainApp(MDApp, ScreenWrapper):
     def init_ros(self):
         # initialize the ros bridge client
         self.client = roslibpy.Ros(
-            "localhost", MovoConfig.Config["RosBridgePort"]
+            MovoConfig.Config["Movo2"]["IP"], MovoConfig.Config["RosBridgePort"]
         )
-        #MovoConfig.Config["Movo2"]["IP"]
         self.client.run()
         asyncio.sleep(0.5)
 
-        self.ros_action_topic = roslibpy.Topic(self.client, "interface/action", "std_msgs/String")
+        self.ros_action_topic = roslibpy.Topic(self.client, "ui/robot/call_action", "std_msgs/String")
 
-        self.interface_screen_topic = roslibpy.Topic(self.client, "interface/set_screen", "std_msgs/String")
+        self.interface_screen_topic = roslibpy.Topic(self.client, "ui/app/set_screen", "std_msgs/String")
         self.interface_screen_topic.subscribe(self.set_screen_callback)
 
     # override
@@ -103,7 +110,6 @@ class MainApp(MDApp, ScreenWrapper):
             args = {}
         args['action'] = str(action)
         json_str = json.dumps(args)
-        print(str(json_str))
         msg = roslibpy.Message({"data": json_str})
         try:
             self.ros_action_topic.publish(msg)
@@ -112,8 +118,15 @@ class MainApp(MDApp, ScreenWrapper):
             return False
 
     def set_screen_callback(self, msg):
-        # self.root.manager.current = msg['data']
-        return True
+        # if the screen requested exists
+        if self.get_screen(str(msg['data'])):
+            # def a function for setting the screen
+            def func(args):
+                self.root.current = args
+            # queue the function
+            self.queue(func, args=str(msg['data']))
+            return True
+        return False
 
 
 if __name__ == "__main__":

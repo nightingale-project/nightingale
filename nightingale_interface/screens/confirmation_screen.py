@@ -34,6 +34,7 @@ class ConfirmationScreen:
         :param args: optional additional arguments
         :return: True if successful
         """
+        print("call_ros_action override not implemented")
         return False
 
     def confirmation_press_yes(self, button_data):
