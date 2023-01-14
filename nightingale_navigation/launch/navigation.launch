@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Location is one of {sim,robohub} (and more to come!) -->
+    <arg name="location" default="robohub" />
+
+    <!-- Set tractor mode -->
+    <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /movo/gp_command movo_msgs/ConfigCmd '{gp_cmd: 'GENERAL_PURPOSE_CMD_SET_OPERATIONAL_MODE', gp_param: 5}' --once"/>
+
+    <!-- launch amcl -->
+    <include file="$(find nightingale_navigation)/launch/localization.launch">
+        <arg name="location" value="$(arg location)"/>
+    </include>
+
+    <!-- launch move_base -->
+    <include file="$(find nightingale_navigation)/launch/move_base.launch"/>
+
+    <!-- launch the room runner node -->
+    <node name="room_runner" pkg="nightingale_navigation" type="room_runner.py" output="screen" >
+        <param name="save_pose" value="true" />
+        <param name="pose_filename" value="/home/$(optenv USER robohub)/.nightingale_room_runner_cache" />
+        <param name="pose_write_period" value="10" />
+    </node>
+</launch>
