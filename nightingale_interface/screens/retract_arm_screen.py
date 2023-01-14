@@ -15,11 +15,6 @@ class RetractArmScreen:
     # wait for rostopic published of when arm is normal state
     # and switch screens on that
 
-    def estop(self, button_data):
-        button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = self.retract_arm_name
-        button_data.parent.manager.current = "estoppedscreen"
-
     def retract_arm_build(self):
         screen = Screen(name=self.retract_arm_name)
 

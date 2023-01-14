@@ -13,14 +13,9 @@ from screens.screen_config import ScreenConfig as cfg
 class AdminScreen:
     admin_name = "adminscreen"
 
-    def estop(self, button_data):
-        button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = self.admin_name
-        button_data.parent.manager.current = "estoppedscreen"
-
     def to_home(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = self.admin_name
+        cfg.LAST_SCREEN = button_data.parent.manager.current
         button_data.parent.manager.current = "homescreen"
 
     def shutdown(self, button_data):
@@ -54,7 +49,7 @@ class AdminScreen:
                 text="Exit",
                 font_size=cfg.CANCEL_BUTTON_FONTSIZE,
                 pos_hint={"center_x": 0.125, "center_y": 0.9},
-                size_hint=(0.2, 0.1),
+                size_hint=(cfg.SHORT_RECT_WIDTH, cfg.SHORT_RECT_HEIGHT),
                 on_release=self.to_home,
             )
         )
@@ -64,8 +59,8 @@ class AdminScreen:
             MDRectangleFlatButton(
                 text="System Shutdown",
                 font_style="H4",
-                pos_hint={"center_x": 0.5, "center_y": 0.35},
-                size_hint=(0.4, 0.12),
+                pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.35},
+                size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
                 on_release=self.shutdown,
             )
         )
@@ -73,8 +68,11 @@ class AdminScreen:
             MDRectangleFlatButton(
                 text="Release bin",
                 font_style="H4",
-                pos_hint={"center_x": 0.5, "center_y": 0.5},
-                size_hint=(0.4, 0.12),
+                pos_hint={
+                    "center_x": cfg.SCREEN_X_CENTER,
+                    "center_y": cfg.SCREEN_Y_CENTER,
+                },
+                size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
                 on_release=self.release_bin,
             )
         )
@@ -82,8 +80,8 @@ class AdminScreen:
             MDRectangleFlatButton(
                 text="Grasp bin",
                 font_style="H4",
-                pos_hint={"center_x": 0.5, "center_y": 0.65},
-                size_hint=(0.4, 0.12),
+                pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.65},
+                size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
                 on_release=self.grasp_bin,
             )
         )

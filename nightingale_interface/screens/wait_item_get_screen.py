@@ -13,15 +13,10 @@ from screens.screen_config import ScreenConfig as cfg
 class WaitItemGetScreen:
     wait_get_name = "waitgetitemscreen"
 
-    def estop(self, button_data):
-        button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = self.wait_get_name
-        button_data.parent.manager.current = "estoppedscreen"
-
     def retract_arm(self, button_data):
         # publishes message to stop to retract arm
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = self.wait_get_name
+        cfg.LAST_SCREEN = button_data.parent.manager.current
         cfg.PENDING_ACTION = cfg.RETRACT_ARM
         button_data.parent.manager.current = "confirmationscreen"
 
@@ -45,7 +40,7 @@ class WaitItemGetScreen:
                 text="Finish",
                 font_style="H4",
                 pos_hint={"center_x": 0.85, "center_y": 0.15},
-                size_hint=(0.2, 0.12),
+                size_hint=(cfg.SHORT_RECT_WIDTH, cfg.SHORT_RECT_HEIGHT),
                 on_release=self.retract_arm,
             )
         )

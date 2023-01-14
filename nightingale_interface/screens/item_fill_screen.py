@@ -15,14 +15,9 @@ class ItemFillScreen:
     # screen id from the screen manager
     item_fill_screen_id = 10
 
-    def estop(self, button_data):
-        button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = self.item_fill_name
-        button_data.parent.manager.current = "estoppedscreen"
-
     def fill_done(self, button_data):
         # publish to ROS topic to let robot go away
-        cfg.LAST_SCREEN = self.item_fill_name
+        cfg.LAST_SCREEN = button_data.parent.manager.current
         cfg.PENDING_ACTION = cfg.DELIVER
         button_data.parent.manager.transition = NoTransition()
         button_data.parent.manager.current = "confirmationscreen"
@@ -30,7 +25,7 @@ class ItemFillScreen:
     def fill_cancel(self, button_data):
         # cancel and publish topic to go to home
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = self.item_fill_name
+        cfg.LAST_SCREEN = button_data.parent.manager.current
         cfg.PENDING_ACTION = cfg.NO_ROS_ACTION
         button_data.parent.manager.current = "confirmationscreen"
 

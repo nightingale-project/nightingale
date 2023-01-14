@@ -1,5 +1,6 @@
 from kivy.uix.screenmanager import Screen
-from kivy.uix.image import Image
+
+# from kivy.uix.image import Image
 
 from kivymd.uix.label import MDLabel
 from kivy.uix.button import Button
@@ -14,7 +15,7 @@ class FaceScreen:
 
     def to_homescreen(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = self.face_name
+        cfg.LAST_SCREEN = button_data.parent.manager.current
         button_data.parent.manager.current = (
             "homescreen"  # Should just be the "Home" screen
         )
@@ -22,21 +23,14 @@ class FaceScreen:
     def face_build(self):
         screen = Screen(name=self.face_name)
 
-        current_action_label = Label(
-            text=cfg.CURRENT_ACTION,
-            # font_style="H4",
-            halign="center",
-            pos_hint={"center_x": 0.5, "center_y": 0.9},
-        )
-        current_action_label.font_size = "50sp"
-
-        screen.add_widget(current_action_label)
-
         # remove press color animation
         screen.add_widget(
             Button(
                 background_normal="images/Face.png",
-                pos_hint={"center_x": 0.5, "center_y": 0.5},
+                pos_hint={
+                    "center_x": cfg.SCREEN_X_CENTER,
+                    "center_y": cfg.SCREEN_Y_CENTER,
+                },
                 size_hint=(0.5, 0.5),
                 on_release=self.to_homescreen,
             )

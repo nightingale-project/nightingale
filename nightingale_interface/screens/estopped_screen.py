@@ -17,16 +17,9 @@ class EStoppedScreen:
         # returns to previous screen that came before estop pressed
         button_data.parent.manager.transition = NoTransition()
         # cfg.LAST_SCREEN = self.screen_name
-        cfg.LAST_SCREEN = self.estopped_name
+        cfg.LAST_SCREEN = button_data.parent.manager.current
         cfg.PENDING_ACTION = cfg.ESTOP_CANCEL
         button_data.parent.manager.current = "confirmationscreen"
-
-    def force_stop(self, button_data):
-        # kill robot in emergency if pressed
-        # UNUSED
-        button_data.parent.manager.transition = NoTransition()
-        button_data.parent.manager.current = "SHUTDOWN"
-        cfg.LAST_SCREEN = self.screen_name
 
     def estopped_build(self):
         screen = Screen(name=self.estopped_name)
@@ -36,7 +29,7 @@ class EStoppedScreen:
             text="EMERGENCY STOP ACTIVATED",
             font_style="H4",
             halign="center",
-            pos_hint={"center_x": 0.5, "center_y": 0.5},
+            pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": cfg.SCREEN_Y_CENTER},
         )
         stopped_label.font_size = "100sp"
 
@@ -45,8 +38,8 @@ class EStoppedScreen:
             MDRectangleFlatButton(
                 text="Restart",
                 font_style="H4",
-                pos_hint={"center_x": 0.5, "center_y": 0.2},
-                size_hint=(0.5, 0.1),
+                pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.2},
+                size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
                 on_release=self.exit_estop,
             )
         )

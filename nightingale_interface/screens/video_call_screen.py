@@ -12,11 +12,6 @@ from screens.screen_config import ScreenConfig as cfg
 class VideoCallScreen:
     video_call_name = "videocallscreen"
 
-    def estop(self, button_data):
-        button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = self.video_call_name
-        button_data.parent.manager.current = "estoppedscreen"
-
     def exit_call(self, button_data):
         button_data.parent.manager.transition = NoTransition()
         cfg.LAST_SCREEN = self.video_call_name

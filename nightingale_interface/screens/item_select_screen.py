@@ -68,7 +68,7 @@ class ItemSelectScreen:
         # send to ROS topic and return to homescren
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "right"
-        cfg.LAST_SCREEN = self.item_select_name
+        cfg.LAST_SCREEN = button_data.parent.manager.current
         cfg.PENDING_ACTION = cfg.STOCK
         button_data.parent.manager.current = "confirmationscreen"
 
@@ -76,14 +76,9 @@ class ItemSelectScreen:
         # return to homescreen
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "right"
-        cfg.LAST_SCREEN = self.item_select_name
+        cfg.LAST_SCREEN = button_data.parent.manager.current
         cfg.PENDING_ACTION = cfg.NO_ROS_ACTION
         button_data.parent.manager.current = "confirmationscreen"
-
-    def estop(self, button_data):
-        button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = self.item_select_name
-        button_data.parent.manager.current = "estoppedscreen"
 
     def item_select_build(self):
         screen = Screen(name=self.item_select_name)
@@ -158,7 +153,7 @@ class ItemSelectScreen:
             text="Water",
             font_style="H4",
             halign="center",
-            pos_hint={"center_x": 0.5, "center_y": 0.7},
+            pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.7},
         )
         water_label.font_size = "70sp"
 
@@ -166,7 +161,7 @@ class ItemSelectScreen:
             text="Ice",
             font_style="H4",
             halign="center",
-            pos_hint={"center_x": 0.5, "center_y": 0.5},
+            pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.5},
         )
         ice_label.font_size = "70sp"
 
@@ -174,7 +169,7 @@ class ItemSelectScreen:
             text="Blanket",
             font_style="H4",
             halign="center",
-            pos_hint={"center_x": 0.5, "center_y": 0.3},
+            pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.3},
         )
         blanket_label.font_size = "70sp"
 
@@ -261,7 +256,7 @@ class ItemSelectScreen:
             id="ice_count",
             font_style="H4",
             halign="center",
-            pos_hint={"center_x": 0.9, "center_y": 0.5},
+            pos_hint={"center_x": 0.9, "center_y": cfg.SCREEN_Y_CENTER},
         )
         ice_counter_label.font_size = "70sp"
 

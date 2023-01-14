@@ -12,11 +12,6 @@ from screens.screen_config import ScreenConfig as cfg
 class ConfirmationScreen:
     confirmation_name = "confirmationscreen"
 
-    def estop(self, button_data):
-        button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = self.confirmation_name
-        button_data.parent.manager.current = "estoppedscreen"
-
     def reset_counts(self):
         # only reset if starting new selection
         if cfg.LAST_SCREEN == "itemfillscreen":
@@ -28,7 +23,7 @@ class ConfirmationScreen:
         if button_data.id == "yes":
             # do yes and return home
             button_data.parent.manager.transition = NoTransition()
-            cfg.LAST_SCREEN = self.confirmation_name
+            cfg.LAST_SCREEN = button_data.parent.manager.current
 
             def execute_action():
                 # state machine to do things based on the executed action
@@ -93,7 +88,7 @@ class ConfirmationScreen:
             text="Confirm selection",
             font_style="H4",
             halign="center",
-            pos_hint={"center_x": 0.5, "center_y": 0.7},
+            pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.7},
         )
         confirmation_label.font_size = "100sp"
         screen.add_widget(confirmation_label)
@@ -103,8 +98,8 @@ class ConfirmationScreen:
                 text="Yes",
                 id="yes",
                 font_style="H4",
-                pos_hint={"center_x": 0.25, "center_y": 0.5},
-                size_hint=(0.4, 0.12),
+                pos_hint={"center_x": 0.25, "center_y": cfg.SCREEN_Y_CENTER},
+                size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
                 on_release=self.press,
             )
         )
@@ -114,8 +109,8 @@ class ConfirmationScreen:
                 text="No",
                 id="no",
                 font_style="H4",
-                pos_hint={"center_x": 0.75, "center_y": 0.5},
-                size_hint=(0.4, 0.12),
+                pos_hint={"center_x": 0.75, "center_y": cfg.SCREEN_Y_CENTER},
+                size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
                 on_release=self.press,
             )
         )
