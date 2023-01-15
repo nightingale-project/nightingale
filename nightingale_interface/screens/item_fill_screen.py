@@ -17,16 +17,16 @@ class ItemFillScreen:
 
     def fill_done(self, button_data):
         # publish to ROS topic to let robot go away
-        cfg.LAST_SCREEN = button_data.parent.manager.current
-        cfg.PENDING_ACTION = cfg.DELIVER
+        cfg.last_screen = button_data.parent.manager.current
+        cfg.pending_action = cfg.DELIVER
         button_data.parent.manager.transition = NoTransition()
         button_data.parent.manager.current = "confirmationscreen"
 
     def fill_cancel(self, button_data):
         # cancel and publish topic to go to home
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = button_data.parent.manager.current
-        cfg.PENDING_ACTION = cfg.NO_ROS_ACTION
+        cfg.last_screen = button_data.parent.manager.current
+        cfg.pending_action = cfg.NO_ROS_ACTION
         button_data.parent.manager.current = "confirmationscreen"
 
     def item_fill_build(self):

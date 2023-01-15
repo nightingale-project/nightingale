@@ -15,7 +15,7 @@ class FaceScreen:
 
     def to_homescreen(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = button_data.parent.manager.current
+        cfg.last_screen = button_data.parent.manager.current
         button_data.parent.manager.current = (
             "homescreen"  # Should just be the "Home" screen
         )
@@ -31,7 +31,7 @@ class FaceScreen:
                     "center_x": cfg.SCREEN_X_CENTER,
                     "center_y": cfg.SCREEN_Y_CENTER,
                 },
-                size_hint=(0.5, 0.5),
+                size_hint=(0.7, 1),
                 on_release=self.to_homescreen,
             )
         )

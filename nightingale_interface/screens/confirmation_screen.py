@@ -14,7 +14,7 @@ class ConfirmationScreen:
 
     def reset_counts(self):
         # only reset if starting new selection
-        if cfg.LAST_SCREEN == "itemfillscreen":
+        if cfg.last_screen == "itemfillscreen":
             self.water_count = 0
             self.ice_count = 0
             self.blanket_count = 0
@@ -23,51 +23,50 @@ class ConfirmationScreen:
         if button_data.id == "yes":
             # do yes and return home
             button_data.parent.manager.transition = NoTransition()
-            cfg.LAST_SCREEN = button_data.parent.manager.current
+            cfg.last_screen = button_data.parent.manager.current
 
             def execute_action():
                 # state machine to do things based on the executed action
                 # if given a 'yes' confirmation
-                cfg.CURRENT_ACTION = cfg.PENDING_ACTION
-                cfg.PENDING_ACTION = ""
-                print(f"CUR ACTION {cfg.CURRENT_ACTION}")
+                cfg.current_action = cfg.pending_action
+                cfg.pending_action = ""
+                # print(f"CUR ACTION {cfg.current_action}")
 
                 # reset counters regardless of cancel or send
                 self.reset_counts()
 
-                if cfg.CURRENT_ACTION == cfg.NO_ROS_ACTION:
+                if cfg.current_action == cfg.NO_ROS_ACTION:
                     # cancel and wait for other inputs. No ROS funcs
-
                     button_data.parent.manager.current = "homescreen"
-                elif cfg.CURRENT_ACTION == cfg.ESTOP_CANCEL:
+                elif cfg.current_action == cfg.ESTOP_CANCEL:
                     # estop cancel
                     # send ROS message to resume
                     button_data.parent.manager.current = "homescreen"
-                elif cfg.CURRENT_ACTION == cfg.STOCK:
+                elif cfg.current_action == cfg.STOCK:
                     # get items
                     # send ros message to move to stock room
                     button_data.parent.manager.current = "facescreen"
-                elif cfg.CURRENT_ACTION == cfg.DELIVER:
+                elif cfg.current_action == cfg.DELIVER:
                     # deliver items
                     # send ros message to move to patient
                     button_data.parent.manager.current = "facescreen"
-                elif cfg.CURRENT_ACTION == cfg.GO_HOME:
+                elif cfg.current_action == cfg.GO_HOME:
                     # deliver items
                     # send ros message to move to patient
                     button_data.parent.manager.current = "facescreen"
-                elif cfg.CURRENT_ACTION == cfg.EXTEND_ARM:
-                    # start arm movement with ROs and go back to screen
-                    button_data.parent.manager.current = "extendarmscreen"
-                elif cfg.CURRENT_ACTION == cfg.RETRACT_ARM:
-                    # start arm movement with ROs and go to retract arm screen
-                    button_data.parent.manager.current = "retractarmscreen"
+                # elif cfg.current_action == cfg.EXTEND_ARM:
+                #    # start arm movement with ROs and go back to screen
+                #    button_data.parent.manager.current = "extendarmscreen"
+                # elif cfg.current_action == cfg.RETRACT_ARM:
+                #    # start arm movement with ROs and go to retract arm screen
+                #    button_data.parent.manager.current = "retractarmscreen"
 
             execute_action()
 
         elif button_data.id == "no":
             # do nothing and return to previous screen
             button_data.parent.manager.transition = NoTransition()
-            button_data.parent.manager.current = cfg.LAST_SCREEN
+            button_data.parent.manager.current = cfg.last_screen
 
     def confirmation_build(self):
         screen = Screen(name=self.confirmation_name)

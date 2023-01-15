@@ -15,8 +15,8 @@ class NurseAlertScreen:
     def nurse_alert_cancel(self, button_data):
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "right"
-        cfg.LAST_SCREEN = button_data.parent.manager.current
-        cfg.PENDING_ACTION = cfg.NO_ROS_ACTION
+        cfg.last_screen = button_data.parent.manager.current
+        cfg.pending_action = cfg.NO_ROS_ACTION
         button_data.parent.manager.current = "confirmationscreen"
 
     def nurse_alert_build(self):

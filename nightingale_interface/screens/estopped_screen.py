@@ -16,9 +16,9 @@ class EStoppedScreen:
     def exit_estop(self, button_data):
         # returns to previous screen that came before estop pressed
         button_data.parent.manager.transition = NoTransition()
-        # cfg.LAST_SCREEN = self.screen_name
-        cfg.LAST_SCREEN = button_data.parent.manager.current
-        cfg.PENDING_ACTION = cfg.ESTOP_CANCEL
+        # cfg.last_screen = self.screen_name
+        cfg.last_screen = button_data.parent.manager.current
+        cfg.pending_action = cfg.ESTOP_CANCEL
         button_data.parent.manager.current = "confirmationscreen"
 
     def estopped_build(self):

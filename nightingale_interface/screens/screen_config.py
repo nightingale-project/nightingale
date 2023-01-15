@@ -14,10 +14,6 @@ class ScreenConfig:
     SCREEN_X_CENTER = 0.5
     SCREEN_Y_CENTER = 0.5
 
-    CURRENT_ACTION = "Waiting"
-    PENDING_ACTION = "Waiting"
-    LAST_SCREEN = "facescreen"
-
     LONG_RECT_WIDTH = 0.4
     LONG_RECT_HEIGHT = 0.12
 
@@ -33,3 +29,10 @@ class ScreenConfig:
     ITEM_DELIVERED = 5
     EXTEND_ARM = 6
     RETRACT_ARM = 7
+
+    # paramters to store values
+    current_action = "Waiting"
+    pending_action = "Waiting"
+    last_screen = "facescreen"
+
+    payload = ""

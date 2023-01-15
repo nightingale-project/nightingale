@@ -14,20 +14,20 @@ class HomeScreen:
 
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = button_data.parent.manager.current
+        cfg.last_screen = button_data.parent.manager.current
         button_data.parent.manager.current = "estoppedscreen"
 
     def to_nurse_alert(self, button_data):
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "left"
-        cfg.LAST_SCREEN = button_data.parent.manager.current
+        cfg.last_screen = button_data.parent.manager.current
         button_data.parent.manager.current = "nursealertscreen"
 
     def to_video_call(self, button_data):
         # publish to topic to tell robot not to move
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "left"
-        cfg.LAST_SCREEN = button_data.parent.manager.current
+        cfg.last_screen = button_data.parent.manager.current
         button_data.parent.manager.current = "videocallscreen"
         # open web browser to specific size of scree
 
@@ -35,19 +35,19 @@ class HomeScreen:
         # publish to topic to tell robot not to move
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "left"
-        cfg.LAST_SCREEN = button_data.parent.manager.current
+        cfg.last_screen = button_data.parent.manager.current
         button_data.parent.manager.current = "itemselectscreen"
 
-    def send_home(self, button_data):
+    def dismiss(self, button_data):
         button_data.parent.manager.transition = NoTransition()
         button_data.parent.manager.transition.direction = "left"
-        cfg.LAST_SCREEN = button_data.parent.manager.current
-        cfg.PENDING_ACTION = cfg.GO_HOME
+        cfg.last_screen = button_data.parent.manager.current
+        cfg.pending_action = cfg.GO_HOME
         button_data.parent.manager.current = "confirmationscreen"
 
     def to_admin_control(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = button_data.parent.manager.current
+        cfg.last_screen = button_data.parent.manager.current
         button_data.parent.manager.current = "adminscreen"
 
     def home_build(self):
@@ -66,54 +66,59 @@ class HomeScreen:
 
         screen.add_widget(
             MDRectangleFlatButton(
-                text="Admin Control",
-                font_size=cfg.CANCEL_BUTTON_FONTSIZE,
-                pos_hint={"center_x": 0.125, "center_y": 0.9},
-                size_hint=(cfg.SHORT_RECT_WIDTH, cfg.SHORT_RECT_HEIGHT),
-                on_release=self.to_admin_control,
-            )
-        )
-
-        screen.add_widget(
-            MDRectangleFlatButton(
                 text="Request Items",
                 font_style="H4",
-                pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.35},
-                size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
-                on_release=self.to_item_select,
-            )
-        )
-        screen.add_widget(
-            MDRectangleFlatButton(
-                text="Chat with Nurse",
-                font_style="H4",
+                # pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.35},
                 pos_hint={
                     "center_x": cfg.SCREEN_X_CENTER,
                     "center_y": cfg.SCREEN_Y_CENTER,
                 },
                 size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
-                on_release=self.to_video_call,
+                on_release=self.to_item_select,
             )
         )
 
         screen.add_widget(
             MDRectangleFlatButton(
-                text="Urgent Assistance",
-                font_style="H4",
-                pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.65},
-                size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
-                on_release=self.to_nurse_alert,
-            )
-        )
-
-        screen.add_widget(
-            MDRectangleFlatButton(
-                text="Send home",
+                text="Dismiss",
                 font_style="H4",
                 pos_hint={"center_x": 0.125, "center_y": 0.1},
                 size_hint=(cfg.SHORT_RECT_WIDTH, cfg.SHORT_RECT_HEIGHT),
-                on_release=self.send_home,
+                on_release=self.dismiss,
             )
         )
+
+        # screen.add_widget(
+        #    MDRectangleFlatButton(
+        #        text="Admin Control",
+        #        font_size=cfg.CANCEL_BUTTON_FONTSIZE,
+        #        pos_hint={"center_x": 0.125, "center_y": 0.9},
+        #        size_hint=(cfg.SHORT_RECT_WIDTH, cfg.SHORT_RECT_HEIGHT),
+        #        on_release=self.to_admin_control,
+        #    )
+        # )
+
+        # screen.add_widget(
+        #    MDRectangleFlatButton(
+        #        text="Chat with Nurse",
+        #        font_style="H4",
+        #        pos_hint={
+        #            "center_x": cfg.SCREEN_X_CENTER,
+        #            "center_y": cfg.SCREEN_Y_CENTER,
+        #        },
+        #        size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
+        #        on_release=self.to_video_call,
+        #    )
+        # )
+
+        # screen.add_widget(
+        #    MDRectangleFlatButton(
+        #        text="Urgent Assistance",
+        #        font_style="H4",
+        #        pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.65},
+        #        size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
+        #        on_release=self.to_nurse_alert,
+        #    )
+        # )
 
         return screen
