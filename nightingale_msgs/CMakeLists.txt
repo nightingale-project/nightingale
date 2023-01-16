@@ -61,6 +61,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_service_files(
   FILES
   InterfaceCall.srv
+  RoomLookup.srv
 )
 
 ## Generate actions in the 'action' folder
