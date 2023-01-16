@@ -62,6 +62,7 @@ add_service_files(
   FILES
   InterfaceCall.srv
   RoomLookup.srv
+  RoomPoseLookup.srv
 )
 
 ## Generate actions in the 'action' folder
