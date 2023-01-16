@@ -14,6 +14,7 @@ from kivy.properties import NumericProperty
 
 import MovoConfig
 from screen_wrapper import ScreenWrapper
+
 from screens.screen_config import ScreenConfig as cfg
 
 
@@ -94,9 +95,9 @@ class MainApp(MDApp, ScreenWrapper):
         self.client.run()
         asyncio.sleep(0.5)
 
-        self.ros_action_topic = roslibpy.Topic(self.client, "ui/robot/call_action", "std_msgs/String")
+        self.ros_action_topic = roslibpy.Topic(self.client, "ui/robot/user_input", "std_msgs/String")
 
-        self.interface_screen_topic = roslibpy.Topic(self.client, "ui/app/set_screen", "std_msgs/String")
+        self.interface_screen_topic = roslibpy.Topic(self.client, "ui/app/robot_status", "std_msgs/String")
         self.interface_screen_topic.subscribe(self.set_screen_callback)
 
     # override
@@ -122,6 +123,9 @@ class MainApp(MDApp, ScreenWrapper):
         if self.get_screen(str(msg['data'])):
             # def a function for setting the screen
             def func(args):
+                # state machine to decide what screen is needed for current action
+                if args == cfg.DELIVER_REQUEST:
+                    self.root.current = "facescreen"
                 self.root.current = args
             # queue the function
             self.queue(func, args=str(msg['data']))

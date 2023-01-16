@@ -21,6 +21,9 @@ class RosBridgeInterface:
         rospy.loginfo(data['action'])
         return False
 
+    def interface_service(self):
+        pass
+
     def main(self):
         rospy.loginfo("Starting Ros Bridge Interface...")
         rospy.spin()

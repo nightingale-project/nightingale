@@ -21,19 +21,6 @@ class ScreenConfig:
     SHORT_RECT_WIDTH = 0.2
     SHORT_RECT_HEIGHT = 0.1
 
-    CURRENT_ACTION = 0
-    PENDING_ACTION = 0
-    LAST_SCREEN = "facescreen"
-
-    # action enums for user buttons
-    NO_ROS_ACTION = 0
-    ESTOP_CANCEL = 1
-    STOCK = 2
-    DELIVER = 3
-    GO_HOME = 4
-    ITEM_DELIVERED = 5
-    EXTEND_ARM = 6
-    RETRACT_ARM = 7
 
     # paramters to store values
     current_action = "Waiting"
@@ -41,4 +28,14 @@ class ScreenConfig:
     last_screen = "facescreen"
 
     payload = ""
+    # User inputs sent from tablet UI to mission planner
+    NO_ROS_ACTION = -1
+    DELIVER_REQUEST = 8
+    DELIVER_ITEMS = 9
+    RETURN_HOME = 10
+    START_EXTEND_ARM = 11
+    ITEMS_TAKEN = 12
+    START_RETRACT_ARM = 13
+    ESTOP = 14
+
 
