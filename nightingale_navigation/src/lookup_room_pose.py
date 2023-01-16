@@ -3,7 +3,7 @@
 import rospy
 
 from geometry_msgs.msg import Pose
-from nightingale_dispatch.srv import RoomPoseLookup, RoomPoseLookupResponse
+from nightingale_msgs.srv import RoomPoseLookup, RoomPoseLookupResponse
 
 
 class RoomPoseServiceNode:
