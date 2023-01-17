@@ -4,14 +4,17 @@ from std_msgs.msg import String
 import json
 import time
 
+#from ros_bridge_interface.include.bridge_interface_config import robot_status, bridge_config
+from ros_bridge_interface.srv import InterfaceCall, InterfaceCallResponse
+
 
 class RosBridgeInterface:
     def __init__(self):
         rospy.init_node('ros_bridge_interface_server', anonymous=True)
-        self.interface_action_sub = rospy.Subscriber("ui/robot/call_action", String, self.interface_action_callback)
-        self.set_screen_pub = rospy.Publisher("ui/app/set_screen", String, queue_size=10)
+        self.interface_input_sub = rospy.Subscriber(bridge_config.USER_INPUT_TOPIC, String, self.interface_input_callback)
+        self.set_screen_pub = rospy.Publisher(bridge_config.ROBOT_STATUS_TOPIC, String, queue_size=10)
 
-    def interface_action_callback(self, msg):
+    def interface_input_callback(self, msg):
         data = json.loads(msg.data)
         if data['action'] == -1:
             rospy.loginfo("set screen request received")
@@ -21,8 +24,12 @@ class RosBridgeInterface:
         rospy.loginfo(data['action'])
         return False
 
-    def interface_service(self):
-        pass
+    def interface_call(self, status):
+        print(f"Received status {status}")
+        # publish to UI tablet
+
+        # wait for next response on USER_INPUT_TOPIC and return it
+        return 1
 
     def main(self):
         rospy.loginfo("Starting Ros Bridge Interface...")

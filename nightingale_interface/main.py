@@ -2,6 +2,10 @@ import asyncio
 import roslibpy
 import json
 
+import sys
+#PLACEHOLDER FOR TESTING UNTIL CONFIG LOCATIONS ARE SET
+sys.path.append("../")
+
 from kivy.config import Config
 
 Config.set("graphics", "width", "1280")
@@ -15,7 +19,8 @@ from kivy.properties import NumericProperty
 import MovoConfig
 from screen_wrapper import ScreenWrapper
 
-from screens.screen_config import ScreenConfig as cfg
+from screens.screen_config import ScreenConfig 
+from ros_bridge_interface.bridge_interface_config import BridgeConfig
 
 
 class MainApp(MDApp, ScreenWrapper):
@@ -28,9 +33,7 @@ class MainApp(MDApp, ScreenWrapper):
     interface_screen_topic = None
 
     # task queue things
-    queue_task = []
-    queue_delay = []
-    queue_args = []
+    task_queue = [] # dict of { "task": Int, "delay": Int, "args":""}
 
     # counters for items
     water_count = NumericProperty(0)
@@ -49,9 +52,7 @@ class MainApp(MDApp, ScreenWrapper):
 
     # add a task to do after a delay
     def queue(self, task, delay=0, args=None):
-        self.queue_delay.append(delay)
-        self.queue_task.append(task)
-        self.queue_args.append(args)
+        self.task_queue.append({"task": task, "delay": delay, "args":args})
 
     # backend polling to read from ros coms
     async def backend(self):
@@ -65,12 +66,14 @@ class MainApp(MDApp, ScreenWrapper):
             while True:
 
                 # execute a queued task
-                if len(self.queue_task):
-                    func = self.queue_task.pop()
-                    await asyncio.sleep(self.queue_delay.pop())
-                    args = self.queue_args.pop()
+                if len(self.task_queue):
+                    current = self.task_queue.pop() 
+                    func = current["task"]
+                    await asyncio.sleep(current["delay"])
+                    func_args = current["args"]
+
                     if args:
-                        func(args)
+                        func(func_args)
                     else:
                         func()
 
@@ -89,15 +92,22 @@ class MainApp(MDApp, ScreenWrapper):
 
     def init_ros(self):
         # initialize the ros bridge client
+
+        #self.client = roslibpy.Ros(
+        #    MovoConfig.Config["Movo2"]["IP"], MovoConfig.Config["RosBridgePort"]
+        #)
+
+        # temporary offline computer testing
         self.client = roslibpy.Ros(
-            MovoConfig.Config["Movo2"]["IP"], MovoConfig.Config["RosBridgePort"]
+            host='localhost', port=9091 
         )
+ 
         self.client.run()
         asyncio.sleep(0.5)
 
-        self.ros_action_topic = roslibpy.Topic(self.client, "ui/robot/user_input", "std_msgs/String")
+        self.ros_action_topic = roslibpy.Topic(self.client, BridgeConfig.USER_INPUT_TOPIC, "std_msgs/String")
 
-        self.interface_screen_topic = roslibpy.Topic(self.client, "ui/app/robot_status", "std_msgs/String")
+        self.interface_screen_topic = roslibpy.Topic(self.client, BridgeConfig.ROBOT_STATUS_TOPIC, "std_msgs/String")
         self.interface_screen_topic.subscribe(self.set_screen_callback)
 
     # override
@@ -118,19 +128,46 @@ class MainApp(MDApp, ScreenWrapper):
         except:
             return False
 
-    def set_screen_callback(self, msg):
-        # if the screen requested exists
-        if self.get_screen(str(msg['data'])):
-            # def a function for setting the screen
-            def func(args):
-                # state machine to decide what screen is needed for current action
-                if args == cfg.DELIVER_REQUEST:
-                    self.root.current = "facescreen"
-                self.root.current = args
-            # queue the function
-            self.queue(func, args=str(msg['data']))
-            return True
-        return False
+    def process_robot_status(self, msg):
+        """
+        :param msg: Message to be sent
+        :return: True if successful
+        """
+
+        # take in status received from master and react to it 
+        status = msg['status'] # enum
+        next_screen = "homescreen"
+        if status == BridgeConfig.IDLE_HOME or status == BridgeConfig.DRIVING:
+            next_screen = "facescreen"
+
+        elif status == BridgeConfig.BEDSIDE_IDLE:
+            next_screen = "homescreen"
+        elif status == BridgeConfig.BEDSIDE_DELIVER:
+            # initiate arm extend
+            next_screen = "extendarmscreen"
+        elif status == BridgeConfig.ITEM_STOCK_REACHED:
+            # show admin what to stock
+            next_screen = "itemstockscreen"
+        elif status == BridgeConfig.ARM_EXTENDED:
+            next_screen = "waititemgetscreen"
+        elif status == BridgeConfig.ARM_RETRACTED:
+            # reset robot state for next request
+            next_screen = "homescreen"
+
+        # statuses which do not change screens
+        elif status == BridgeConfig.EXTENDING_ARM:
+            # show popup or message that arm is extending
+            pass
+        elif status == BridgeConfig.RETRACTING_ARM:
+            # show popup or message that arm is retracting
+            pass
+
+        else:
+            print(f"CODE {status} UNKNOWN")
+            return False
+ 
+        self.root.current = next_screen
+        return True
 
 
 if __name__ == "__main__":
