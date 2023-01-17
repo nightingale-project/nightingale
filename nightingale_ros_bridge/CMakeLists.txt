@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(ros_bridge_interface)
+project(nightingale_ros_bridge)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -10,6 +10,8 @@ project(ros_bridge_interface)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
+  message_generation
+  nightingale_srvs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -53,11 +55,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+  FILES
+  InterfaceCall.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -103,7 +104,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES ros_bridge_interface
+#  LIBRARIES nightingale_ros_bridge
 #  CATKIN_DEPENDS rospy std_msgs
 #  DEPENDS system_lib
 )

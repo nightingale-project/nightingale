@@ -4,8 +4,8 @@ from std_msgs.msg import String
 import json
 import time
 
-#from ros_bridge_interface.include.bridge_interface_config import robot_status, bridge_config
-from ros_bridge_interface.srv import InterfaceCall, InterfaceCallResponse
+#from bridge_interface_config import robot_status, bridge_config
+from nightingale_srvs.srv import (InterfaceCall, InterfaceCallResponse)
 
 
 class RosBridgeInterface:
