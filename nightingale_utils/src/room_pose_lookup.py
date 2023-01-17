@@ -13,7 +13,7 @@ class RoomPoseServiceNode:
         self.rooms = self.load_rooms()
 
         self.server = rospy.Service(
-            "lookup_room_pose", RoomPoseLookup, self.lookup_room_pose
+            "room_pose_lookup", RoomPoseLookup, self.room_pose_lookup
         )
 
     def load_rooms(self):
@@ -40,13 +40,13 @@ class RoomPoseServiceNode:
             rooms[room] = features
         return rooms
 
-    def lookup_room_pose(self, req):
+    def room_pose_lookup(self, req):
         res = RoomPoseLookupResponse()
-        if req.room in self.rooms.keys():
+        if req.room not in self.rooms.keys():
             res.status = RoomPoseLookupResponse.ROOM_NOT_FOUND
             res.pose = Pose()
             return res
-        elif req.feature in self.rooms[req.room].keys():
+        elif req.feature not in self.rooms[req.room].keys():
             res.status = RoomPoseLookupResponse.FEATURE_NOT_FOUND
             res.pose = Pose()
             return res
