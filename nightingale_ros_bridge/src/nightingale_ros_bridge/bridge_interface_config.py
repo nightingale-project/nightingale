@@ -14,4 +14,5 @@ class RobotStatus:
 class BridgeConfig:
     USER_INPUT_TOPIC = "nightingale_ui/user_input"
     ROBOT_STATUS_TOPIC = "nightingale_ui/robot_status"
+    UPDATE_UI_SERVICE = "nightingale_ui/update_ui_state"
 
