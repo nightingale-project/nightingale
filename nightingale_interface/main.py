@@ -20,7 +20,7 @@ import MovoConfig
 from screen_wrapper import ScreenWrapper
 
 from screens.screen_config import ScreenConfig 
-from ros_bridge_interface.bridge_interface_config import BridgeConfig
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import BridgeConfig
 
 
 class MainApp(MDApp, ScreenWrapper):
@@ -108,7 +108,7 @@ class MainApp(MDApp, ScreenWrapper):
         self.ros_action_topic = roslibpy.Topic(self.client, BridgeConfig.USER_INPUT_TOPIC, "std_msgs/String")
 
         self.interface_screen_topic = roslibpy.Topic(self.client, BridgeConfig.ROBOT_STATUS_TOPIC, "std_msgs/String")
-        self.interface_screen_topic.subscribe(self.set_screen_callback)
+        self.interface_screen_topic.subscribe(self.process_robot_status)
 
     # override
     def call_ros_action(self, action: int, args: dict = {}) -> bool:

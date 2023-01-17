@@ -4,15 +4,15 @@ from std_msgs.msg import String
 import json
 import time
 
-#from bridge_interface_config import robot_status, bridge_config
-from nightingale_srvs.srv import (InterfaceCall, InterfaceCallResponse)
+from nightingale_ros_bridge.bridge_interface_config import RobotStatus, BridgeConfig
+#from nightingale_srvs.srv import (InterfaceCall, InterfaceCallResponse)
 
 
 class RosBridgeInterface:
     def __init__(self):
         rospy.init_node('ros_bridge_interface_server', anonymous=True)
-        self.interface_input_sub = rospy.Subscriber(bridge_config.USER_INPUT_TOPIC, String, self.interface_input_callback)
-        self.set_screen_pub = rospy.Publisher(bridge_config.ROBOT_STATUS_TOPIC, String, queue_size=10)
+        self.interface_input_sub = rospy.Subscriber(BridgeConfig.USER_INPUT_TOPIC, String, self.interface_input_callback)
+        self.set_screen_pub = rospy.Publisher(BridgeConfig.ROBOT_STATUS_TOPIC, String, queue_size=10)
 
     def interface_input_callback(self, msg):
         data = json.loads(msg.data)
