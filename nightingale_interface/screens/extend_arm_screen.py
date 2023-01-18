@@ -11,7 +11,6 @@ from screens.screen_config import ScreenConfig as cfg
 from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import UserInputs
 
 class ExtendArmScreen:
-    extend_arm_name = "extendarmscreen"
 
     # when arm is extended to goal rostopic should publish to tell interface to switch to waititemget screen
 
@@ -20,17 +19,17 @@ class ExtendArmScreen:
         button_data.parent.manager.transition = NoTransition()
         cfg.last_screen = button_data.parent.manager.current
         cfg.pending_action = UserInputs.START_RETRACT_ARM
-        button_data.parent.manager.current = "confirmation_screen"
+        button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
 
     def extend_arm(self, button_data):
         # starts robot arm extend when patient is ready
         button_data.parent.manager.transition = NoTransition()
         cfg.last_screen = button_data.parent.manager.current
         cfg.pending_action = UserInputs.START_EXTEND_ARM
-        button_data.parent.manager.current = "confirmationscreen"
+        button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
 
     def extend_arm_build(self):
-        screen = Screen(name=self.extend_arm_name)
+        screen = Screen(name=cfg.EXTEND_ARM_SCREEN_NAME)
 
         # estop button
         screen.add_widget(

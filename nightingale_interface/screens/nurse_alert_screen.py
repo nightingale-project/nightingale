@@ -10,17 +10,16 @@ from screens.screen_config import ScreenConfig as cfg
 
 
 class NurseAlertScreen:
-    nurse_alert_name = "nursealertscreen"
 
     def nurse_alert_cancel(self, button_data):
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "right"
         cfg.last_screen = button_data.parent.manager.current
         cfg.pending_action = cfg.NO_ROS_ACTION
-        button_data.parent.manager.current = "confirmationscreen"
+        button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME 
 
     def nurse_alert_build(self):
-        screen = Screen(name=self.nurse_alert_name)
+        screen = Screen(name=cfg.NURSE_ALERT_SCREEN_NAME)
 
         # estop button
         screen.add_widget(

@@ -18,12 +18,6 @@ class ItemSelectScreen:
     ice_count_label_idx = 1
     blanket_count_label_idx = 0
 
-    # screen id from the screen manager
-    item_select_screen_id = 9
-
-    # screenname
-    item_select_name = "itemselectscreen"
-
     def add_item(self, button_data):
         if button_data.id == "water" and self.water_count < 3:
             self.water_count += 1
@@ -42,26 +36,26 @@ class ItemSelectScreen:
 
     # functions to update text on count change
     def on_water_count(self, *args):
-        self.root.screens[self.item_select_screen_id].children[
+        self.root.screens[cfg.ITEM_SELECT_SCREEN_ID].children[
             self.water_count_label_idx
         ].text = str(self.water_count)
-        self.root.screens[self.item_fill_screen_id].children[
+        self.root.screens[cfg.ITEM_FILL_SCREEN_ID].children[
             self.water_count_label_idx
         ].text = str(self.water_count)
 
     def on_ice_count(self, *args):
-        self.root.screens[self.item_select_screen_id].children[
+        self.root.screens[cfg.ITEM_SELECT_SCREEN_ID].children[
             self.ice_count_label_idx
         ].text = str(self.ice_count)
-        self.root.screens[self.item_fill_screen_id].children[
+        self.root.screens[cfg.ITEM_FILL_SCREEN_ID].children[
             self.ice_count_label_idx
         ].text = str(self.ice_count)
 
     def on_blanket_count(self, *args):
-        self.root.screens[self.item_select_screen_id].children[
+        self.root.screens[cfg.ITEM_SELECT_SCREEN_ID].children[
             self.blanket_count_label_idx
         ].text = str(self.blanket_count)
-        self.root.screens[self.item_fill_screen_id].children[
+        self.root.screens[cfg.ITEM_FILL_SCREEN_ID].children[
             self.blanket_count_label_idx
         ].text = str(self.blanket_count)
 
@@ -73,7 +67,7 @@ class ItemSelectScreen:
             button_data.parent.manager.transition.direction = "right"
             cfg.last_screen = button_data.parent.manager.current
             cfg.pending_action = UserInputs.STOCK_ITEMS
-            button_data.parent.manager.current = "confirmationscreen"
+            button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
 
     def cancel_request(self, button_data):
         # return to homescreen
@@ -81,10 +75,10 @@ class ItemSelectScreen:
         button_data.parent.manager.transition.direction = "right"
         cfg.last_screen = button_data.parent.manager.current
         cfg.pending_action = UserInputs.NO_ROS_ACTION
-        button_data.parent.manager.current = "confirmationscreen"
+        button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
 
     def item_select_build(self):
-        screen = Screen(name=self.item_select_name)
+        screen = Screen(name=cfg.ITEM_SELECT_SCREEN_NAME)
 
         # estop button
         screen.add_widget(

@@ -43,4 +43,8 @@ class ScreenConfig:
     NURSE_ALERT_SCREEN_NAME = 'nursealertscreen'
     VIDEO_CALL_SCREEN_NAME = 'videocallscreen'
 
+    # screen id nums
+    ITEM_SELECT_SCREEN_ID = 9
+    ITEM_FILL_SCREEN_ID = 10
+
 

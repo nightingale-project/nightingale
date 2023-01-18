@@ -11,17 +11,14 @@ from screens.screen_config import ScreenConfig as cfg
 
 
 class FaceScreen:
-    face_name = "facescreen"
 
     def to_homescreen(self, button_data):
         button_data.parent.manager.transition = NoTransition()
         cfg.last_screen = button_data.parent.manager.current
-        button_data.parent.manager.current = (
-            "homescreen"  # Should just be the "Home" screen
-        )
+        button_data.parent.manager.current = cfg.HUB_SCREEN_NAME 
 
     def face_build(self):
-        screen = Screen(name=self.face_name)
+        screen = Screen(name=cfg.FACE_SCREEN_NAME)
 
         # remove press color animation
         screen.add_widget(

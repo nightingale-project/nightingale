@@ -59,7 +59,7 @@ class MainApp(MDApp, ScreenWrapper):
         self.root.transition = kivy.uix.screenmanager.FadeTransition()
 
         # set the initial screen
-        self.root.current = "facescreen"
+        self.root.current = ScreenConfig.FACE_SCREEN_NAME 
 
         try:
             while True:
@@ -149,28 +149,28 @@ class MainApp(MDApp, ScreenWrapper):
         print(f"recieved {msg}")
         status = int(msg['data']) # enum
 
-        next_screen = "homescreen"
+        next_screen = ScreenConfig.HUB_SCREEN_NAME
         if status == RobotStatus.IDLE_HOME or status == RobotStatus.DRIVING:
             # instantly return since no user input expected
             self.call_ros_action(RobotStatus.NO_ROS_ACTION)
-            next_screen = "facescreen"
+            next_screen = ScreenConfig.FACE_SCREEN_NAME
 
         elif status == RobotStatus.BEDSIDE_IDLE:
-            next_screen = "homescreen"
+            next_screen = ScreenConfig.HUB_SCREEN_NAME
         elif status == RobotStatus.BEDSIDE_DELIVER:
             # initiate arm extend
-            next_screen = "extendarmscreen"
+            next_screen = ScreenConfig.EXTEND_ARM_SCREEN_NAME
         elif status == RobotStatus.ITEM_STOCK_REACHED:
             # show admin what to stock
-            next_screen = "itemstockscreen"
+            next_screen = ScreenConfig.ITEM_FILL_SCREEN_NAME
         elif status == RobotStatus.ARM_EXTENDED:
             # return NO_ACTION code since the master decides when next state occurs
             self.call_ros_action(ScreenConfig.NO_ROS_ACTION)
-            next_screen = "waititemgetscreen"
+            next_screen = ScreenConfig.WAIT_ITEM_GET_SCREEN_NAME
         elif status == RobotStatus.ARM_RETRACTED:
             # reset robot state for next request
             self.call_ros_action(ScreenConfig.NO_ROS_ACTION)
-            next_screen = "homescreen"
+            next_screen = ScreenConfig.HUB_SCREEN_NAME
 
         # statuses which do not change screens
         elif status == RobotStatus.EXTENDING_ARM:

@@ -11,12 +11,11 @@ from screens.screen_config import ScreenConfig as cfg
 
 
 class RetractArmScreen:
-    retract_arm_name = "retractarmscreen"
     # wait for rostopic published of when arm is normal state
     # and switch screens on that
 
     def retract_arm_build(self):
-        screen = Screen(name=self.retract_arm_name)
+        screen = Screen(name=cfg.RETRACT_ARM_SCREEN_NAME)
 
         # estop button
         screen.add_widget(

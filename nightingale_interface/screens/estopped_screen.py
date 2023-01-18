@@ -12,7 +12,6 @@ from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config i
 
 
 class EStoppedScreen:
-    estopped_name = "estoppedscreen"
 
     def exit_estop(self, button_data):
         # returns to previous screen that came before estop pressed
@@ -20,10 +19,10 @@ class EStoppedScreen:
         # cfg.last_screen = self.screen_name
         cfg.last_screen = button_data.parent.manager.current
         cfg.pending_action = UserInputs.ESTOP_CANCEL
-        button_data.parent.manager.current = "confirmationscreen"
+        button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME 
 
     def estopped_build(self):
-        screen = Screen(name=self.estopped_name)
+        screen = Screen(name=cfg.ESTOP_SCREEN_NAME)
 
         # ADD IMAGE FOR STOPPED STATE
         stopped_label = MDLabel(

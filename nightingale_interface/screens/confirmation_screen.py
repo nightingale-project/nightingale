@@ -11,18 +11,17 @@ from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config i
 
 
 class ConfirmationScreen:
-    confirmation_name = "confirmationscreen"
 
     def reset_counts(self):
         # only reset if starting new selection
-        if cfg.last_screen == "itemfillscreen":
+        if cfg.last_screen == cfg.ITEM_FILL_SCREEN_NAME:
             self.water_count = 0
             self.ice_count = 0
             self.blanket_count = 0
 
     def reset_counts(self):
         # only reset if starting new selection
-        if cfg.last_screen == "itemfillscreen":
+        if cfg.last_screen == cfg.ITEM_FILL_SCREEN_NAME:
             self.water_count = 0
             self.ice_count = 0
             self.blanket_count = 0
@@ -54,17 +53,17 @@ class ConfirmationScreen:
 
         if cfg.current_action == UserInputs.NO_ROS_ACTION:
             # cancel and wait for other inputs. No ROS funcs
-            button_data.parent.manager.current = "homescreen"
+            button_data.parent.manager.current = cfg.HUB_SCREEN_NAME
             return True
 
         if cfg.current_action == UserInputs.ESTOP_CANCEL:
             # stop ros estop 
             self.call_ros_action(int(cfg.current_action))
             # temporarily have homescreen as the screen after estop pressed. likely have to impement queue
-            button_data.parent.manager.current = 'homescreen' 
+            button_data.parent.manager.current = cfg.HUB_SCREEN_NAME 
             return True
 
-        button_data.parent.manager.current = "facescreen"
+        button_data.parent.manager.current = cfg.FACE_SCREEN_NAME 
         if self.call_ros_action(int(cfg.current_action)):
             return True
 
@@ -77,7 +76,7 @@ class ConfirmationScreen:
         button_data.parent.manager.current = cfg.last_screen
 
     def confirmation_build(self):
-        screen = Screen(name=self.confirmation_name)
+        screen = Screen(name=cfg.CONFIRMATION_SCREEN_NAME)
 
         # estop button
         screen.add_widget(
