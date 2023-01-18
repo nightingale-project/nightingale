@@ -10,13 +10,13 @@ Config.set("graphics", "height", "800")
 from kivymd.app import MDApp
 from kivy.uix.screenmanager import ScreenManager
 import kivy
-from kivy.properties import NumericProperty
+from kivy.properties import NumericProperty, StringProperty
 
 import MovoConfig
 from screen_wrapper import ScreenWrapper
 
 from screens.screen_config import ScreenConfig 
-from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import BridgeConfig, UserInputs
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import RobotStatus, BridgeConfig, UserInputs
 
 
 class MainApp(MDApp, ScreenWrapper):
@@ -36,6 +36,8 @@ class MainApp(MDApp, ScreenWrapper):
     water_count = NumericProperty(0)
     ice_count = NumericProperty(0)
     blanket_count = NumericProperty(0)
+
+    ros_set_screen = ""
 
     def main(self):
         self._other_task = asyncio.ensure_future(self.backend())
@@ -61,6 +63,10 @@ class MainApp(MDApp, ScreenWrapper):
 
         try:
             while True:
+
+                if len(self.ros_set_screen) > 6:
+                    self.root.current = self.ros_set_screen
+                    self.ros_set_screen = ""
 
                 # execute a queued task
                 if len(self.task_queue):
@@ -140,34 +146,37 @@ class MainApp(MDApp, ScreenWrapper):
         :return: True if successful
         """
         # take in status received from master and react to it 
-        status = msg['status'] # enum
+        print(f"recieved {msg}")
+        status = int(msg['data']) # enum
+
         next_screen = "homescreen"
-        if status == BridgeConfig.IDLE_HOME or status == BridgeConfig.DRIVING:
-            self.call_ros_action(ScreenConfig.NO_ROS_ACTION)
+        if status == RobotStatus.IDLE_HOME or status == RobotStatus.DRIVING:
+            # instantly return since no user input expected
+            self.call_ros_action(RobotStatus.NO_ROS_ACTION)
             next_screen = "facescreen"
 
-        elif status == BridgeConfig.BEDSIDE_IDLE:
+        elif status == RobotStatus.BEDSIDE_IDLE:
             next_screen = "homescreen"
-        elif status == BridgeConfig.BEDSIDE_DELIVER:
+        elif status == RobotStatus.BEDSIDE_DELIVER:
             # initiate arm extend
             next_screen = "extendarmscreen"
-        elif status == BridgeConfig.ITEM_STOCK_REACHED:
+        elif status == RobotStatus.ITEM_STOCK_REACHED:
             # show admin what to stock
             next_screen = "itemstockscreen"
-        elif status == BridgeConfig.ARM_EXTENDED:
+        elif status == RobotStatus.ARM_EXTENDED:
             # return NO_ACTION code since the master decides when next state occurs
             self.call_ros_action(ScreenConfig.NO_ROS_ACTION)
             next_screen = "waititemgetscreen"
-        elif status == BridgeConfig.ARM_RETRACTED:
+        elif status == RobotStatus.ARM_RETRACTED:
             # reset robot state for next request
             self.call_ros_action(ScreenConfig.NO_ROS_ACTION)
             next_screen = "homescreen"
 
         # statuses which do not change screens
-        elif status == BridgeConfig.EXTENDING_ARM:
+        elif status == RobotStatus.EXTENDING_ARM:
             # show popup or message that arm is extending
             pass
-        elif status == BridgeConfig.RETRACTING_ARM:
+        elif status == RobotStatus.RETRACTING_ARM:
             # show popup or message that arm is retracting
             pass
 
@@ -175,7 +184,9 @@ class MainApp(MDApp, ScreenWrapper):
             print(f"CODE {status} UNKNOWN")
             return False
  
-        self.root.current = next_screen
+        # does not work since only screen changes allowed in main loop
+        #self.root.current = next_screen
+        self.ros_set_screen = next_screen
         return True
 
 

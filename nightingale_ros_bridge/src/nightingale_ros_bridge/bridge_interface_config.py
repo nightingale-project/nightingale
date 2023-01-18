@@ -19,6 +19,7 @@ class BridgeConfig:
 
 class UserInputs:
     # User inputs sent from tablet UI to mission planner
+    NO_INPUT = -2
     NO_ROS_ACTION = -1
     STOCK_ITEMS = 9
     DELIVER_ITEMS = 10 
