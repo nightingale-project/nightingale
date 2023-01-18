@@ -1,5 +1,6 @@
 local_costmap:
    global_frame: odom
+   robot_base_frame: base_link
    static_map: false
    rolling_window: true
    width: 8.0
