@@ -41,7 +41,7 @@ class ConfirmationScreen:
     def confirmation_press_yes(self, button_data):
         # do yes and return home
         button_data.parent.manager.transition = NoTransition()
-        cfg.last_screen = self.confirmation_name
+        #cfg.last_screen = self.confirmation_name
 
         # state machine to do things based on the executed action
         # if given a 'yes' confirmation
@@ -59,7 +59,9 @@ class ConfirmationScreen:
 
         if cfg.current_action == UserInputs.ESTOP_CANCEL:
             # stop ros estop 
-            self.estop_topic.publish(int(cfg.ESTOP_CANCEL))
+            self.call_ros_action(int(cfg.current_action))
+            # temporarily have homescreen as the screen after estop pressed. likely have to impement queue
+            button_data.parent.manager.current = 'homescreen' 
             return True
 
         button_data.parent.manager.current = "facescreen"

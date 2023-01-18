@@ -27,8 +27,7 @@ class HomeScreen:
         cfg.last_screen = button_data.parent.manager.current
 
         # engage estop on ROS topic
-        self.estop_topic.publish(1)
-
+        self.call_ros_action(UserInputs.ESTOP)
         button_data.parent.manager.current = "estoppedscreen"
 
     def to_nurse_alert(self, button_data):

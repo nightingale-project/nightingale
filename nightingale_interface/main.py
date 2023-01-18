@@ -2,8 +2,6 @@ import asyncio
 import roslibpy
 import json
 
-import sys
-
 from kivy.config import Config
 
 Config.set("graphics", "width", "1280")
@@ -23,7 +21,7 @@ from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config i
 
 class MainApp(MDApp, ScreenWrapper):
     _other_task = None
-    coms_enabled = False
+    coms_enabled = True
 
     # ros things
     client = None
@@ -98,7 +96,7 @@ class MainApp(MDApp, ScreenWrapper):
 
         # temporary offline computer testing
         self.client = roslibpy.Ros(
-            host='localhost', port=9091 
+            host='localhost', port=MovoConfig.Config["RosBridgePort"]
         )
         # temporary offline computer testing
 
@@ -107,7 +105,7 @@ class MainApp(MDApp, ScreenWrapper):
 
         # publisher back to interface
         self.ros_action_topic = roslibpy.Topic(self.client, BridgeConfig.USER_INPUT_TOPIC, "std_msgs/String")
-        self.estop_topic = roslibpy.Topic(self.client, BridgeConfig.ESTOP_TOPIC, "std_msgs/Int", latch=True)
+        self.estop_topic = roslibpy.Topic(self.client, BridgeConfig.ESTOP_TOPIC, "std_msgs/String", latch=True)
 
         # subscriber to interface messages
         self.interface_screen_topic = roslibpy.Topic(self.client, BridgeConfig.ROBOT_STATUS_TOPIC, "std_msgs/String")
@@ -125,8 +123,13 @@ class MainApp(MDApp, ScreenWrapper):
         args['action'] = str(action)
         json_str = json.dumps(args)
         msg = roslibpy.Message({"data": json_str})
+        print(f"send mesage {msg}")
         try:
-            self.ros_action_topic.publish(msg)
+            # different topic if engaging estop
+            if action == UserInputs.ESTOP:
+                self.estop_action_topic.publish(msg)
+            else:
+                self.ros_action_topic.publish(msg)
             return True
         except:
             return False
@@ -136,7 +139,6 @@ class MainApp(MDApp, ScreenWrapper):
         :param msg: Message to be sent
         :return: True if successful
         """
-
         # take in status received from master and react to it 
         status = msg['status'] # enum
         next_screen = "homescreen"
