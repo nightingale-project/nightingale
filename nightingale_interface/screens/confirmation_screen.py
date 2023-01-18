@@ -51,9 +51,14 @@ class ConfirmationScreen:
         # reset counters regardless of cancel or send
         self.reset_counts()
 
-        if (cfg.CURRENT_ACTION == cfg.NO_ROS_ACTION) or (cfg.CURRENT_ACTION == cfg.ESTOP_CANCEL):
+        if cfg.CURRENT_ACTION == cfg.NO_ROS_ACTION:
             # cancel and wait for other inputs. No ROS funcs
             button_data.parent.manager.current = "homescreen"
+            return True
+
+        if cfg.CURRENT_ACTION == cfg.ESTOP_CANCEL:
+            # stop ros estop 
+            self.estop_topic.publish(int(cfg.ESTOP_CANCEL))
             return True
 
         button_data.parent.manager.current = "facescreen"

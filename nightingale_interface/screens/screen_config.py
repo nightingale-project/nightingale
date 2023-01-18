@@ -30,12 +30,27 @@ class ScreenConfig:
     payload = ""
     # User inputs sent from tablet UI to mission planner
     NO_ROS_ACTION = -1
-    DELIVER_REQUEST = 8
+    STOCK_ITEMS = 8
     DELIVER_ITEMS = 9
     RETURN_HOME = 10
     START_EXTEND_ARM = 11
     ITEMS_TAKEN = 12
     START_RETRACT_ARM = 13
     ESTOP = 14
+    WD_TIMEOUT = 15
+
+    # screen names
+    HUB_SCREEN_NAME = 'hubscreen'
+    FACE_SCREEN_NAME =  'facescreen'
+    ADMIN_SCREEN_NAME = 'adminscreen'
+    CONFIRMATION_SCREEN_NAME = 'confirmationscreen'
+    ESTOP_SCREEN_NAME = 'estoppedscreen'
+    ITEM_SELECT_SCREEN_NAME = 'itemselectscreen'
+    ITEM_FILL_SCREEN_NAME = 'itemfillscreen'
+    EXTEND_ARM_SCREEN_NAME = 'extendarmscreen'
+    WAIT_ITEM_GET_SCREEN_NAME = 'waititemgetscreen'
+    RETRACT_ARM_SCREEN_NAME = 'retractarmscreen'
+    NURSE_ALERT_SCREEN_NAME = 'nursealertscreen'
+    VIDEO_CALL_SCREEN_NAME = 'videocallscreen'
 
 

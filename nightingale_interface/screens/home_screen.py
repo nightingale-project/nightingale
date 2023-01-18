@@ -8,6 +8,9 @@ from kivy.uix.button import Button
 from kivy.uix.screenmanager import SlideTransition, NoTransition
 from screens.screen_config import ScreenConfig as cfg
 
+import roslibpy
+import json
+
 
 class HomeScreen:
     home_name = "homescreen"
@@ -15,6 +18,10 @@ class HomeScreen:
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
         cfg.last_screen = button_data.parent.manager.current
+
+        # engage estop on ROS topic
+        self.estop_topic.publish(1)
+
         button_data.parent.manager.current = "estoppedscreen"
 
     def to_nurse_alert(self, button_data):

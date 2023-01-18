@@ -31,6 +31,7 @@ class MainApp(MDApp, ScreenWrapper):
     client = None
     ros_action_topic = None
     interface_screen_topic = None
+    estop_topic = None
 
     # task queue things
     task_queue = [] # dict of { "task": Int, "delay": Int, "args":""}
@@ -101,12 +102,16 @@ class MainApp(MDApp, ScreenWrapper):
         self.client = roslibpy.Ros(
             host='localhost', port=9091 
         )
- 
+        # temporary offline computer testing
+
         self.client.run()
         asyncio.sleep(0.5)
 
+        # publisher back to interface
         self.ros_action_topic = roslibpy.Topic(self.client, BridgeConfig.USER_INPUT_TOPIC, "std_msgs/String")
+        self.estop_topic = roslibpy.Topic(self.client, BridgeConfig.ESTOP_TOPIC, "std_msgs/Int", latch=True)
 
+        # subscriber to interface messages
         self.interface_screen_topic = roslibpy.Topic(self.client, BridgeConfig.ROBOT_STATUS_TOPIC, "std_msgs/String")
         self.interface_screen_topic.subscribe(self.process_robot_status)
 
@@ -138,6 +143,7 @@ class MainApp(MDApp, ScreenWrapper):
         status = msg['status'] # enum
         next_screen = "homescreen"
         if status == BridgeConfig.IDLE_HOME or status == BridgeConfig.DRIVING:
+            self.call_ros_action(ScreenConfig.NO_ROS_ACTION)
             next_screen = "facescreen"
 
         elif status == BridgeConfig.BEDSIDE_IDLE:
@@ -149,9 +155,12 @@ class MainApp(MDApp, ScreenWrapper):
             # show admin what to stock
             next_screen = "itemstockscreen"
         elif status == BridgeConfig.ARM_EXTENDED:
+            # return NO_ACTION code since the master decides when next state occurs
+            self.call_ros_action(ScreenConfig.NO_ROS_ACTION)
             next_screen = "waititemgetscreen"
         elif status == BridgeConfig.ARM_RETRACTED:
             # reset robot state for next request
+            self.call_ros_action(ScreenConfig.NO_ROS_ACTION)
             next_screen = "homescreen"
 
         # statuses which do not change screens
