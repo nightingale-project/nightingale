@@ -9,6 +9,7 @@ from kivy.uix.label import Label
 from kivy.uix.screenmanager import NoTransition
 from screens.screen_config import ScreenConfig as cfg
 
+
 class FaceScreen:
     face_name = "facescreen"
 
@@ -23,7 +24,6 @@ class FaceScreen:
         screen = Screen(name=self.face_name)
 
         # remove press color animation
-
         screen.add_widget(
             Button(
                 background_normal="images/Face.png",
@@ -33,7 +33,6 @@ class FaceScreen:
                 },
                 size_hint=(0.7, 1),
                 on_release=self.to_homescreen,
-
             )
         )
 
