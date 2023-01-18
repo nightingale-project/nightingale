@@ -21,6 +21,10 @@ class ScreenConfig:
     SHORT_RECT_WIDTH = 0.2
     SHORT_RECT_HEIGHT = 0.1
 
+    VIDEO_PLAYER_XPOS = 0.35
+    VIDEO_PLAYER_YPOS = SCREEN_Y_CENTER 
+    VIDEO_PLAYER_HEIGHT = 0.7
+    VIDEO_PLAYER_WIDTH = 0.7
 
     # paramters to store values
     current_action = "0"
@@ -46,5 +50,7 @@ class ScreenConfig:
     # screen id nums
     ITEM_SELECT_SCREEN_ID = 9
     ITEM_FILL_SCREEN_ID = 10
+
+    WATCHDOG_TIMER_SECONDS = 30
 
 

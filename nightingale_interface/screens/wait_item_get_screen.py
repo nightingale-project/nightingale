@@ -1,6 +1,6 @@
 from kivy.uix.screenmanager import Screen
 from kivy.uix.image import Image
-from kivy.uix.videoplayer import VideoPlayer
+from kivy.uix.video import Video
 
 from kivymd.uix.label import MDLabel
 from kivymd.uix.button import MDRectangleFlatButton
@@ -47,12 +47,15 @@ class WaitItemGetScreen:
         )
 
         # Video player of robot moving
-        # screen.add_widget(
-        #    VideoPlayer(
-        #        source='wait_item_get.mkv',
-        #        state='play',
-        #        size_hint_x=0.15,
-        #        pos_hint={"center_x": 0.3, "center_y": 0.5},
-        # )
+        screen.add_widget(
+            Video(
+                source='videos/clock.mp4',
+                state='play',
+                options = {'eos': 'loop'},
+                size_hint_x=cfg.VIDEO_PLAYER_WIDTH,
+                size_hint_y=cfg.VIDEO_PLAYER_HEIGHT,
+                pos_hint={"center_x": cfg.VIDEO_PLAYER_XPOS, "center_y": cfg.VIDEO_PLAYER_YPOS},
+            )
+        )
 
         return screen

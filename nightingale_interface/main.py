@@ -39,6 +39,8 @@ class MainApp(MDApp, ScreenWrapper):
 
     ros_set_screen = ""
 
+    watchdog_timer = ScreenConfig.WATCHDOG_TIMER_SECONDS 
+
     def main(self):
         self._other_task = asyncio.ensure_future(self.backend())
 
