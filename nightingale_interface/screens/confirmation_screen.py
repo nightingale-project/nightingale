@@ -7,6 +7,7 @@ from kivy.uix.button import Button
 
 from kivy.uix.screenmanager import SlideTransition, NoTransition
 from screens.screen_config import ScreenConfig as cfg
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import UserInputs
 
 
 class ConfirmationScreen:
@@ -21,7 +22,7 @@ class ConfirmationScreen:
 
     def reset_counts(self):
         # only reset if starting new selection
-        if cfg.LAST_SCREEN == "itemfillscreen":
+        if cfg.last_screen == "itemfillscreen":
             self.water_count = 0
             self.ice_count = 0
             self.blanket_count = 0
@@ -40,29 +41,29 @@ class ConfirmationScreen:
     def confirmation_press_yes(self, button_data):
         # do yes and return home
         button_data.parent.manager.transition = NoTransition()
-        cfg.LAST_SCREEN = self.confirmation_name
+        cfg.last_screen = self.confirmation_name
 
         # state machine to do things based on the executed action
         # if given a 'yes' confirmation
-        cfg.CURRENT_ACTION = cfg.PENDING_ACTION
-        cfg.PENDING_ACTION = ""
-        print(f"CUR ACTION {cfg.CURRENT_ACTION}")
+        cfg.current_action = cfg.pending_action
+        cfg.pending_action = ""
+        print(f"CUR ACTION {cfg.current_action}")
 
         # reset counters regardless of cancel or send
         self.reset_counts()
 
-        if cfg.CURRENT_ACTION == cfg.NO_ROS_ACTION:
+        if cfg.current_action == UserInputs.NO_ROS_ACTION:
             # cancel and wait for other inputs. No ROS funcs
             button_data.parent.manager.current = "homescreen"
             return True
 
-        if cfg.CURRENT_ACTION == cfg.ESTOP_CANCEL:
+        if cfg.current_action == UserInputs.ESTOP_CANCEL:
             # stop ros estop 
             self.estop_topic.publish(int(cfg.ESTOP_CANCEL))
             return True
 
         button_data.parent.manager.current = "facescreen"
-        if self.call_ros_action(int(cfg.CURRENT_ACTION)):
+        if self.call_ros_action(int(cfg.current_action)):
             return True
 
         print("Unknown error occurred while sending ros action command")
@@ -71,7 +72,7 @@ class ConfirmationScreen:
     def confirmation_press_no(self, button_data):
         # do nothing and return to previous screen
         button_data.parent.manager.transition = NoTransition()
-        button_data.parent.manager.current = cfg.LAST_SCREEN
+        button_data.parent.manager.current = cfg.last_screen
 
     def confirmation_build(self):
         screen = Screen(name=self.confirmation_name)
@@ -104,7 +105,7 @@ class ConfirmationScreen:
                 font_style="H4",
                 pos_hint={"center_x": 0.25, "center_y": cfg.SCREEN_Y_CENTER},
                 size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
-                on_release=self.press,
+                on_release=self.confirmation_press_yes,
             )
         )
 
@@ -115,7 +116,7 @@ class ConfirmationScreen:
                 font_style="H4",
                 pos_hint={"center_x": 0.75, "center_y": cfg.SCREEN_Y_CENTER},
                 size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
-                on_release=self.press,
+                on_release=self.confirmation_press_no,
             )
         )
 

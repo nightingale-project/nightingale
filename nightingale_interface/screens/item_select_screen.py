@@ -7,6 +7,7 @@ from kivy.uix.button import Button
 
 from kivy.uix.screenmanager import SlideTransition, NoTransition
 from screens.screen_config import ScreenConfig as cfg
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import UserInputs
 
 from kivy.app import App
 
@@ -65,19 +66,21 @@ class ItemSelectScreen:
         ].text = str(self.blanket_count)
 
     def send_request(self, button_data):
-        # send to ROS topic and return to homescren
-        button_data.parent.manager.transition = SlideTransition()
-        button_data.parent.manager.transition.direction = "right"
-        cfg.last_screen = button_data.parent.manager.current
-        cfg.pending_action = cfg.STOCK
-        button_data.parent.manager.current = "confirmationscreen"
+        if self.water_count + self.blanket_count + self.ice_count > 0:
+            # only execute if item was added
+            # send to ROS topic and return to homescren
+            button_data.parent.manager.transition = SlideTransition()
+            button_data.parent.manager.transition.direction = "right"
+            cfg.last_screen = button_data.parent.manager.current
+            cfg.pending_action = UserInputs.STOCK_ITEMS
+            button_data.parent.manager.current = "confirmationscreen"
 
     def cancel_request(self, button_data):
         # return to homescreen
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "right"
         cfg.last_screen = button_data.parent.manager.current
-        cfg.pending_action = cfg.NO_ROS_ACTION
+        cfg.pending_action = UserInputs.NO_ROS_ACTION
         button_data.parent.manager.current = "confirmationscreen"
 
     def item_select_build(self):

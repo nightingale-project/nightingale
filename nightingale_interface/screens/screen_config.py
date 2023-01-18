@@ -23,21 +23,11 @@ class ScreenConfig:
 
 
     # paramters to store values
-    current_action = "Waiting"
-    pending_action = "Waiting"
+    current_action = "0"
+    pending_action = "0"
     last_screen = "facescreen"
 
     payload = ""
-    # User inputs sent from tablet UI to mission planner
-    NO_ROS_ACTION = -1
-    STOCK_ITEMS = 8
-    DELIVER_ITEMS = 9
-    RETURN_HOME = 10
-    START_EXTEND_ARM = 11
-    ITEMS_TAKEN = 12
-    START_RETRACT_ARM = 13
-    ESTOP = 14
-    WD_TIMEOUT = 15
 
     # screen names
     HUB_SCREEN_NAME = 'hubscreen'

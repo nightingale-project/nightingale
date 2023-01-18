@@ -8,6 +8,7 @@ from kivy.uix.button import Button
 
 from kivy.uix.screenmanager import NoTransition
 from screens.screen_config import ScreenConfig as cfg
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import BridgeConfig, UserInputs
 
 
 class EStoppedScreen:
@@ -18,7 +19,7 @@ class EStoppedScreen:
         button_data.parent.manager.transition = NoTransition()
         # cfg.last_screen = self.screen_name
         cfg.last_screen = button_data.parent.manager.current
-        cfg.pending_action = cfg.ESTOP_CANCEL
+        cfg.pending_action = UserInputs.ESTOP_CANCEL
         button_data.parent.manager.current = "confirmationscreen"
 
     def estopped_build(self):

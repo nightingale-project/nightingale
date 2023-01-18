@@ -3,8 +3,6 @@ import roslibpy
 import json
 
 import sys
-#PLACEHOLDER FOR TESTING UNTIL CONFIG LOCATIONS ARE SET
-sys.path.append("../")
 
 from kivy.config import Config
 
@@ -20,12 +18,12 @@ import MovoConfig
 from screen_wrapper import ScreenWrapper
 
 from screens.screen_config import ScreenConfig 
-from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import BridgeConfig
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import BridgeConfig, UserInputs
 
 
 class MainApp(MDApp, ScreenWrapper):
     _other_task = None
-    coms_enabled = True
+    coms_enabled = False
 
     # ros things
     client = None

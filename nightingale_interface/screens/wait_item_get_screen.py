@@ -8,6 +8,7 @@ from kivy.uix.button import Button
 
 from kivy.uix.screenmanager import SlideTransition, NoTransition
 from screens.screen_config import ScreenConfig as cfg
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import UserInputs
 
 
 class WaitItemGetScreen:
@@ -17,7 +18,7 @@ class WaitItemGetScreen:
         # publishes message to stop to retract arm
         button_data.parent.manager.transition = NoTransition()
         cfg.last_screen = button_data.parent.manager.current
-        cfg.pending_action = cfg.RETRACT_ARM
+        cfg.pending_action = UserInputs.RETRACT_ARM
         button_data.parent.manager.current = "confirmationscreen"
 
     def wait_item_get_build(self):

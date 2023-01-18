@@ -17,3 +17,18 @@ class BridgeConfig:
     ESTOP_TOPIC = "nightingale_ui/estop_status"
     UPDATE_UI_SERVICE = "nightingale_ui/update_ui_state"
 
+class UserInputs:
+    # User inputs sent from tablet UI to mission planner
+    NO_ROS_ACTION = -1
+    STOCK_ITEMS = 9
+    DELIVER_ITEMS = 10 
+    RETURN_HOME = 11
+    START_EXTEND_ARM = 12
+    ITEMS_TAKEN = 13
+    START_RETRACT_ARM = 14
+    ESTOP = 15
+    ESTOP_CANCEL = 16
+    WD_TIMEOUT = 17
+
+
+

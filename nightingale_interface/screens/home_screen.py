@@ -8,6 +8,13 @@ from kivy.uix.button import Button
 from kivy.uix.screenmanager import SlideTransition, NoTransition
 from screens.screen_config import ScreenConfig as cfg
 
+# TEMPORARY UNTIL INCLUDES ARE FIXED
+import sys
+sys.path.append("..")
+# TEMPORARY UNTIL INCLUDES ARE FIXED
+
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import BridgeConfig, UserInputs
+
 import roslibpy
 import json
 
@@ -49,7 +56,7 @@ class HomeScreen:
         button_data.parent.manager.transition = NoTransition()
         button_data.parent.manager.transition.direction = "left"
         cfg.last_screen = button_data.parent.manager.current
-        cfg.pending_action = cfg.GO_HOME
+        cfg.pending_action = UserInputs.RETURN_HOME
         button_data.parent.manager.current = "confirmationscreen"
 
     def to_admin_control(self, button_data):

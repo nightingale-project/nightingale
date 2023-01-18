@@ -57,7 +57,7 @@ class AdminScreen:
         screen.add_widget(
             MDRectangleFlatButton(
                 text="Exit",
-                font_size=cfg.CANCEL_BUTTON_FONT_SIZE,
+                font_size=cfg.CANCEL_BUTTON_FONTSIZE,
                 pos_hint={"center_x": 0.125, "center_y": 0.9},
                 size_hint=(0.2, 0.1),
                 on_release=self.to_home,

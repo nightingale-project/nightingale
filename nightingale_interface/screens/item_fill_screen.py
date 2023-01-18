@@ -7,6 +7,7 @@ from kivy.uix.button import Button
 
 from kivy.uix.screenmanager import SlideTransition, NoTransition
 from screens.screen_config import ScreenConfig as cfg
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import UserInputs
 
 
 class ItemFillScreen:
@@ -18,7 +19,7 @@ class ItemFillScreen:
     def fill_done(self, button_data):
         # publish to ROS topic to let robot go away
         cfg.last_screen = button_data.parent.manager.current
-        cfg.pending_action = cfg.DELIVER
+        cfg.pending_action = UserInputs.DELIVER_ITEMS
         button_data.parent.manager.transition = NoTransition()
         button_data.parent.manager.current = "confirmationscreen"
 
@@ -26,7 +27,7 @@ class ItemFillScreen:
         # cancel and publish topic to go to home
         button_data.parent.manager.transition = NoTransition()
         cfg.last_screen = button_data.parent.manager.current
-        cfg.pending_action = cfg.NO_ROS_ACTION
+        cfg.pending_action = UserInputs.NO_ROS_ACTION
         button_data.parent.manager.current = "confirmationscreen"
 
     def item_fill_build(self):

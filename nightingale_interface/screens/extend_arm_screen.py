@@ -8,7 +8,7 @@ from kivy.uix.button import Button
 
 from kivy.uix.screenmanager import SlideTransition, NoTransition
 from screens.screen_config import ScreenConfig as cfg
-
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import UserInputs
 
 class ExtendArmScreen:
     extend_arm_name = "extendarmscreen"
@@ -19,14 +19,14 @@ class ExtendArmScreen:
         # publishes message to stop to retract arm
         button_data.parent.manager.transition = NoTransition()
         cfg.last_screen = button_data.parent.manager.current
-        cfg.pending_action = cfg.RETRACT_ARM
+        cfg.pending_action = UserInputs.START_RETRACT_ARM
         button_data.parent.manager.current = "confirmation_screen"
 
     def extend_arm(self, button_data):
         # starts robot arm extend when patient is ready
         button_data.parent.manager.transition = NoTransition()
         cfg.last_screen = button_data.parent.manager.current
-        cfg.pending_action = cfg.EXTEND_ARM
+        cfg.pending_action = UserInputs.START_EXTEND_ARM
         button_data.parent.manager.current = "confirmationscreen"
 
     def extend_arm_build(self):
