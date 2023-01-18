@@ -12,21 +12,24 @@ from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config i
 
 class ExtendArmScreen:
 
-    # when arm is extended to goal rostopic should publish to tell interface to switch to waititemget screen
-
-    def retract_arm(self, button_data):
+    def cancel_extend_arm(self, button_data):
+        pass
         # publishes message to stop to retract arm
-        button_data.parent.manager.transition = NoTransition()
-        cfg.last_screen = button_data.parent.manager.current
-        cfg.pending_action = UserInputs.START_RETRACT_ARM
-        button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
+        #button_data.parent.manager.transition = NoTransition()
+        #cfg.last_screen = button_data.parent.manager.current
+        #cfg.pending_action = UserInputs.START_RETRACT_ARM
+        #button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
 
     def extend_arm(self, button_data):
         # starts robot arm extend when patient is ready
-        button_data.parent.manager.transition = NoTransition()
-        cfg.last_screen = button_data.parent.manager.current
-        cfg.pending_action = UserInputs.START_EXTEND_ARM
-        button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
+        #button_data.parent.manager.transition = NoTransition()
+        #cfg.last_screen = button_data.parent.manager.current
+        #cfg.pending_action = UserInputs.START_EXTEND_ARM
+        #button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
+
+        # respond to M.P to extend arm
+        self.call_ros_action(UserInputs.START_EXTEND_ARM)
+        # show pop up
 
     def extend_arm_build(self):
         screen = Screen(name=cfg.EXTEND_ARM_SCREEN_NAME)
@@ -49,7 +52,7 @@ class ExtendArmScreen:
                 font_style="H4",
                 pos_hint={"center_x": 0.85, "center_y": 0.35},
                 size_hint=(cfg.SHORT_RECT_WIDTH, cfg.SHORT_RECT_HEIGHT),
-                on_release=self.retract_arm,
+                on_release=self.cancel_extend_arm,
             )
         )
 

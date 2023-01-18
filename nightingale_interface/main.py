@@ -64,6 +64,8 @@ class MainApp(MDApp, ScreenWrapper):
         try:
             while True:
 
+                # update screen upon new state
+                # need better way. probably just another state
                 if len(self.ros_set_screen) > 6:
                     self.root.current = self.ros_set_screen
                     self.ros_set_screen = ""
@@ -152,7 +154,7 @@ class MainApp(MDApp, ScreenWrapper):
         next_screen = ScreenConfig.HUB_SCREEN_NAME
         if status == RobotStatus.IDLE_HOME or status == RobotStatus.DRIVING:
             # instantly return since no user input expected
-            self.call_ros_action(RobotStatus.NO_ROS_ACTION)
+            self.call_ros_action(UserInputs.NO_ROS_ACTION)
             next_screen = ScreenConfig.FACE_SCREEN_NAME
 
         elif status == RobotStatus.BEDSIDE_IDLE:
@@ -164,28 +166,27 @@ class MainApp(MDApp, ScreenWrapper):
             # show admin what to stock
             next_screen = ScreenConfig.ITEM_FILL_SCREEN_NAME
         elif status == RobotStatus.ARM_EXTENDED:
-            # return NO_ACTION code since the master decides when next state occurs
-            self.call_ros_action(ScreenConfig.NO_ROS_ACTION)
             next_screen = ScreenConfig.WAIT_ITEM_GET_SCREEN_NAME
         elif status == RobotStatus.ARM_RETRACTED:
             # reset robot state for next request
-            self.call_ros_action(ScreenConfig.NO_ROS_ACTION)
+            self.call_ros_action(UserInputs.NO_ROS_ACTION)
             next_screen = ScreenConfig.HUB_SCREEN_NAME
 
         # statuses which do not change screens
+        # for now
         elif status == RobotStatus.EXTENDING_ARM:
             # show popup or message that arm is extending
-            pass
+            self.call_ros_action(UserInputs.NO_ROS_ACTION)
+            return True
         elif status == RobotStatus.RETRACTING_ARM:
             # show popup or message that arm is retracting
-            pass
+            self.call_ros_action(UserInputs.NO_ROS_ACTION)
+            return True
 
         else:
             print(f"CODE {status} UNKNOWN")
             return False
  
-        # does not work since only screen changes allowed in main loop
-        #self.root.current = next_screen
         self.ros_set_screen = next_screen
         return True
 

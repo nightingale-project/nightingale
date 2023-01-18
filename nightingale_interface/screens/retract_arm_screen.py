@@ -8,11 +8,22 @@ from kivy.uix.button import Button
 
 from kivy.uix.screenmanager import SlideTransition, NoTransition
 from screens.screen_config import ScreenConfig as cfg
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import UserInputs
+
 
 
 class RetractArmScreen:
-    # wait for rostopic published of when arm is normal state
-    # and switch screens on that
+
+    def retract_arm(self, button_data):
+        # publishes message to stop to retract arm
+        #button_data.parent.manager.transition = NoTransition()
+        #cfg.last_screen = button_data.parent.manager.current
+        #cfg.pending_action = UserInputs.START_RETRACT_ARM
+        #button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
+        # respond to M.P to extend arm
+        self.call_ros_action(UserInputs.START_RETRACT_ARM)
+        # show pop up
+
 
     def retract_arm_build(self):
         screen = Screen(name=cfg.RETRACT_ARM_SCREEN_NAME)
@@ -27,6 +38,18 @@ class RetractArmScreen:
                 on_release=self.estop,
             )
         )
+
+        # start extend arm
+        screen.add_widget(
+            MDRectangleFlatButton(
+                text="Start retract arm",
+                font_style="H4",
+                pos_hint={"center_x": 0.85, "center_y": 0.15},
+                size_hint=(cfg.SHORT_RECT_WIDTH, cfg.SHORT_RECT_HEIGHT),
+                on_release=self.retract_arm,
+            )
+        )
+
 
         # Video player of robot moving
         # screen.add_widget(

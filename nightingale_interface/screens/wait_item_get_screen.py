@@ -13,12 +13,13 @@ from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config i
 
 class WaitItemGetScreen:
 
-    def retract_arm(self, button_data):
+    def items_taken(self, button_data):
         # publishes message to stop to retract arm
         button_data.parent.manager.transition = NoTransition()
         cfg.last_screen = button_data.parent.manager.current
-        cfg.pending_action = UserInputs.RETRACT_ARM
-        button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME1 
+        #cfg.pending_action = UserInputs.START_RETRACT_ARM
+        #button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME 
+        button_data.parent.manager.current = cfg.RETRACT_ARM_SCREEN_NAME 
 
     def wait_item_get_build(self):
         screen = Screen(name=cfg.WAIT_ITEM_GET_SCREEN_NAME)
@@ -34,14 +35,14 @@ class WaitItemGetScreen:
             )
         )
 
-        # retract arm
+        # go to screen to retract arm 
         screen.add_widget(
             MDRectangleFlatButton(
                 text="Finish",
                 font_style="H4",
                 pos_hint={"center_x": 0.85, "center_y": 0.15},
                 size_hint=(cfg.SHORT_RECT_WIDTH, cfg.SHORT_RECT_HEIGHT),
-                on_release=self.retract_arm,
+                on_release=self.items_taken,
             )
         )
 

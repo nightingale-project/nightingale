@@ -46,7 +46,6 @@ class ConfirmationScreen:
         # if given a 'yes' confirmation
         cfg.current_action = cfg.pending_action
         cfg.pending_action = ""
-        print(f"CUR ACTION {cfg.current_action}")
 
         # reset counters regardless of cancel or send
         self.reset_counts()
@@ -62,6 +61,13 @@ class ConfirmationScreen:
             # temporarily have homescreen as the screen after estop pressed. likely have to impement queue
             button_data.parent.manager.current = cfg.HUB_SCREEN_NAME 
             return True
+        
+        if cfg.current_action == UserInputs.START_RETRACT_ARM:
+            self.call_ros_action(int(cfg.current_action))
+            # should already be on the screen
+            #button_data.parent.manager.current = cfg.RETRACT_ARM_SCREEN_NAME 
+            return True
+ 
 
         button_data.parent.manager.current = cfg.FACE_SCREEN_NAME 
         if self.call_ros_action(int(cfg.current_action)):
