@@ -28,6 +28,7 @@ class ExtendArmScreen:
         #cfg.pending_action = UserInputs.START_EXTEND_ARM
         #button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
 
+        self.reset_wd()
         # respond to M.P to extend arm
         self.call_ros_action(UserInputs.START_EXTEND_ARM)
         # show pop up

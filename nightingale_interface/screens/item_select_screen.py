@@ -19,6 +19,7 @@ class ItemSelectScreen:
     blanket_count_label_idx = 0
 
     def add_item(self, button_data):
+        self.reset_wd()
         if button_data.id == "water" and self.water_count < 3:
             self.water_count += 1
         if button_data.id == "ice" and self.ice_count < 3:
@@ -27,6 +28,7 @@ class ItemSelectScreen:
             self.blanket_count += 1
 
     def remove_item(self, button_data):
+        self.reset_wd()
         if button_data.id == "water" and self.water_count > 0:
             self.water_count -= 1
         if button_data.id == "ice" and self.ice_count > 0:
@@ -60,6 +62,7 @@ class ItemSelectScreen:
         ].text = str(self.blanket_count)
 
     def send_request(self, button_data):
+        self.reset_wd()
         if self.water_count + self.blanket_count + self.ice_count > 0:
             # only execute if item was added
             # send to ROS topic and return to homescren
@@ -73,6 +76,7 @@ class ItemSelectScreen:
         # return to homescreen
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "right"
+        self.reset_wd()
         cfg.last_screen = button_data.parent.manager.current
         cfg.pending_action = UserInputs.NO_ROS_ACTION
         button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME

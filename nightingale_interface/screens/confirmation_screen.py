@@ -19,13 +19,6 @@ class ConfirmationScreen:
             self.ice_count = 0
             self.blanket_count = 0
 
-    def reset_counts(self):
-        # only reset if starting new selection
-        if cfg.last_screen == cfg.ITEM_FILL_SCREEN_NAME:
-            self.water_count = 0
-            self.ice_count = 0
-            self.blanket_count = 0
-
     def call_ros_action(self, action: int, args: dict = {}) -> bool:
         """
         override expected with ros functionality
@@ -40,7 +33,7 @@ class ConfirmationScreen:
     def confirmation_press_yes(self, button_data):
         # do yes and return home
         button_data.parent.manager.transition = NoTransition()
-        #cfg.last_screen = self.confirmation_name
+        self.reset_wd()
 
         # state machine to do things based on the executed action
         # if given a 'yes' confirmation
@@ -79,6 +72,7 @@ class ConfirmationScreen:
     def confirmation_press_no(self, button_data):
         # do nothing and return to previous screen
         button_data.parent.manager.transition = NoTransition()
+        self.reset_wd()
         button_data.parent.manager.current = cfg.last_screen
 
     def confirmation_build(self):

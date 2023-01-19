@@ -24,7 +24,7 @@ class HomeScreen:
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
         cfg.last_screen = button_data.parent.manager.current
-
+        self.reset_wd()
         # engage estop on ROS topic
         self.call_ros_action(UserInputs.ESTOP)
         button_data.parent.manager.current = cfg.ESTOP_SCREEN_NAME 
@@ -32,6 +32,7 @@ class HomeScreen:
     def to_nurse_alert(self, button_data):
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "left"
+        self.reset_wd()
         cfg.last_screen = button_data.parent.manager.current
         button_data.parent.manager.current = cfg.NURSE_ALERT_SCREEN_NAME
 
@@ -39,6 +40,7 @@ class HomeScreen:
         # publish to topic to tell robot not to move
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "left"
+        self.reset_wd()
         cfg.last_screen = button_data.parent.manager.current
         button_data.parent.manager.current = cfg.VIDEO_CALL_SCREEN_NAME
         # open web browser to specific size of scree
@@ -47,18 +49,21 @@ class HomeScreen:
         # publish to topic to tell robot not to move
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "left"
+        self.reset_wd()
         cfg.last_screen = button_data.parent.manager.current
         button_data.parent.manager.current = cfg.ITEM_SELECT_SCREEN_NAME
 
     def dismiss(self, button_data):
         button_data.parent.manager.transition = NoTransition()
         button_data.parent.manager.transition.direction = "left"
+        self.reset_wd()
         cfg.last_screen = button_data.parent.manager.current
         cfg.pending_action = UserInputs.RETURN_HOME
         button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME 
 
     def to_admin_control(self, button_data):
         button_data.parent.manager.transition = NoTransition()
+        self.reset_wd()
         cfg.last_screen = button_data.parent.manager.current
         button_data.parent.manager.current = cfg.ADMIN_SCREEN_NAME 
 

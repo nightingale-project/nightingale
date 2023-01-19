@@ -10,6 +10,7 @@ from screens.video_call_screen import VideoCallScreen
 from screens.item_select_screen import ItemSelectScreen
 from screens.item_fill_screen import ItemFillScreen
 from screens.confirmation_screen import ConfirmationScreen
+from screens.watchdog_screen import WatchdogScreen
 
 from kivy.uix.screenmanager import ScreenManager
 from kivy.properties import ListProperty
@@ -28,6 +29,7 @@ class ScreenWrapper(
     ItemSelectScreen,
     ItemFillScreen,
     ConfirmationScreen,
+    WatchdogScreen,
 ):
     def get_screen(self, name):
         for i in range(len(self.root.screen_names)):
@@ -48,6 +50,7 @@ class ScreenWrapper(
         itemselectionscreen = self.item_select_build()
         itemfillscreen = self.item_fill_build()
         confirmationscreen = self.confirmation_build()
+        watchdogscreen = self.watchdog_build()
 
         sm = ScreenManager()
         # id's of screens are in the order they are added, facescreen = 0, last is -1
@@ -63,5 +66,6 @@ class ScreenWrapper(
         sm.add_widget(itemselectionscreen)
         sm.add_widget(itemfillscreen)
         sm.add_widget(confirmationscreen)
+        sm.add_widget(watchdogscreen)
 
         return sm

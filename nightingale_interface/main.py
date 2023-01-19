@@ -1,6 +1,7 @@
 import asyncio
 import roslibpy
 import json
+import time
 
 from kivy.config import Config
 
@@ -21,7 +22,8 @@ from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config i
 
 class MainApp(MDApp, ScreenWrapper):
     _other_task = None
-    coms_enabled = True
+    _wd_task = None
+    coms_enabled = False
 
     # ros things
     client = None
@@ -40,16 +42,19 @@ class MainApp(MDApp, ScreenWrapper):
     ros_set_screen = ""
 
     watchdog_timer = ScreenConfig.WATCHDOG_TIMER_SECONDS 
+    watchdog2_exited = False
 
     def main(self):
         self._other_task = asyncio.ensure_future(self.backend())
+        self._wd_task = asyncio.ensure_future(self.watchdog_run())
 
         async def run_wrapper():
             await self.async_run(async_lib="asyncio")
             print("App done")
             self._other_task.cancel()
+            self._wd_task.cancel()
 
-        return asyncio.gather(run_wrapper(), self._other_task)
+        return asyncio.gather(run_wrapper(), self._other_task, self._wd_task)
 
     # add a task to do after a delay
     def queue(self, task, delay=0, args=None):
@@ -90,6 +95,50 @@ class MainApp(MDApp, ScreenWrapper):
             pass
         finally:
             print("Backend Done")
+
+    async def watchdog_run(self):
+        await asyncio.sleep(0.5)
+        try:
+            while True:
+                # need to only activate on user input screens
+                if self.root.current in [ScreenConfig.HUB_SCREEN_NAME, ScreenConfig.CONFIRMATION_SCREEN_NAME, ScreenConfig.ITEM_SELECT_SCREEN_NAME]:
+                    self.watchdog_timer -= 1
+                    print(f"wd1 timer {self.watchdog_timer}")
+                    await asyncio.sleep(1)
+                    if self.watchdog_timer <= 0:
+                        # store screen to return to if input recieved
+                        ScreenConfig.last_screen = self.root.current
+                        self.root.current = ScreenConfig.WATCHDOG_TIMEOUT_SCREEN_NAME
+                        watchdog2 = ScreenConfig.WATCHDOG_TIMER_SECONDS 
+                        while True:
+                            await asyncio.sleep(1)
+                            watchdog2 -= 1
+                            #print(f"wd2 timer {watchdog2}")
+                            if watchdog2 <= 0:
+                                # watchtime time up, send robot home
+                                print("WD2 timeout")
+                                self.call_ros_action(UserInputs.WD_TIMEOUT)
+                                self.root.current = ScreenConfig.FACE_SCREEN_NAME
+                                # restart watchdog since no longer waiting on user input
+                                self.reset_wd()
+                                break
+                            elif self.watchdog2_exited == True:
+                                # user responded they are here
+                                self.reset_wd()
+                                self.watchdog2_exited = False
+                                break
+                else:
+                    # on certain screens wd does not run
+                    self.reset_wd()
+
+                    # give back control to other threads
+                    await asyncio.sleep(0.5)
+        except asyncio.CancelledError:
+            pass
+        finally:
+            print("Watchdog")
+
+
 
     # kivy screen set up
     def build(self):
@@ -191,6 +240,10 @@ class MainApp(MDApp, ScreenWrapper):
  
         self.ros_set_screen = next_screen
         return True
+    
+    def reset_wd(self):
+        # reset watchdog to max time
+        self.watchdog_timer = ScreenConfig.WATCHDOG_TIMER_SECONDS
 
 
 if __name__ == "__main__":
