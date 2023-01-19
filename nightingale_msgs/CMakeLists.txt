@@ -63,6 +63,8 @@ add_service_files(
   InterfaceCall.srv
   RoomLookup.srv
   RoomPoseLookup.srv
+  AddTaskDispatcher.srv
+  CancelTaskDispatcher.srv
 )
 
 ## Generate actions in the 'action' folder
