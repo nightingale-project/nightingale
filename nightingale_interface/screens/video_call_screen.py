@@ -10,11 +10,10 @@ from screens.screen_config import ScreenConfig as cfg
 
 
 class VideoCallScreen:
-
     def exit_call(self, button_data):
         button_data.parent.manager.transition = NoTransition()
         self.screen_stack.append(button_data.parent.manager.current)
-        button_data.parent.manager.current = cfg.HUB_SCREEN_NAME 
+        button_data.parent.manager.current = cfg.HUB_SCREEN_NAME
 
     def video_call_build(self):
         screen = Screen(name=cfg.VIDEO_CALL_SCREEN_NAME)

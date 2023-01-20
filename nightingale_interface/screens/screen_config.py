@@ -22,29 +22,27 @@ class ScreenConfig:
     SHORT_RECT_HEIGHT = 0.1
 
     VIDEO_PLAYER_XPOS = 0.35
-    VIDEO_PLAYER_YPOS = SCREEN_Y_CENTER 
+    VIDEO_PLAYER_YPOS = SCREEN_Y_CENTER
     VIDEO_PLAYER_HEIGHT = 0.7
     VIDEO_PLAYER_WIDTH = 0.7
 
     # screen names
-    HUB_SCREEN_NAME = 'hubscreen'
-    FACE_SCREEN_NAME =  'facescreen'
-    ADMIN_SCREEN_NAME = 'adminscreen'
-    CONFIRMATION_SCREEN_NAME = 'confirmationscreen'
-    ESTOP_SCREEN_NAME = 'estoppedscreen'
-    ITEM_SELECT_SCREEN_NAME = 'itemselectscreen'
-    ITEM_FILL_SCREEN_NAME = 'itemfillscreen'
-    EXTEND_ARM_SCREEN_NAME = 'extendarmscreen'
-    WAIT_ITEM_GET_SCREEN_NAME = 'waititemgetscreen'
-    RETRACT_ARM_SCREEN_NAME = 'retractarmscreen'
-    NURSE_ALERT_SCREEN_NAME = 'nursealertscreen'
-    VIDEO_CALL_SCREEN_NAME = 'videocallscreen'
-    WATCHDOG_TIMEOUT_SCREEN_NAME = 'watchdogscreen'
+    HUB_SCREEN_NAME = "hubscreen"
+    FACE_SCREEN_NAME = "facescreen"
+    ADMIN_SCREEN_NAME = "adminscreen"
+    CONFIRMATION_SCREEN_NAME = "confirmationscreen"
+    ESTOP_SCREEN_NAME = "estoppedscreen"
+    ITEM_SELECT_SCREEN_NAME = "itemselectscreen"
+    ITEM_FILL_SCREEN_NAME = "itemfillscreen"
+    EXTEND_ARM_SCREEN_NAME = "extendarmscreen"
+    WAIT_ITEM_GET_SCREEN_NAME = "waititemgetscreen"
+    RETRACT_ARM_SCREEN_NAME = "retractarmscreen"
+    NURSE_ALERT_SCREEN_NAME = "nursealertscreen"
+    VIDEO_CALL_SCREEN_NAME = "videocallscreen"
+    WATCHDOG_TIMEOUT_SCREEN_NAME = "watchdogscreen"
 
     # screen id nums
     ITEM_SELECT_SCREEN_ID = 9
     ITEM_FILL_SCREEN_ID = 10
 
-    WATCHDOG_TIMER_SECONDS = 5 
-
-
+    WATCHDOG_TIMER_SECONDS = 45

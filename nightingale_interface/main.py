@@ -16,14 +16,18 @@ from kivy.properties import NumericProperty, StringProperty
 import MovoConfig
 from screen_wrapper import ScreenWrapper
 
-from screens.screen_config import ScreenConfig 
-from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import RobotStatus, BridgeConfig, UserInputs
+from screens.screen_config import ScreenConfig
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import (
+    RobotStatus,
+    BridgeConfig,
+    UserInputs,
+)
 
 
 class MainApp(MDApp, ScreenWrapper):
     _other_task = None
     _wd_task = None
-    coms_enabled = False
+    coms_enabled = True
 
     # ros things
     client = None
@@ -32,7 +36,7 @@ class MainApp(MDApp, ScreenWrapper):
     estop_topic = None
 
     # task queue things
-    task_queue = [] # dict of { "task": Int, "delay": Int, "args":""}
+    task_queue = []  # dict of { "task": Int, "delay": Int, "args":""}
 
     # counters for items
     water_count = NumericProperty(0)
@@ -41,7 +45,7 @@ class MainApp(MDApp, ScreenWrapper):
 
     ros_set_screen = ""
 
-    watchdog_timer = ScreenConfig.WATCHDOG_TIMER_SECONDS 
+    watchdog_timer = ScreenConfig.WATCHDOG_TIMER_SECONDS
     watchdog2_exited = False
 
     # stack for screens to be able to return to them
@@ -64,7 +68,7 @@ class MainApp(MDApp, ScreenWrapper):
 
     # add a task to do after a delay
     def queue(self, task, delay=0, args=None):
-        self.task_queue.append({"task": task, "delay": delay, "args":args})
+        self.task_queue.append({"task": task, "delay": delay, "args": args})
 
     # backend polling to read from ros coms
     async def backend(self):
@@ -72,7 +76,7 @@ class MainApp(MDApp, ScreenWrapper):
         self.root.transition = kivy.uix.screenmanager.FadeTransition()
 
         # set the initial screen
-        self.root.current = ScreenConfig.FACE_SCREEN_NAME 
+        self.root.current = ScreenConfig.FACE_SCREEN_NAME
         self.screen_stack.append(self.root.current)
 
         try:
@@ -86,7 +90,7 @@ class MainApp(MDApp, ScreenWrapper):
 
                 # execute a queued task
                 if len(self.task_queue):
-                    current = self.task_queue.pop() 
+                    current = self.task_queue.pop()
                     func = current["task"]
                     await asyncio.sleep(current["delay"])
                     func_args = current["args"]
@@ -108,22 +112,26 @@ class MainApp(MDApp, ScreenWrapper):
         try:
             while True:
                 # need to only activate on user input screens
-                if self.root.current in [ScreenConfig.HUB_SCREEN_NAME, ScreenConfig.CONFIRMATION_SCREEN_NAME, ScreenConfig.ITEM_SELECT_SCREEN_NAME]:
+                if self.root.current in [
+                    ScreenConfig.HUB_SCREEN_NAME,
+                    ScreenConfig.CONFIRMATION_SCREEN_NAME,
+                    ScreenConfig.ITEM_SELECT_SCREEN_NAME,
+                ]:
                     self.watchdog_timer -= 1
-                    print(f"wd1 timer {self.watchdog_timer}")
+                    # print(f"wd1 timer {self.watchdog_timer}")
                     await asyncio.sleep(1)
                     if self.watchdog_timer <= 0:
                         # store screen to return to if input recieved
                         ScreenConfig.last_screen = self.root.current
                         self.root.current = ScreenConfig.WATCHDOG_TIMEOUT_SCREEN_NAME
-                        watchdog2 = ScreenConfig.WATCHDOG_TIMER_SECONDS 
+                        watchdog2 = ScreenConfig.WATCHDOG_TIMER_SECONDS
                         while True:
                             await asyncio.sleep(1)
                             watchdog2 -= 1
-                            #print(f"wd2 timer {watchdog2}")
+                            # print(f"wd2 timer {watchdog2}")
                             if watchdog2 <= 0:
                                 # watchtime time up, send robot home
-                                print("WD2 timeout")
+                                # print("WD2 timeout")
                                 self.call_ros_action(UserInputs.WD_TIMEOUT)
                                 self.root.current = ScreenConfig.FACE_SCREEN_NAME
                                 # restart watchdog since no longer waiting on user input
@@ -145,8 +153,6 @@ class MainApp(MDApp, ScreenWrapper):
         finally:
             print("Watchdog")
 
-
-
     # kivy screen set up
     def build(self):
         self.theme_cls.primary_palette = "Blue"
@@ -156,13 +162,13 @@ class MainApp(MDApp, ScreenWrapper):
     def init_ros(self):
         # initialize the ros bridge client
 
-        #self.client = roslibpy.Ros(
+        # self.client = roslibpy.Ros(
         #    MovoConfig.Config["Movo2"]["IP"], MovoConfig.Config["RosBridgePort"]
-        #)
+        # )
 
         # temporary offline computer testing
         self.client = roslibpy.Ros(
-            host='localhost', port=MovoConfig.Config["RosBridgePort"]
+            host="localhost", port=MovoConfig.Config["RosBridgePort"]
         )
         # temporary offline computer testing
 
@@ -170,11 +176,17 @@ class MainApp(MDApp, ScreenWrapper):
         asyncio.sleep(0.5)
 
         # publisher back to interface
-        self.ros_action_topic = roslibpy.Topic(self.client, BridgeConfig.USER_INPUT_TOPIC, "std_msgs/String")
-        self.estop_topic = roslibpy.Topic(self.client, BridgeConfig.ESTOP_TOPIC, "std_msgs/String", latch=True)
+        self.ros_action_topic = roslibpy.Topic(
+            self.client, BridgeConfig.USER_INPUT_TOPIC, "std_msgs/String"
+        )
+        self.estop_topic = roslibpy.Topic(
+            self.client, BridgeConfig.ESTOP_TOPIC, "std_msgs/String", latch=True
+        )
 
         # subscriber to interface messages
-        self.interface_screen_topic = roslibpy.Topic(self.client, BridgeConfig.ROBOT_STATUS_TOPIC, "std_msgs/String")
+        self.interface_screen_topic = roslibpy.Topic(
+            self.client, BridgeConfig.ROBOT_STATUS_TOPIC, "std_msgs/String"
+        )
         self.interface_screen_topic.subscribe(self.process_robot_status)
 
     # override
@@ -186,7 +198,7 @@ class MainApp(MDApp, ScreenWrapper):
         """
         if not type(args) is dict:
             args = {}
-        args['action'] = str(action)
+        args["action"] = str(action)
         json_str = json.dumps(args)
         msg = roslibpy.Message({"data": json_str})
         print(f"send mesage {msg}")
@@ -205,9 +217,9 @@ class MainApp(MDApp, ScreenWrapper):
         :param msg: Message to be sent
         :return: True if successful
         """
-        # take in status received from master and react to it 
+        # take in status received from master and react to it
         print(f"recieved {msg}")
-        status = int(msg['data']) # enum
+        status = int(msg["data"])  # enum
 
         next_screen = ScreenConfig.HUB_SCREEN_NAME
         if status == RobotStatus.IDLE_HOME or status == RobotStatus.DRIVING:
@@ -244,10 +256,10 @@ class MainApp(MDApp, ScreenWrapper):
         else:
             print(f"CODE {status} UNKNOWN")
             return False
- 
+
         self.ros_set_screen = next_screen
         return True
-    
+
     def reset_wd(self):
         # reset watchdog to max time
         self.watchdog_timer = ScreenConfig.WATCHDOG_TIMER_SECONDS

@@ -2,17 +2,21 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.image import Image
 
 from kivymd.uix.label import MDLabel
+from kivy.uix.label import Label
 from kivymd.uix.button import MDRectangleFlatButton
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 
+import time
+
 from kivy.uix.screenmanager import SlideTransition, NoTransition
 from screens.screen_config import ScreenConfig as cfg
-from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import UserInputs
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import (
+    UserInputs,
+)
 
 
 class ConfirmationScreen:
-
     def reset_counts(self):
         # only reset if starting new selection
         if self.screen_stack.pop() == cfg.ITEM_FILL_SCREEN_NAME:
@@ -32,7 +36,6 @@ class ConfirmationScreen:
         return False
 
     def confirmation_press_yes(self, button_data):
-        # do yes and return home
         button_data.parent.manager.transition = NoTransition()
         self.reset_wd()
 
@@ -50,24 +53,26 @@ class ConfirmationScreen:
             return True
 
         if self.current_action == UserInputs.ESTOP_CANCEL:
-            # stop ros estop 
+            # stop ros estop
             self.call_ros_action(int(self.current_action))
             # temporarily have homescreen as the screen after estop pressed. likely have to impement queue
             screen_before_estop = cfg.HUB_SCREEN_NAME
-            while self.screen_stack[-1] in [cfg.ESTOP_SCREEN_NAME, cfg.CONFIRMATION_SCREEN_NAME]:
+            while self.screen_stack[-1] in [
+                cfg.ESTOP_SCREEN_NAME,
+                cfg.CONFIRMATION_SCREEN_NAME,
+            ]:
                 self.screen_stack.pop()
             button_data.parent.manager.current = self.screen_stack.pop()
             return True
-        
+
         if self.current_action == UserInputs.START_RETRACT_ARM:
             self.call_ros_action(int(self.current_action))
             # should already be on the screen
-            #button_data.parent.manager.current = cfg.RETRACT_ARM_SCREEN_NAME 
+            # button_data.parent.manager.current = cfg.RETRACT_ARM_SCREEN_NAME
             return True
- 
 
-        button_data.parent.manager.current = cfg.FACE_SCREEN_NAME 
-        if self.call_ros_action(int(cfg.current_action)):
+        button_data.parent.manager.current = cfg.FACE_SCREEN_NAME
+        if self.call_ros_action(int(self.current_action)):
             return True
 
         print("Unknown error occurred while sending ros action command")
@@ -77,8 +82,7 @@ class ConfirmationScreen:
         # do nothing and return to previous screen
         button_data.parent.manager.transition = NoTransition()
         self.reset_wd()
-        button_data.parent.manager.current = self.screen_stack.pop() 
-
+        button_data.parent.manager.current = self.screen_stack.pop()
 
     def confirmation_build(self):
         screen = Screen(name=cfg.CONFIRMATION_SCREEN_NAME)

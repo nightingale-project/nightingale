@@ -10,24 +10,27 @@ from screens.screen_config import ScreenConfig as cfg
 
 # TEMPORARY UNTIL INCLUDES ARE FIXED
 import sys
+
 sys.path.append("..")
 # TEMPORARY UNTIL INCLUDES ARE FIXED
 
-from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import BridgeConfig, UserInputs
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import (
+    BridgeConfig,
+    UserInputs,
+)
 
 import roslibpy
 import json
 
 
 class HomeScreen:
-
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
         self.screen_stack.append(button_data.parent.manager.current)
         self.reset_wd()
         # engage estop on ROS topic
         self.call_ros_action(UserInputs.ESTOP)
-        button_data.parent.manager.current = cfg.ESTOP_SCREEN_NAME 
+        button_data.parent.manager.current = cfg.ESTOP_SCREEN_NAME
 
     def to_nurse_alert(self, button_data):
         button_data.parent.manager.transition = SlideTransition()
@@ -59,13 +62,13 @@ class HomeScreen:
         self.reset_wd()
         self.screen_stack.append(button_data.parent.manager.current)
         self.pending_action = UserInputs.RETURN_HOME
-        button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME 
+        button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
 
     def to_admin_control(self, button_data):
         button_data.parent.manager.transition = NoTransition()
         self.reset_wd()
         self.screen_stack.append(button_data.parent.manager.current)
-        button_data.parent.manager.current = cfg.ADMIN_SCREEN_NAME 
+        button_data.parent.manager.current = cfg.ADMIN_SCREEN_NAME
 
     def home_build(self):
         screen = Screen(name=cfg.HUB_SCREEN_NAME)

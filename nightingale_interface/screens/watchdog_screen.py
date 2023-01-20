@@ -8,14 +8,17 @@ from kivy.uix.button import Button
 
 from kivy.uix.screenmanager import NoTransition
 from screens.screen_config import ScreenConfig as cfg
-from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import BridgeConfig, UserInputs
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import (
+    BridgeConfig,
+    UserInputs,
+)
+
 
 class WatchdogScreen:
-
     def exit_wd(self, button_data):
-        # returns to previous screen that came before wd activated 
+        # returns to previous screen that came before wd activated
         button_data.parent.manager.transition = NoTransition()
-        button_data.parent.manager.current = self.screen_stack.pop() 
+        button_data.parent.manager.current = self.screen_stack.pop()
         self.watchdog2_exited = True
 
     def watchdog_build(self):

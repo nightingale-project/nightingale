@@ -7,7 +7,9 @@ from kivy.uix.button import Button
 
 from kivy.uix.screenmanager import SlideTransition, NoTransition
 from screens.screen_config import ScreenConfig as cfg
-from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import UserInputs
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import (
+    UserInputs,
+)
 
 from kivy.app import App
 
