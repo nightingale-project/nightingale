@@ -17,8 +17,8 @@ class RetractArmScreen:
     def retract_arm(self, button_data):
         # publishes message to stop to retract arm
         #button_data.parent.manager.transition = NoTransition()
-        #cfg.last_screen = button_data.parent.manager.current
-        #cfg.pending_action = UserInputs.START_RETRACT_ARM
+        self.screen_stack.append(button_data.parent.manager.current)
+        #self.pending_action = UserInputs.START_RETRACT_ARM
         #button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
         # respond to M.P to extend arm
         self.call_ros_action(UserInputs.START_RETRACT_ARM)

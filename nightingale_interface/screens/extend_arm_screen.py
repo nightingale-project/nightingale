@@ -24,10 +24,9 @@ class ExtendArmScreen:
     def extend_arm(self, button_data):
         # starts robot arm extend when patient is ready
         #button_data.parent.manager.transition = NoTransition()
-        #cfg.last_screen = button_data.parent.manager.current
-        #cfg.pending_action = UserInputs.START_EXTEND_ARM
+        #self.pending_action = UserInputs.START_EXTEND_ARM
         #button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
-
+        self.screen_stack.append(button_data.parent.manager.current)
         self.reset_wd()
         # respond to M.P to extend arm
         self.call_ros_action(UserInputs.START_EXTEND_ARM)

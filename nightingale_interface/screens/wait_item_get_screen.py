@@ -16,7 +16,7 @@ class WaitItemGetScreen:
     def items_taken(self, button_data):
         # publishes message to stop to retract arm
         button_data.parent.manager.transition = NoTransition()
-        cfg.last_screen = button_data.parent.manager.current
+        self.screen_stack.append(button_data.parent.manager.current)
         button_data.parent.manager.current = cfg.RETRACT_ARM_SCREEN_NAME 
 
     def wait_item_get_build(self):

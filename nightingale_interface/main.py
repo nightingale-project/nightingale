@@ -44,6 +44,12 @@ class MainApp(MDApp, ScreenWrapper):
     watchdog_timer = ScreenConfig.WATCHDOG_TIMER_SECONDS 
     watchdog2_exited = False
 
+    # stack for screens to be able to return to them
+    screen_stack = []
+    current_action = "0"
+    pending_action = "0"
+    payload = ""
+
     def main(self):
         self._other_task = asyncio.ensure_future(self.backend())
         self._wd_task = asyncio.ensure_future(self.watchdog_run())
@@ -67,6 +73,7 @@ class MainApp(MDApp, ScreenWrapper):
 
         # set the initial screen
         self.root.current = ScreenConfig.FACE_SCREEN_NAME 
+        self.screen_stack.append(self.root.current)
 
         try:
             while True:
@@ -84,7 +91,7 @@ class MainApp(MDApp, ScreenWrapper):
                     await asyncio.sleep(current["delay"])
                     func_args = current["args"]
 
-                    if args:
+                    if func_args:
                         func(func_args)
                     else:
                         func()

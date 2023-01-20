@@ -26,13 +26,6 @@ class ScreenConfig:
     VIDEO_PLAYER_HEIGHT = 0.7
     VIDEO_PLAYER_WIDTH = 0.7
 
-    # paramters to store values
-    current_action = "0"
-    pending_action = "0"
-    last_screen = "facescreen"
-
-    payload = ""
-
     # screen names
     HUB_SCREEN_NAME = 'hubscreen'
     FACE_SCREEN_NAME =  'facescreen'

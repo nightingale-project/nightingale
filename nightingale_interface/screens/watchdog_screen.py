@@ -15,7 +15,7 @@ class WatchdogScreen:
     def exit_wd(self, button_data):
         # returns to previous screen that came before wd activated 
         button_data.parent.manager.transition = NoTransition()
-        button_data.parent.manager.current = cfg.last_screen 
+        button_data.parent.manager.current = self.screen_stack.pop() 
         self.watchdog2_exited = True
 
     def watchdog_build(self):
