@@ -8,6 +8,7 @@ from actionlib.simple_action_client import SimpleGoalState
 from nightingale_msgs.msg import TaskAction, TaskGoal
 from nightingale_msgs.srv import AddTaskDispatcher
 
+
 class DispatcherNode:
     def __init__(self):
         rospy.init_node("dispatcher_node")
@@ -38,6 +39,7 @@ class DispatcherNode:
         if not self.tasks.empty():
             goal = self.tasks.get()
             self.task_client.send_goal(goal, self.handle_done_task)
+
 
 def main():
     dispatcher = DispatcherNode()

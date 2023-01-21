@@ -12,7 +12,9 @@ class TaskActionServer:
     def __init__(self):
         rospy.init_node("task_action_server_node")
 
-        self.server = actionlib.SimpleActionServer("task", TaskAction, self.goal_cb, False)
+        self.server = actionlib.SimpleActionServer(
+            "task", TaskAction, self.goal_cb, False
+        )
         self.server.start()
 
     def goal_cb(self, goal):

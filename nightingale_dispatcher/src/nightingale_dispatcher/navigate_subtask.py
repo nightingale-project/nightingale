@@ -4,6 +4,7 @@ import rospy
 
 from nightingale_dispatcher.subtask import Subtask
 
+
 class NavigateSubtask(Subtask):
     def __init__(self, name, room, feature, priority):
         super.__init__(name, priority)
@@ -18,7 +19,7 @@ class NavigateSubtask(Subtask):
     def execute(self):
         try:
             res = self.lookup_proxy(self.room, self.feature)
-            
+
             if res.status == RoomPoseLookupResponse.ROOM_NOT_FOUND:
                 return self.ARGUMENT_ERROR
             elif res.status == RoomPoseLookupResponse.FEATURE_NOT_FOUND:
