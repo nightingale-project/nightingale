@@ -1,0 +1,6 @@
+string name
+string items_json
+---
+int8 status
+---
+int8 subtasks_remaining
