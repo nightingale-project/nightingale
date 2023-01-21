@@ -9,7 +9,7 @@ class NavigateSubtask(Subtask):
         super.__init__(name, priority)
 
         self.room = room
-        self.feature = featurm
+        self.feature = feature
 
         # TODO Consider making a Singleton or share resources
         rospy.wait_for_service("/lookup_room_pose")
