@@ -1,0 +1,117 @@
+from kivy.uix.screenmanager import Screen
+from kivy.uix.image import Image
+
+from kivymd.uix.label import MDLabel
+from kivymd.uix.button import MDRectangleFlatButton
+from kivy.uix.button import Button
+
+from kivy.uix.screenmanager import SlideTransition, NoTransition
+from screens.screen_config import ScreenConfig as cfg
+
+
+class ConfirmationScreen:
+    confirmation_name = "confirmationscreen"
+
+    def reset_counts(self):
+        # only reset if starting new selection
+        if cfg.last_screen == "itemfillscreen":
+            self.water_count = 0
+            self.ice_count = 0
+            self.blanket_count = 0
+
+    def press(self, button_data):
+        if button_data.id == "yes":
+            # do yes and return home
+            button_data.parent.manager.transition = NoTransition()
+            cfg.last_screen = button_data.parent.manager.current
+
+            def execute_action():
+                # state machine to do things based on the executed action
+                # if given a 'yes' confirmation
+                cfg.current_action = cfg.pending_action
+                cfg.pending_action = ""
+                # print(f"CUR ACTION {cfg.current_action}")
+
+                # reset counters regardless of cancel or send
+                self.reset_counts()
+
+                if cfg.current_action == cfg.NO_ROS_ACTION:
+                    # cancel and wait for other inputs. No ROS funcs
+                    button_data.parent.manager.current = "homescreen"
+                elif cfg.current_action == cfg.ESTOP_CANCEL:
+                    # estop cancel
+                    # send ROS message to resume
+                    button_data.parent.manager.current = "homescreen"
+                elif cfg.current_action == cfg.STOCK:
+                    # get items
+                    # send ros message to move to stock room
+                    button_data.parent.manager.current = "facescreen"
+                elif cfg.current_action == cfg.DELIVER:
+                    # deliver items
+                    # send ros message to move to patient
+                    button_data.parent.manager.current = "facescreen"
+                elif cfg.current_action == cfg.GO_HOME:
+                    # deliver items
+                    # send ros message to move to patient
+                    button_data.parent.manager.current = "facescreen"
+                # elif cfg.current_action == cfg.EXTEND_ARM:
+                #    # start arm movement with ROs and go back to screen
+                #    button_data.parent.manager.current = "extendarmscreen"
+                # elif cfg.current_action == cfg.RETRACT_ARM:
+                #    # start arm movement with ROs and go to retract arm screen
+                #    button_data.parent.manager.current = "retractarmscreen"
+
+            execute_action()
+
+        elif button_data.id == "no":
+            # do nothing and return to previous screen
+            button_data.parent.manager.transition = NoTransition()
+            button_data.parent.manager.current = cfg.last_screen
+
+    def confirmation_build(self):
+        screen = Screen(name=self.confirmation_name)
+
+        # estop button
+        screen.add_widget(
+            Button(
+                background_normal="images/stop.png",
+                size_hint_x=cfg.ESTOP_XHINT,
+                size_hint_y=cfg.ESTOP_YHINT,
+                pos_hint={"center_x": cfg.ESTOP_XPOS, "center_y": cfg.ESTOP_YPOS},
+                on_release=self.estop,
+            )
+        )
+
+        # add label asking to confirm
+        confirmation_label = MDLabel(
+            text="Confirm selection",
+            font_style="H4",
+            halign="center",
+            pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.7},
+        )
+        confirmation_label.font_size = "100sp"
+        screen.add_widget(confirmation_label)
+
+        screen.add_widget(
+            MDRectangleFlatButton(
+                text="Yes",
+                id="yes",
+                font_style="H4",
+                pos_hint={"center_x": 0.25, "center_y": cfg.SCREEN_Y_CENTER},
+                size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
+                on_release=self.press,
+            )
+        )
+
+        screen.add_widget(
+            MDRectangleFlatButton(
+                text="No",
+                id="no",
+                font_style="H4",
+                pos_hint={"center_x": 0.75, "center_y": cfg.SCREEN_Y_CENTER},
+                size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
+                on_release=self.press,
+            )
+        )
+
+        return screen
