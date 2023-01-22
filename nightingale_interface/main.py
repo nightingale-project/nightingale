@@ -1,7 +1,6 @@
 import asyncio
 import roslibpy
 import json
-import time
 
 from kivy.config import Config
 
@@ -43,8 +42,6 @@ class MainApp(MDApp, ScreenWrapper):
     ice_count = NumericProperty(0)
     blanket_count = NumericProperty(0)
 
-    ros_set_screen = ""
-
     watchdog_timer = ScreenConfig.WATCHDOG_TIMER_SECONDS
     watchdog2_exited = False
 
@@ -81,12 +78,6 @@ class MainApp(MDApp, ScreenWrapper):
 
         try:
             while True:
-
-                # update screen upon new state
-                # need better way. probably just another state
-                if len(self.ros_set_screen) > 6:
-                    self.root.current = self.ros_set_screen
-                    self.ros_set_screen = ""
 
                 # execute a queued task
                 if len(self.task_queue):
@@ -257,8 +248,13 @@ class MainApp(MDApp, ScreenWrapper):
             print(f"CODE {status} UNKNOWN")
             return False
 
-        self.ros_set_screen = next_screen
+        self.queue(self.robot_state_screen_change_task, 0, next_screen)
         return True
+
+    def robot_state_screen_change_task(self, next_screen):
+        # update screen upon new state
+        if next_screen is not None and self.get_screen(next_screen):
+            self.root.current = next_screen
 
     def reset_wd(self):
         # reset watchdog to max time

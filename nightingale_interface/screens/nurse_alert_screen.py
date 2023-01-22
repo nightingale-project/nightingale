@@ -7,6 +7,10 @@ from kivy.uix.button import Button
 
 from kivy.uix.screenmanager import SlideTransition
 from screens.screen_config import ScreenConfig as cfg
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import (
+    BridgeConfig,
+    UserInputs,
+)
 
 
 class NurseAlertScreen:
@@ -14,7 +18,7 @@ class NurseAlertScreen:
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "right"
         self.screen_stack.append(button_data.parent.manager.current)
-        self.pending_action = cfg.NO_ROS_ACTION
+        self.pending_action = UserInputs.NO_ROS_ACTION
         button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
 
     def nurse_alert_build(self):
