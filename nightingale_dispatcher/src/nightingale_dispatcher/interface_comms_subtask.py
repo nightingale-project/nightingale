@@ -3,7 +3,8 @@
 import rospy
 
 from nightingale_dispatcher.subtask import Subtask
-from nightingale_ros_bridge import BridgeConfig 
+from nightingale_ros_bridge import BridgeConfig
+
 
 class InterfaceCommsSubtask(Subtask):
     def __init__(self, name, robot_state, priority):
@@ -12,9 +13,11 @@ class InterfaceCommsSubtask(Subtask):
         self.robot_state = robot_state
 
         # TODO Consider making a Singleton or share resources
-        self.interface_comms_service_name = BridgeConfig.UPDATE_UI_SERVICE 
+        self.interface_comms_service_name = BridgeConfig.UPDATE_UI_SERVICE
         rospy.wait_for_service(self.interface_comms_service_name)
-        self.interface_comms_proxy = rospy.ServiceProxy(self.interface_comms_service_name, InterfaceCall)
+        self.interface_comms_proxy = rospy.ServiceProxy(
+            self.interface_comms_service_name, InterfaceCall
+        )
 
     def execute(self):
         try:
@@ -25,5 +28,3 @@ class InterfaceCommsSubtask(Subtask):
         except rospy.ServiceException as e:
             print(f"Interface communication failed service call failed: {e}")
             return self.SERVICE_ERROR
-
-
