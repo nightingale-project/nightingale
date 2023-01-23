@@ -13,7 +13,6 @@ from screens.confirmation_screen import ConfirmationScreen
 from screens.watchdog_screen import WatchdogScreen
 
 from kivy.uix.screenmanager import ScreenManager
-from kivy.properties import ListProperty
 
 
 class ScreenWrapper(

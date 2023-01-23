@@ -1,12 +1,8 @@
 from kivy.uix.screenmanager import Screen
-
-# from kivy.uix.image import Image
+from kivy.uix.screenmanager import NoTransition
+from kivy.uix.button import Button
 
 from kivymd.uix.label import MDLabel
-from kivy.uix.button import Button
-from kivy.uix.label import Label
-
-from kivy.uix.screenmanager import NoTransition
 from screens.screen_config import ScreenConfig as cfg
 
 

@@ -1,7 +1,17 @@
+import MovoConfig
+from screen_wrapper import ScreenWrapper
+from screens.screen_config import ScreenConfig
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import (
+    RobotStatus,
+    BridgeConfig,
+    UserInputs,
+)
+
+import json
 import asyncio
 import roslibpy
-import json
 
+import kivy
 from kivy.config import Config
 
 Config.set("graphics", "width", "1280")
@@ -9,18 +19,7 @@ Config.set("graphics", "height", "800")
 
 from kivymd.app import MDApp
 from kivy.uix.screenmanager import ScreenManager
-import kivy
 from kivy.properties import NumericProperty, StringProperty
-
-import MovoConfig
-from screen_wrapper import ScreenWrapper
-
-from screens.screen_config import ScreenConfig
-from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import (
-    RobotStatus,
-    BridgeConfig,
-    UserInputs,
-)
 
 
 class MainApp(MDApp, ScreenWrapper):
@@ -80,7 +79,7 @@ class MainApp(MDApp, ScreenWrapper):
             while True:
 
                 # execute a queued task
-                if len(self.task_queue):
+                if len(self.task_queue) > 0:
                     current = self.task_queue.pop()
                     func = current["task"]
                     await asyncio.sleep(current["delay"])

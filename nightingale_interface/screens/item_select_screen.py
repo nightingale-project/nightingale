@@ -1,17 +1,16 @@
 from kivy.uix.screenmanager import Screen
 from kivy.uix.image import Image
 
-from kivymd.uix.label import MDLabel
-from kivymd.uix.button import MDRectangleFlatButton
+from kivy.uix.screenmanager import SlideTransition, NoTransition
 from kivy.uix.button import Button
 
-from kivy.uix.screenmanager import SlideTransition, NoTransition
+from kivymd.uix.label import MDLabel
+from kivymd.uix.button import MDRectangleFlatButton
+
 from screens.screen_config import ScreenConfig as cfg
 from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import (
     UserInputs,
 )
-
-from kivy.app import App
 
 
 class ItemSelectScreen:
