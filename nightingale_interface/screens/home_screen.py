@@ -81,7 +81,6 @@ class HomeScreen:
             MDRectangleFlatButton(
                 text="Request Items",
                 font_style="H4",
-                # pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.35},
                 pos_hint={
                     "center_x": cfg.SCREEN_X_CENTER,
                     "center_y": cfg.SCREEN_Y_CENTER,
@@ -90,6 +89,16 @@ class HomeScreen:
                 on_release=self.to_item_select,
             )
         )
+
+        screen.add_widget(
+            MDRectangleFlatButton(
+                text="Nurse Assistance",
+                font_style="H4",
+                pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.75},
+                size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
+                on_release=self.to_nurse_alert,
+            )
+         )
 
         screen.add_widget(
             MDRectangleFlatButton(
@@ -124,13 +133,4 @@ class HomeScreen:
         #    )
         # )
 
-        # screen.add_widget(
-        #    MDRectangleFlatButton(
-        #        text="Urgent Assistance",
-        #        font_style="H4",
-        #        pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.65},
-        #        size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
-        #        on_release=self.to_nurse_alert,
-        #    )
-        # )
         return screen

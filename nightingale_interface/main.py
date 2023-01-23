@@ -197,6 +197,10 @@ class MainApp(MDApp, ScreenWrapper):
             if action == UserInputs.ESTOP:
                 self.estop_action_topic.publish(msg)
             else:
+                if action == UserInputs.WD_TIMEOUT or action == UserInputs.RETURN_HOME:
+                    # clear screen history for next patient/task loop
+                    self.screen_stack.clear()
+
                 self.ros_action_topic.publish(msg)
             return True
         except:
@@ -254,6 +258,7 @@ class MainApp(MDApp, ScreenWrapper):
         # update screen upon new state
         if next_screen is not None and self.get_screen(next_screen):
             self.root.current = next_screen
+            self.screen_stack.append(self.root.current) 
 
     def reset_wd(self):
         # reset watchdog to max time

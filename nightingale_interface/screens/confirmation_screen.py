@@ -1,6 +1,10 @@
 from kivy.uix.screenmanager import Screen
 from kivy.uix.button import Button
 from kivy.uix.screenmanager import SlideTransition, NoTransition
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+from kivy.uix.gridlayout import GridLayout
+from kivy.clock import Clock
 
 from kivymd.uix.label import MDLabel
 from kivymd.uix.button import MDRectangleFlatButton
@@ -9,6 +13,8 @@ from screens.screen_config import ScreenConfig as cfg
 from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import (
     UserInputs,
 )
+
+import time
 
 
 class ConfirmationScreen:
@@ -46,6 +52,21 @@ class ConfirmationScreen:
             # cancel and wait for other inputs. No ROS funcs
             button_data.parent.manager.current = cfg.HUB_SCREEN_NAME
             return True
+
+        # popup feedback for yes selection. Only for actual ROS commands
+        layout = GridLayout(cols = 1, padding = 10)
+        popupLabel = Label(text = "Selection received! Tap to dismiss")
+        layout.add_widget(popupLabel)
+        # Instantiate the modal popup and display
+        popup = Popup(title ='Nightingale Action Center',
+                content = layout,
+                size_hint=(None, None),
+                size =(300, 100),
+                pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.9},
+                )
+        popup.open()
+        # Schedule pop up auto dismiss for 2 seconds
+        Clock.schedule_once(popup.dismiss, 2)
 
         if self.current_action == UserInputs.ESTOP_CANCEL:
             # stop ros estop
@@ -109,7 +130,7 @@ class ConfirmationScreen:
                 id="yes",
                 font_style="H4",
                 pos_hint={"center_x": 0.25, "center_y": cfg.SCREEN_Y_CENTER},
-                size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
+                size_hint=(cfg.LONG_RECT_WIDTH_CONFIRM, cfg.LONG_RECT_HEIGHT_CONFIRM),
                 on_release=self.confirmation_press_yes,
             )
         )
@@ -120,7 +141,7 @@ class ConfirmationScreen:
                 id="no",
                 font_style="H4",
                 pos_hint={"center_x": 0.75, "center_y": cfg.SCREEN_Y_CENTER},
-                size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
+                size_hint=(cfg.LONG_RECT_WIDTH_CONFIRM, cfg.LONG_RECT_HEIGHT_CONFIRM),
                 on_release=self.confirmation_press_no,
             )
         )
