@@ -33,16 +33,18 @@
         <param name="destination_frame" value="base_link"/>
         <param name="cloud_destination_topic" value="/movo/merged_cloud_camera"/>
         <param name="scan_destination_topic" value="/movo/scan_multi_camera"/>
-        <param name="laserscan_topics" value ="/movo/$(optenv LASER1_PREFIX front)_scan /movo/$(optenv LASER2_PREFIX rear)_scan /movo/camera_scan"/>
+        <param name="laserscan_topics" value ="/movo/scan_multi /movo/camera_scan"/>
+	<!--param name="laserscan_topics" value ="/movo/$(optenv LASER1_PREFIX front)_scan /movo/$(optenv LASER2_PREFIX rear)_scan /movo/camera_scan"/-->
+ 
     </node>
 
-    <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="movo_laser_filter_camera" clear_params="true" respawn="true">
+    <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="movo_laser_filter_camera" clear_params="true" respawn="true" output="screen">
         <remap from="scan" to="/movo/scan_multi_camera" />
         <remap from="scan_filtered" to="/movo/base_scan_filtered_camera" />
         <param name="target_frame" value="base_link" />
         <param name="high_fidelity" value="true" />
         <rosparam command="load" 
-            file="$(find movo_bringup)/launch/sensors/config/laser_scan_filter.yaml" />
+            file="$(find nightingale_perception)/config/laser_scan_filter.yaml" />
     </node>
 
 
