@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <launch>
+    <!-- Set the base into tractor mode  -->
+    <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /movo/gp_command movo_msgs/ConfigCmd '{gp_cmd: 'GENERAL_PURPOSE_CMD_SET_OPERATIONAL_MODE', gp_param: 5}' --once"/>
     <!--- Run gmapping -->
     <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
         <rosparam command="load" file="$(find nightingale_navigation)/configs/gmapping.yaml"/>
