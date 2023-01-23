@@ -1,26 +1,26 @@
 from kivy.uix.screenmanager import Screen
-from kivy.uix.image import Image
+from kivy.uix.screenmanager import SlideTransition
+from kivy.uix.button import Button
 
 from kivymd.uix.label import MDLabel
 from kivymd.uix.button import MDRectangleFlatButton
-from kivy.uix.button import Button
 
-from kivy.uix.screenmanager import SlideTransition
 from screens.screen_config import ScreenConfig as cfg
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import (
+    UserInputs,
+)
 
 
 class NurseAlertScreen:
-    nurse_alert_name = "nursealertscreen"
-
     def nurse_alert_cancel(self, button_data):
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "right"
-        cfg.last_screen = button_data.parent.manager.current
-        cfg.pending_action = cfg.NO_ROS_ACTION
-        button_data.parent.manager.current = "confirmationscreen"
+        self.screen_stack.append(button_data.parent.manager.current)
+        self.pending_action = UserInputs.NO_ROS_ACTION
+        button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
 
     def nurse_alert_build(self):
-        screen = Screen(name=self.nurse_alert_name)
+        screen = Screen(name=cfg.NURSE_ALERT_SCREEN_NAME)
 
         # estop button
         screen.add_widget(

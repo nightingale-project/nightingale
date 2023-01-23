@@ -1,22 +1,17 @@
 from kivy.uix.screenmanager import Screen
-from kivy.uix.image import Image
-
-from kivymd.uix.label import MDLabel
-from kivymd.uix.button import MDRectangleFlatButton
-from kivy.uix.button import Button
 
 from kivy.uix.screenmanager import SlideTransition, NoTransition
+from kivy.uix.button import Button
 
+from kivymd.uix.button import MDRectangleFlatButton
 from screens.screen_config import ScreenConfig as cfg
 
 
 class AdminScreen:
-    admin_name = "adminscreen"
-
     def to_home(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.last_screen = button_data.parent.manager.current
-        button_data.parent.manager.current = "homescreen"
+        self.screen_stack.append(button_data.parent.manager.current)
+        button_data.parent.manager.current = cfg.HUB_SCREEN_NAME
 
     def shutdown(self, button_data):
         # shutdown system, might not be useful since HW button exists
@@ -31,7 +26,7 @@ class AdminScreen:
         pass
 
     def admin_build(self):
-        screen = Screen(name=self.admin_name)
+        screen = Screen(name=cfg.ADMIN_SCREEN_NAME)
 
         # estop button
         screen.add_widget(
@@ -50,6 +45,16 @@ class AdminScreen:
                 font_size=cfg.CANCEL_BUTTON_FONTSIZE,
                 pos_hint={"center_x": 0.125, "center_y": 0.9},
                 size_hint=(cfg.SHORT_RECT_WIDTH, cfg.SHORT_RECT_HEIGHT),
+                on_release=self.to_home,
+            )
+        )
+
+        screen.add_widget(
+            MDRectangleFlatButton(
+                text="Exit",
+                font_size=cfg.CANCEL_BUTTON_FONTSIZE,
+                pos_hint={"center_x": 0.125, "center_y": 0.9},
+                size_hint=(0.2, 0.1),
                 on_release=self.to_home,
             )
         )

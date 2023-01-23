@@ -1,75 +1,86 @@
 from kivy.uix.screenmanager import Screen
-from kivy.uix.image import Image
+from kivy.uix.button import Button
+from kivy.uix.screenmanager import SlideTransition, NoTransition
 
 from kivymd.uix.label import MDLabel
 from kivymd.uix.button import MDRectangleFlatButton
-from kivy.uix.button import Button
 
-from kivy.uix.screenmanager import SlideTransition, NoTransition
 from screens.screen_config import ScreenConfig as cfg
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import (
+    UserInputs,
+)
 
 
 class ConfirmationScreen:
-    confirmation_name = "confirmationscreen"
-
     def reset_counts(self):
         # only reset if starting new selection
-        if cfg.last_screen == "itemfillscreen":
+        if self.screen_stack.pop() == cfg.ITEM_FILL_SCREEN_NAME:
             self.water_count = 0
             self.ice_count = 0
             self.blanket_count = 0
 
-    def press(self, button_data):
-        if button_data.id == "yes":
-            # do yes and return home
-            button_data.parent.manager.transition = NoTransition()
-            cfg.last_screen = button_data.parent.manager.current
+    def call_ros_action(self, action: int, args: dict = {}) -> bool:
+        """
+        override expected with ros functionality
 
-            def execute_action():
-                # state machine to do things based on the executed action
-                # if given a 'yes' confirmation
-                cfg.current_action = cfg.pending_action
-                cfg.pending_action = ""
-                # print(f"CUR ACTION {cfg.current_action}")
+        :param action: Enum for which action to be called
+        :param args: optional additional arguments
+        :return: True if successful
+        """
+        print("call_ros_action override not implemented")
+        return False
 
-                # reset counters regardless of cancel or send
-                self.reset_counts()
+    def confirmation_press_yes(self, button_data):
+        button_data.parent.manager.transition = NoTransition()
+        self.reset_wd()
 
-                if cfg.current_action == cfg.NO_ROS_ACTION:
-                    # cancel and wait for other inputs. No ROS funcs
-                    button_data.parent.manager.current = "homescreen"
-                elif cfg.current_action == cfg.ESTOP_CANCEL:
-                    # estop cancel
-                    # send ROS message to resume
-                    button_data.parent.manager.current = "homescreen"
-                elif cfg.current_action == cfg.STOCK:
-                    # get items
-                    # send ros message to move to stock room
-                    button_data.parent.manager.current = "facescreen"
-                elif cfg.current_action == cfg.DELIVER:
-                    # deliver items
-                    # send ros message to move to patient
-                    button_data.parent.manager.current = "facescreen"
-                elif cfg.current_action == cfg.GO_HOME:
-                    # deliver items
-                    # send ros message to move to patient
-                    button_data.parent.manager.current = "facescreen"
-                # elif cfg.current_action == cfg.EXTEND_ARM:
-                #    # start arm movement with ROs and go back to screen
-                #    button_data.parent.manager.current = "extendarmscreen"
-                # elif cfg.current_action == cfg.RETRACT_ARM:
-                #    # start arm movement with ROs and go to retract arm screen
-                #    button_data.parent.manager.current = "retractarmscreen"
+        # state machine to do things based on the executed action
+        # if given a 'yes' confirmation
+        self.current_action = self.pending_action
+        self.pending_action = ""
 
-            execute_action()
+        # reset counters regardless of cancel or send
+        self.reset_counts()
 
-        elif button_data.id == "no":
-            # do nothing and return to previous screen
-            button_data.parent.manager.transition = NoTransition()
-            button_data.parent.manager.current = cfg.last_screen
+        if self.current_action == UserInputs.NO_ROS_ACTION:
+            # cancel and wait for other inputs. No ROS funcs
+            button_data.parent.manager.current = cfg.HUB_SCREEN_NAME
+            return True
+
+        if self.current_action == UserInputs.ESTOP_CANCEL:
+            # stop ros estop
+            self.call_ros_action(int(self.current_action))
+            # temporarily have homescreen as the screen after estop pressed. likely have to impement queue
+            screen_before_estop = cfg.HUB_SCREEN_NAME
+            while self.screen_stack[-1] in [
+                cfg.ESTOP_SCREEN_NAME,
+                cfg.CONFIRMATION_SCREEN_NAME,
+            ]:
+                self.screen_stack.pop()
+            button_data.parent.manager.current = self.screen_stack.pop()
+            return True
+
+        if self.current_action == UserInputs.START_RETRACT_ARM:
+            self.call_ros_action(int(self.current_action))
+            # should already be on the screen
+            # button_data.parent.manager.current = cfg.RETRACT_ARM_SCREEN_NAME
+            return True
+
+        button_data.parent.manager.current = cfg.FACE_SCREEN_NAME
+        if self.call_ros_action(int(self.current_action)):
+            return True
+
+        print("Unknown error occurred while sending ros action command")
+        return False
+
+    def confirmation_press_no(self, button_data):
+        # do nothing and return to previous screen
+        button_data.parent.manager.transition = NoTransition()
+        self.reset_wd()
+        button_data.parent.manager.current = self.screen_stack.pop()
 
     def confirmation_build(self):
-        screen = Screen(name=self.confirmation_name)
+        screen = Screen(name=cfg.CONFIRMATION_SCREEN_NAME)
 
         # estop button
         screen.add_widget(
@@ -99,7 +110,7 @@ class ConfirmationScreen:
                 font_style="H4",
                 pos_hint={"center_x": 0.25, "center_y": cfg.SCREEN_Y_CENTER},
                 size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
-                on_release=self.press,
+                on_release=self.confirmation_press_yes,
             )
         )
 
@@ -110,7 +121,7 @@ class ConfirmationScreen:
                 font_style="H4",
                 pos_hint={"center_x": 0.75, "center_y": cfg.SCREEN_Y_CENTER},
                 size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
-                on_release=self.press,
+                on_release=self.confirmation_press_no,
             )
         )
 

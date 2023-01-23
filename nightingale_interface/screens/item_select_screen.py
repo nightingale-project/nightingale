@@ -1,14 +1,16 @@
 from kivy.uix.screenmanager import Screen
 from kivy.uix.image import Image
 
-from kivymd.uix.label import MDLabel
-from kivymd.uix.button import MDRectangleFlatButton
+from kivy.uix.screenmanager import SlideTransition, NoTransition
 from kivy.uix.button import Button
 
-from kivy.uix.screenmanager import SlideTransition, NoTransition
-from screens.screen_config import ScreenConfig as cfg
+from kivymd.uix.label import MDLabel
+from kivymd.uix.button import MDRectangleFlatButton
 
-from kivy.app import App
+from screens.screen_config import ScreenConfig as cfg
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import (
+    UserInputs,
+)
 
 
 class ItemSelectScreen:
@@ -17,13 +19,8 @@ class ItemSelectScreen:
     ice_count_label_idx = 1
     blanket_count_label_idx = 0
 
-    # screen id from the screen manager
-    item_select_screen_id = 9
-
-    # screenname
-    item_select_name = "itemselectscreen"
-
     def add_item(self, button_data):
+        self.reset_wd()
         if button_data.id == "water" and self.water_count < 3:
             self.water_count += 1
         if button_data.id == "ice" and self.ice_count < 3:
@@ -32,6 +29,7 @@ class ItemSelectScreen:
             self.blanket_count += 1
 
     def remove_item(self, button_data):
+        self.reset_wd()
         if button_data.id == "water" and self.water_count > 0:
             self.water_count -= 1
         if button_data.id == "ice" and self.ice_count > 0:
@@ -41,47 +39,51 @@ class ItemSelectScreen:
 
     # functions to update text on count change
     def on_water_count(self, *args):
-        self.root.screens[self.item_select_screen_id].children[
+        self.root.screens[cfg.ITEM_SELECT_SCREEN_ID].children[
             self.water_count_label_idx
         ].text = str(self.water_count)
-        self.root.screens[self.item_fill_screen_id].children[
+        self.root.screens[cfg.ITEM_FILL_SCREEN_ID].children[
             self.water_count_label_idx
         ].text = str(self.water_count)
 
     def on_ice_count(self, *args):
-        self.root.screens[self.item_select_screen_id].children[
+        self.root.screens[cfg.ITEM_SELECT_SCREEN_ID].children[
             self.ice_count_label_idx
         ].text = str(self.ice_count)
-        self.root.screens[self.item_fill_screen_id].children[
+        self.root.screens[cfg.ITEM_FILL_SCREEN_ID].children[
             self.ice_count_label_idx
         ].text = str(self.ice_count)
 
     def on_blanket_count(self, *args):
-        self.root.screens[self.item_select_screen_id].children[
+        self.root.screens[cfg.ITEM_SELECT_SCREEN_ID].children[
             self.blanket_count_label_idx
         ].text = str(self.blanket_count)
-        self.root.screens[self.item_fill_screen_id].children[
+        self.root.screens[cfg.ITEM_FILL_SCREEN_ID].children[
             self.blanket_count_label_idx
         ].text = str(self.blanket_count)
 
     def send_request(self, button_data):
-        # send to ROS topic and return to homescren
-        button_data.parent.manager.transition = SlideTransition()
-        button_data.parent.manager.transition.direction = "right"
-        cfg.last_screen = button_data.parent.manager.current
-        cfg.pending_action = cfg.STOCK
-        button_data.parent.manager.current = "confirmationscreen"
+        self.reset_wd()
+        if self.water_count + self.blanket_count + self.ice_count > 0:
+            # only execute if item was added
+            # send to ROS topic and return to homescren
+            button_data.parent.manager.transition = SlideTransition()
+            button_data.parent.manager.transition.direction = "right"
+            self.screen_stack.append(button_data.parent.manager.current)
+            self.pending_action = UserInputs.STOCK_ITEMS
+            button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
 
     def cancel_request(self, button_data):
         # return to homescreen
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "right"
-        cfg.last_screen = button_data.parent.manager.current
-        cfg.pending_action = cfg.NO_ROS_ACTION
-        button_data.parent.manager.current = "confirmationscreen"
+        self.reset_wd()
+        self.screen_stack.append(button_data.parent.manager.current)
+        self.pending_action = UserInputs.NO_ROS_ACTION
+        button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
 
     def item_select_build(self):
-        screen = Screen(name=self.item_select_name)
+        screen = Screen(name=cfg.ITEM_SELECT_SCREEN_NAME)
 
         # estop button
         screen.add_widget(
@@ -112,6 +114,17 @@ class ItemSelectScreen:
                 pos_hint={"center_x": 0.9, "center_y": 0.1},
                 size_hint=(0.2, 0.1),
                 on_release=self.send_request,
+            )
+        )
+
+        # estop button
+        screen.add_widget(
+            Image(
+                source="images/waterbottle.png",
+                allow_stretch=True,
+                keep_ratio=True,
+                size_hint_x=0.05,
+                pos_hint={"center_x": 0.2, "center_y": 0.7},
             )
         )
 

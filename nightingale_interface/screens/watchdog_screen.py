@@ -10,20 +10,19 @@ from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config i
 )
 
 
-class EStoppedScreen:
-    def exit_estop(self, button_data):
-        # returns to previous screen that came before estop pressed
+class WatchdogScreen:
+    def exit_wd(self, button_data):
+        # returns to previous screen that came before wd activated
         button_data.parent.manager.transition = NoTransition()
-        self.screen_stack.append(button_data.parent.manager.current)
-        self.pending_action = UserInputs.ESTOP_CANCEL
-        button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
+        button_data.parent.manager.current = self.screen_stack.pop()
+        self.watchdog2_exited = True
 
-    def estopped_build(self):
-        screen = Screen(name=cfg.ESTOP_SCREEN_NAME)
+    def watchdog_build(self):
+        screen = Screen(name=cfg.WATCHDOG_TIMEOUT_SCREEN_NAME)
 
         # ADD IMAGE FOR STOPPED STATE
         stopped_label = MDLabel(
-            text="EMERGENCY STOP ACTIVATED",
+            text="Are you there?",
             font_style="H4",
             halign="center",
             pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": cfg.SCREEN_Y_CENTER},
@@ -33,11 +32,11 @@ class EStoppedScreen:
         screen.add_widget(stopped_label)
         screen.add_widget(
             MDRectangleFlatButton(
-                text="Restart",
+                text="Yes",
                 font_style="H4",
                 pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.2},
                 size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
-                on_release=self.exit_estop,
+                on_release=self.exit_wd,
             )
         )
 

@@ -1,36 +1,33 @@
 from kivy.uix.screenmanager import Screen
-from kivy.uix.image import Image
+from kivy.uix.screenmanager import SlideTransition, NoTransition
+from kivy.uix.button import Button
 
 from kivymd.uix.label import MDLabel
 from kivymd.uix.button import MDRectangleFlatButton
-from kivy.uix.button import Button
 
-from kivy.uix.screenmanager import SlideTransition, NoTransition
 from screens.screen_config import ScreenConfig as cfg
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import (
+    UserInputs,
+)
 
 
 class ItemFillScreen:
-    item_fill_name = "itemfillscreen"
-
-    # screen id from the screen manager
-    item_fill_screen_id = 10
-
     def fill_done(self, button_data):
         # publish to ROS topic to let robot go away
-        cfg.last_screen = button_data.parent.manager.current
-        cfg.pending_action = cfg.DELIVER
+        self.screen_stack.append(button_data.parent.manager.current)
+        self.pending_action = UserInputs.DELIVER_ITEMS
         button_data.parent.manager.transition = NoTransition()
-        button_data.parent.manager.current = "confirmationscreen"
+        button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
 
     def fill_cancel(self, button_data):
         # cancel and publish topic to go to home
         button_data.parent.manager.transition = NoTransition()
-        cfg.last_screen = button_data.parent.manager.current
-        cfg.pending_action = cfg.NO_ROS_ACTION
-        button_data.parent.manager.current = "confirmationscreen"
+        self.screen_stack.append(button_data.parent.manager.current)
+        self.pending_action = UserInputs.RETURN_HOME
+        button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
 
     def item_fill_build(self):
-        screen = Screen(name=self.item_fill_name)
+        screen = Screen(name=cfg.ITEM_FILL_SCREEN_NAME)
 
         # estop button
         screen.add_widget(

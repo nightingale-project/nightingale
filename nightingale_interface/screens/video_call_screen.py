@@ -1,24 +1,19 @@
 from kivy.uix.screenmanager import Screen
-from kivy.uix.image import Image
-
-from kivymd.uix.label import MDLabel
-from kivymd.uix.button import MDRectangleFlatButton
 from kivy.uix.button import Button
-
 from kivy.uix.screenmanager import SlideTransition, NoTransition
+
+from kivymd.uix.button import MDRectangleFlatButton
 from screens.screen_config import ScreenConfig as cfg
 
 
 class VideoCallScreen:
-    video_call_name = "videocallscreen"
-
     def exit_call(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.last_screen = self.video_call_name
-        button_data.parent.manager.current = "homescreen"
+        self.screen_stack.append(button_data.parent.manager.current)
+        button_data.parent.manager.current = cfg.HUB_SCREEN_NAME
 
     def video_call_build(self):
-        screen = Screen(name=self.video_call_name)
+        screen = Screen(name=cfg.VIDEO_CALL_SCREEN_NAME)
 
         # estop button
         screen.add_widget(

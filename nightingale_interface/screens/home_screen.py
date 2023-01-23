@@ -1,57 +1,70 @@
 from kivy.uix.screenmanager import Screen
-from kivy.uix.image import Image
-
-from kivymd.uix.label import MDLabel
-from kivymd.uix.button import MDRectangleFlatButton
 from kivy.uix.button import Button
-
 from kivy.uix.screenmanager import SlideTransition, NoTransition
+
+from kivymd.uix.button import MDRectangleFlatButton
 from screens.screen_config import ScreenConfig as cfg
+
+# TEMPORARY UNTIL INCLUDES ARE FIXED
+import sys
+
+sys.path.append("..")
+# TEMPORARY UNTIL INCLUDES ARE FIXED
+
+from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config import (
+    UserInputs,
+)
 
 
 class HomeScreen:
-    home_name = "homescreen"
-
     def estop(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.last_screen = button_data.parent.manager.current
-        button_data.parent.manager.current = "estoppedscreen"
+        self.screen_stack.append(button_data.parent.manager.current)
+        self.reset_wd()
+        # engage estop on ROS topic
+        self.call_ros_action(UserInputs.ESTOP)
+        button_data.parent.manager.current = cfg.ESTOP_SCREEN_NAME
 
     def to_nurse_alert(self, button_data):
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "left"
-        cfg.last_screen = button_data.parent.manager.current
-        button_data.parent.manager.current = "nursealertscreen"
+        self.reset_wd()
+        self.screen_stack.append(button_data.parent.manager.current)
+        button_data.parent.manager.current = cfg.NURSE_ALERT_SCREEN_NAME
 
     def to_video_call(self, button_data):
         # publish to topic to tell robot not to move
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "left"
-        cfg.last_screen = button_data.parent.manager.current
-        button_data.parent.manager.current = "videocallscreen"
+        self.reset_wd()
+        self.screen_stack.append(button_data.parent.manager.current)
+        button_data.parent.manager.current = cfg.VIDEO_CALL_SCREEN_NAME
         # open web browser to specific size of scree
 
     def to_item_select(self, button_data):
         # publish to topic to tell robot not to move
         button_data.parent.manager.transition = SlideTransition()
         button_data.parent.manager.transition.direction = "left"
-        cfg.last_screen = button_data.parent.manager.current
-        button_data.parent.manager.current = "itemselectscreen"
+        self.reset_wd()
+        self.screen_stack.append(button_data.parent.manager.current)
+        button_data.parent.manager.current = cfg.ITEM_SELECT_SCREEN_NAME
 
     def dismiss(self, button_data):
         button_data.parent.manager.transition = NoTransition()
         button_data.parent.manager.transition.direction = "left"
-        cfg.last_screen = button_data.parent.manager.current
-        cfg.pending_action = cfg.GO_HOME
-        button_data.parent.manager.current = "confirmationscreen"
+        self.reset_wd()
+        self.screen_stack.append(button_data.parent.manager.current)
+        self.pending_action = UserInputs.RETURN_HOME
+        button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
 
     def to_admin_control(self, button_data):
         button_data.parent.manager.transition = NoTransition()
-        cfg.last_screen = button_data.parent.manager.current
-        button_data.parent.manager.current = "adminscreen"
+        self.reset_wd()
+        self.screen_stack.append(button_data.parent.manager.current)
+        button_data.parent.manager.current = cfg.ADMIN_SCREEN_NAME
 
     def home_build(self):
-        screen = Screen(name=self.home_name)
+        screen = Screen(name=cfg.HUB_SCREEN_NAME)
 
         # estop button
         screen.add_widget(
@@ -120,5 +133,4 @@ class HomeScreen:
         #        on_release=self.to_nurse_alert,
         #    )
         # )
-
         return screen
