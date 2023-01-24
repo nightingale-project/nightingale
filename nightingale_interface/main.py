@@ -1,3 +1,8 @@
+# follow environment variable is needed to be set so Kivy doesn't take
+# over the commmand line for reading arguments
+import os
+os.environ["KIVY_NO_ARGS"] = "1"
+
 import MovoConfig
 from screen_wrapper import ScreenWrapper
 from screens.screen_config import ScreenConfig
@@ -11,7 +16,7 @@ import json
 import asyncio
 import roslibpy
 from functools import partial
-
+import argparse
 import kivy
 from kivy.config import Config
 from kivy.clock import Clock
@@ -27,7 +32,6 @@ from kivy.properties import NumericProperty, StringProperty
 class MainApp(MDApp, ScreenWrapper):
     _other_task = None
     _wd_task = None
-    coms_enabled = True
 
     # ros things
     client = None
@@ -151,18 +155,18 @@ class MainApp(MDApp, ScreenWrapper):
         self.theme_cls.theme_style = "Dark"
         return self.build_wrapper()
 
-    def init_ros(self):
+    def init_ros(self, on_movo=False):
         # initialize the ros bridge client
 
-        # self.client = roslibpy.Ros(
-        #    MovoConfig.Config["Movo2"]["IP"], MovoConfig.Config["RosBridgePort"]
-        # )
-
-        # temporary offline computer testing
-        self.client = roslibpy.Ros(
-            host="localhost", port=MovoConfig.Config["RosBridgePort"]
-        )
-        # temporary offline computer testing
+        self.client = None
+        if on_movo == True:
+            self.client = roslibpy.Ros(
+               MovoConfig.Config["Movo2"]["IP"], MovoConfig.Config["RosBridgePort"]
+            )
+        else:
+            self.client = roslibpy.Ros(
+                host="localhost", port=MovoConfig.Config["RosBridgePort"]
+            )
 
         self.client.run()
         asyncio.sleep(0.5)
@@ -280,13 +284,18 @@ class MainApp(MDApp, ScreenWrapper):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--ros_comms", action='store_true', help="If set then True to use ROS bridge, False otherwise")
+    parser.add_argument("--on_movo", action='store_true', help="If set then True to run on movo, False if on own computer")
+
+    args = parser.parse_args() 
     # initialize the app and event loop
     loop = asyncio.get_event_loop()
     app = MainApp()
 
     # initializes everything related to ros bridge
-    if app.coms_enabled:
-        app.init_ros()
+    if args.ros_comms == True:
+        app.init_ros(args.on_movo)
 
     # start the app event loop
     loop.run_until_complete(app.main())
