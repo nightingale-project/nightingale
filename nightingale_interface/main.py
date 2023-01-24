@@ -10,9 +10,11 @@ from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config i
 import json
 import asyncio
 import roslibpy
+from functools import partial
 
 import kivy
 from kivy.config import Config
+from kivy.clock import Clock
 
 Config.set("graphics", "width", "1280")
 Config.set("graphics", "height", "800")
@@ -216,10 +218,17 @@ class MainApp(MDApp, ScreenWrapper):
         status = int(msg["data"])  # enum
 
         next_screen = ScreenConfig.HUB_SCREEN_NAME
-        if status == RobotStatus.IDLE_HOME or status == RobotStatus.DRIVING:
+        if status == RobotStatus.IDLE_HOME:
             # instantly return since no user input expected
             self.call_ros_action(UserInputs.NO_ROS_ACTION)
             next_screen = ScreenConfig.FACE_SCREEN_NAME
+
+        elif status == RobotStatus.DRIVING:
+            # instantly return since no user input expected
+            # switch to start driving screen for 5 secs and then switch to face screen
+            self.call_ros_action(UserInputs.NO_ROS_ACTION)
+            next_screen = ScreenConfig.START_DRIVE_SCREEN_NAME
+            Clock.schedule_once(partial(self.set_screen_delayed, ScreenConfig.FACE_SCREEN_NAME),  5)
 
         elif status == RobotStatus.BEDSIDE_IDLE:
             next_screen = ScreenConfig.HUB_SCREEN_NAME
@@ -254,6 +263,11 @@ class MainApp(MDApp, ScreenWrapper):
         self.queue(self.robot_state_screen_change_task, 0, next_screen)
         return True
 
+    def set_screen_delayed(self, screen_name, dt):
+        # able to set any screen name after a delay. 
+        # meant to be used with Kivy.Clock scheduling calls
+        self.root.current = screen_name 
+ 
     def robot_state_screen_change_task(self, next_screen):
         # update screen upon new state
         if next_screen is not None and self.get_screen(next_screen):
