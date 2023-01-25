@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch
+
+    <!-- launch the room runner node -->
+    <node name="human_pose_estimation" pkg="nightingale_perception" type="human_pose_estimation.py" output="screen" >
+ 
+</launch>
+
