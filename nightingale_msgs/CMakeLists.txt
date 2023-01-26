@@ -62,14 +62,14 @@ add_service_files(
   FILES
   InterfaceCall.srv
   RoomPoseLookup.srv
-  AddTaskDispatcher.srv
+  AddMissionPlan.srv
 )
 
 ## Generate actions in the 'action' folder
 add_action_files(
   FILES
   RoomRunner.action
-  Task.action
+  MissionPlan.action
 )
 
 ## Generate added messages and services with any dependencies listed here

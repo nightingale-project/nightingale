@@ -5,15 +5,15 @@ import actionlib
 import time
 
 from actionlib_msgs.msg import GoalStatus
-from nightingale_msgs.msg import TaskAction
+from nightingale_msgs.msg import MissionPlanAction
 
 
-class TaskActionServer:
+class MissionPlanner:
     def __init__(self):
-        rospy.init_node("task_action_server_node")
+        rospy.init_node("mission_planner_node")
 
         self.server = actionlib.SimpleActionServer(
-            "task", TaskAction, self.goal_cb, False
+            "mission_planner", MissionPlanAction, self.goal_cb, False
         )
         self.server.start()
 
@@ -21,11 +21,11 @@ class TaskActionServer:
         # TODO execute subtasks in order and report status
         # Nav -> Bed. idle -> Nav -> Stock -> Bed. deliver -> Nav -> Idle
 
-        self.server.set_succeeded()
+        raise NotImplementedError()
 
 
 def main():
-    task_action_server = TaskActionServer()
+    mission_planner = MissionPlanner()
 
     rospy.spin()
 
