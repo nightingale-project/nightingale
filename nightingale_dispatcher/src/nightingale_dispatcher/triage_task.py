@@ -5,7 +5,8 @@ import rospy
 
 class TriageTask:
     # Once at the patient bedside, wait for a user input on the tablet
-    def __init__(self):
+    # TODO define inputs
+    def __init__(self, *args, **kwargs):
         raise NotImplementedError()
 
     def execute(self):
