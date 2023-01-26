@@ -2,14 +2,17 @@
 
 import rospy
 
+from nightingale_dispatcher.task import Task
 
-class NavigateTask:
+
+class NavigateTask(Task):
     # Go to position with given context
-    # TODO define inputs
+    # TODO define parameters
     def __init__(self, *args, **kwargs):
         raise NotImplementedError()
 
-    def execute(self):
+    # TODO define inputs
+    def execute(self, *args, **kwargs):
         # Check if there are intermediate steps to travel to the destination
         # Call room_runner to drive to pose
         raise NotImplementedError()

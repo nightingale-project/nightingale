@@ -9,9 +9,6 @@ from nightingale_msgs.msg import MissionPlanAction, MissionPlanGoal
 from nightingale_msgs.srv import AddMissionPlan
 
 
-import time
-
-
 class DispatcherNode:
     def __init__(self):
         rospy.init_node("dispatcher_node")

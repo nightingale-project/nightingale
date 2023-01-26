@@ -2,13 +2,16 @@
 
 import rospy
 
+from nightingale_dispatcher.task import Task
 
-class IdleTask:
+
+class IdleTask(Task):
     # Goto idle position and wait
-    # TODO define inputs
+    # TODO define parameters
     def __init__(self, *args, **kwargs):
         raise NotImplementedError()
 
-    def execute(self):
+    # TODO define inputs
+    def execute(self, *args, **kwargs):
         # Goto home position
         raise NotImplementedError()
