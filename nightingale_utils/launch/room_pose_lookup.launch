@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="nightingale_utils" type="room_pose_lookup.py" name="room_pose_lookup" output="screen">
+        <rosparam command="load" file="$(find nightingale_utils)/configs/room_pose_lookup.yaml"/>
+        <remap from="rooms" to="/room_pose_lookup/rooms"/>
+    </node>
+</launch>
