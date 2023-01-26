@@ -5,7 +5,8 @@ import rospy
 
 class IdleTask:
     # Goto idle position and wait
-    def __init__(self):
+    # TODO define inputs
+    def __init__(self, *args, **kwargs):
         raise NotImplementedError()
 
     def execute(self):

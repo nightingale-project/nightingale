@@ -159,8 +159,8 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  src/nightingale_dispatcher/main.py
-  src/nightingale_dispatcher/task_action_server.py
+  src/nightingale_dispatcher/dispatcher.py
+  src/nightingale_dispatcher/mission_planner.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

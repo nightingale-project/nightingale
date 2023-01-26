@@ -5,7 +5,8 @@ import rospy
 
 class StockTask:
     # Once arrived at the stock area, collect items for patient
-    def __init__(self):
+    # TODO define inputs
+    def __init__(self, *args, **kwargs):
         raise NotImplementedError()
 
     def execute(self):
