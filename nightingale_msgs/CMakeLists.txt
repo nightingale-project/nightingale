@@ -63,7 +63,10 @@ add_service_files(
   InterfaceCall.srv
   RoomPoseLookup.srv
   RobotConfigurationLookup.srv
+<<<<<<< HEAD
   AddMissionPlan.srv
+=======
+>>>>>>> added robot configuration lookup service
 )
 
 ## Generate actions in the 'action' folder

@@ -1,46 +1,18 @@
-joint_states: {
-    home: {
-        head: {
-            names: ["pan_joint", "tilt_joint"],
-            joints: [0.0,0.0]
-        },
-        torso: {
-            names: ["linear_joint"],
-            joints: [0.1]
-        },
-        left_arm: {
-            names: ["left_shoulder_pan_joint", "left_shoulder_lift_joint", "left_arm_half_joint", "left_elbow_joint", "left_wrist_spherical_1_joint", "left_wrist_spherical_2_joint", "left_wrist_3_joint"],
-            joints: [1.6285100157139785, 1.4853564921068, -0.4129526423290365, 2.680378098157231, 0.03587460652925101, -0.45225347904488444, 1.7006671448238166]
-        },
-        right_arm: {
-            names: ["right_shoulder_pan_joint", "right_shoulder_lift_joint", "right_arm_half_joint", "right_elbow_joint", "right_wrist_spherical_1_joint", "right_wrist_spherical_2_joint", "right_wrist_3_joint"],
-            joints: [-1.3619729954335744, -1.4932225928175198, 0.4410807851642762, -2.66686424986983, 0.03346679617681403, -2.051480810941249, -1.6562489931736222]
-        }
+home_joint_configurations: {
+    head: {
+        names: ["pan_joint", "tilt_joint"],
+        joints: [0.0,0.0],
     },
-    handoff: {
-        right_arm: {
-            names: ["right_shoulder_pan_joint", "right_shoulder_lift_joint", "right_arm_half_joint", "right_elbow_joint", "right_wrist_spherical_1_joint", "right_wrist_spherical_2_joint", "right_wrist_3_joint"],
-            joints: [-1.3805385006229827, -0.367722359099307, 0.37472254460360777, -2.065029556896355, 0.32164880671358187, -1.4908161397795825, -2.106156420715312]
-        }
+    torso: {
+        names: ["linear_joint"],
+        joints: [0.1],
     },
-    tuck: {
-        right_arm: {
-            names: ["right_shoulder_pan_joint", "right_shoulder_lift_joint", "right_arm_half_joint", "right_elbow_joint", "right_wrist_spherical_1_joint", "right_wrist_spherical_2_joint", "right_wrist_3_joint"],
-            joints: [-3.115176200866699, 2.143636465072632, -0.4040210247039795, -0.03806966915726662, 0.7302623987197876, 2.8932955265045166, -0.32719579339027405]
-        }
-    }
-},
-end_effector_poses: {
-    handoff: {
-        right_arm: {
-            position: [0.87513, -0.012111, 0.9517],
-            orientation: [-0.71141, -0.083265, -0.093164, 0.691]
-        }
+    left_arm: {
+        names: ["left_shoulder_pan_joint", "left_shoulder_lift_joint", "left_arm_half_joint", "left_elbow_joint", "left_wrist_spherical_1_joint", "left_wrist_spherical_2_joint", "left_wrist_3_joint"],
+        joints: [1.6285100157139785, 1.4853564921068, -0.4129526423290365, 2.680378098157231, 0.03587460652925101, -0.45225347904488444, 1.7006671448238166],
     },
-    tuck: {
-        right_arm: {
-            position = [0.68051, -0.0064524, 0.65082],
-            orientation = [-0.71776, -0.040455, -0.052179, 0.69]
-        }
+    right_arm: {
+        names: ["right_shoulder_pan_joint", "right_shoulder_lift_joint", "right_arm_half_joint", "right_elbow_joint", "right_wrist_spherical_1_joint", "right_wrist_spherical_2_joint", "right_wrist_3_joint"],
+        joints: [-1.3619729954335744, -1.4932225928175198, 0.4410807851642762, -2.66686424986983, 0.03346679617681403, -2.051480810941249, -1.6562489931736222],
     }
 }

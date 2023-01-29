@@ -65,7 +65,9 @@ class RobotConfigurationService:
             RobotConfigurationLookup,
             self.robot_configuration_lookup,
         )
-        self.configurations = rospy.get_param("/nightingale_utils/robot_configurations")
+        self.configurations = rospy.get_param(
+            "/nightingale_utils/home_joint_configurations"
+        )
 
     def robot_configuration_lookup(self, req):
         ret = RobotConfigurationLookupResponse()
@@ -76,6 +78,9 @@ class RobotConfigurationService:
             req.TORSO: "torso",
             req.HEAD: "head",
         }[req.body_part]
+        if body_part_string not in self.configurations.keys():
+            # returning None is well defined for rospy services
+            return None
         ret.jnt_state.name = self.configurations[body_part_string]["names"]
         ret.jnt_state.position = self.configurations[body_part_string]["joints"]
         ret.jnt_state.velocity = [0.0 for _ in range(len(ret.jnt_state.name))]
