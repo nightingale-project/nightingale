@@ -1,0 +1,7 @@
+<library path="lib/libhallway_planner">
+  <class name="hallway_planner/HallwayPlanner" type="hallway_planner::HallwayPlanner" base_class_type="nav_core::BaseGlobalPlanner">
+    <description>
+      An grid based planner using an A* solver with right-side path biasing in hallway regions of the map
+    </description>
+  </class>
+</library>
