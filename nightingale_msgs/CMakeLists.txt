@@ -62,6 +62,7 @@ add_service_files(
   FILES
   InterfaceCall.srv
   RoomPoseLookup.srv
+  RobotConfigurationLookup.srv
   AddMissionPlan.srv
 )
 
