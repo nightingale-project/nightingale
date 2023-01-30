@@ -14,6 +14,17 @@ class TriageTask(Task):
 
     # TODO define inputs
     def execute(self, *args, **kwargs):
-        # show user main screen
-        # wait for an item request, home command, or timeout
+        # show user main screen. Blocks until dismiss or stock items call given
+        userinput = self.interface_comms_client(RobotStatus.BEDSIDE_IDLE)
+        if userinput == UserInputs.STOCK_ITEMS:
+            # queue up go to stock items phase
+            pass
+        elif userinput == UserInputs.RETURN_HOME:
+            # queue up go home phase
+            pass
+        elif userinput == UserInputs.WD_TIMEOUT:
+            # queue up go home phase
+            # not sure if different processing needed
+            pass
+
         raise NotImplementedError()

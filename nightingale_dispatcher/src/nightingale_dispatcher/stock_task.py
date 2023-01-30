@@ -13,7 +13,28 @@ class StockTask(Task):
 
     # TODO define inputs
     def execute(self, *args, **kwargs):
-        # show screen to load items
-        # load items into the box
-        # lower arms to driving pose
+        # called after stock room reached
+        # extend arm
+        status = extend_arm_action
+        if status != SUCCESS:
+            # handle error
+            pass 
+
+        # interface call to set stock items
+        userinput = self.interface_comms_client(RobotStatus.ITEM_STOCK_REACHED)
+
+        # upon stock finished or cancel retract arm
+        status = retract_arm_action
+        if status != SUCCESS:
+            # handle error
+            # try arm retract again
+            pass 
+
+        if userinput == UserInputs.DELIVER_ITEMS:
+            # queue up navigate to patient phase
+            pass
+        elif userinput == UserInputs.RETURN_HOME:
+            # queue up navigate to home phase
+            pass
+        
         raise NotImplementedError()
