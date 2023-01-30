@@ -96,7 +96,7 @@ class RoomRunnerNode(object):
             logger_name=self.logger_name,
         )
         goal_pose = self.lookup_pose(goal.room_number, goal.sublocation)
-        msg, fb_cb, a_cb = self.generate_goal_info(goal_pose, "navigating to door")
+        msg, fb_cb, a_cb = self.generate_goal_info(goal_pose)
 
         self.client.send_goal(msg, feedback_cb=fb_cb, active_cb=a_cb)
         self.client.wait_for_result()
@@ -127,7 +127,7 @@ class RoomRunnerNode(object):
         result = RoomRunnerResult()
         self.server.set_preempted(result)
 
-    def generate_goal_info(self, pose, phase):
+    def generate_goal_info(self, pose):
         msg = MoveBaseGoal()
         msg.target_pose = pose
 

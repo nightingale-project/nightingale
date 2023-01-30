@@ -38,11 +38,22 @@ class MissionPlanner:
         self.phases = queue.Queue()
 
     def go_to_patient(self):
-        # Extract room number and bed number from goal (bell)
-        status = self.navigate_task.execute(self.room, "bed")
+        rospy.loginfo("Nightingale Mission Planner going to patient")
+        # Assume door is open
+        # TODO: first go to doorside then bedside when door opening added
+        status = self.navigate_task.execute(self.room, "bedside")
         if status == Task.ERROR:
             raise NotImplementedError()
         self.phases.put(self.triage_patient)
+
+    def go_home(self):
+        rospy.loginfo("Nightingale Mission Planner going home")
+        # Assume door is open
+        # TODO: first go to doorside then bedside when door opening added
+        status = self.navigate_task.execute("home", "")
+        if status == Task.ERROR:
+            raise NotImplementedError()
+        self.phases.put(self.go_idle)
 
     def triage_patient(self):
         # Arrived at patient's bedside
@@ -58,8 +69,8 @@ class MissionPlanner:
             self.phases.put(self.go_to_stock)
 
     def go_to_stock(self):
-        # Go to stock room
-        status = self.navigate_task.execute("stock")
+        rospy.loginfo("Nightingale Mission Planner going to stock")
+        status = self.navigate_task.execute("stock", "")
         if status == Task.ERROR:
             raise NotImplementedError()
         self.phases.put(self.get_items)
@@ -72,8 +83,11 @@ class MissionPlanner:
         self.phases.put(self.return_to_patient)
 
     def return_to_patient(self):
+        rospy.loginfo("Nightingale Mission Planner returning to patient")
         # Got items, go back to patient room
-        status = self.navigate_task.execute(self.room, "bed")
+        # Assume door is open
+        # TODO: first go to doorside then bedside when door opening added
+        status = self.navigate_task.execute(self.room, "bedside")
         if status == Task.ERROR:
             raise NotImplementedError()
         self.phases.put(self.handoff_items)
@@ -93,7 +107,7 @@ class MissionPlanner:
     def goal_cb(self, goal):
         # TODO execute subtasks in order and report status
         # Nav -> Triage -> Nav -> Stock -> Nav ->
-        #   Handoff -> Idle
+        #   Handoff -> Home -> Idle
 
         self.room = goal.room
         self.phases.put(self.go_to_patient)
