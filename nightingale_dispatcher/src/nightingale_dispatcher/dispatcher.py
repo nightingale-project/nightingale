@@ -14,6 +14,7 @@ class DispatcherNode:
         rospy.init_node("dispatcher_node")
 
         self.mission_planner_client = actionlib.SimpleActionClient("mission_planner", MissionPlanAction)
+        rospy.loginfo("Dispatcher: waiting for Mission Planner")
         self.mission_planner_client.wait_for_server()
 
         self.missions = queue.Queue()
