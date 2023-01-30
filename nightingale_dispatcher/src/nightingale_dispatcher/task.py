@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import rospy
 from nightingale_ros_bridge import BridgeConfig, RobotStatus, UserInputs
-
+from nightingale_msgs.srv import InterfaceCall
 
 class Task:
     def __init__(self):
@@ -10,15 +10,24 @@ class Task:
         # client for interface communication
         self.current_robot_state = RobotStatus.IDLE_HOME
         self.interface_comms_service_name = BridgeConfig.UPDATE_UI_SERVICE
-        rospy.wait_for_service(self.interface_comms_service_name)
-        self.interface_comms_proxy = rospy.ServiceProxy(
-            self.interface_comms_service_name, InterfaceCall
-        )
+
+    def interface_comms_client(self, robot_state):
+        rospy.wait_for_service(self.interface_comms_service_name, InterfaceCall)
+        try:
+            # spin up proxy when needed
+            self.interface_comms_proxy = rospy.ServiceProxy(
+                self.interface_comms_service_name, InterfaceCall
+            )
+            user_input = self.interface_comms_proxy(robot_state)
+            return user_input
+        except rospy.ServiceException as e:
+            print("Service call failed: %s"%e)
 
 
      # helper functions
      def process_user_input(self, user_input):
         """
+        MAY BE MOVED TO INSIDE EACH TASK
         takes in the enum of user input codes and returns an enum based on what robot state should come next and what task is to be queued
         :param user_input: Enum of user inputs
         :return next_robot_state: Enum of next robot state
