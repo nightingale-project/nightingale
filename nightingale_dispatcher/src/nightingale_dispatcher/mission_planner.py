@@ -15,11 +15,14 @@ from nightingale_dispatcher.task import Task
 from nightingale_dispatcher.triage_task import TriageTask
 from nightingale_ros_bridge.bridge_interface_config import BridgeConfig
 
+
 class MissionPlanner:
     def __init__(self):
         rospy.init_node("mission_planner_node")
 
-        self.estop_sub = rospy.Subscriber(BridgeConfig.USER_INPUT_TOPIC, String, self.estop_cb)
+        self.estop_sub = rospy.Subscriber(
+            BridgeConfig.USER_INPUT_TOPIC, String, self.estop_cb
+        )
 
         self.server = actionlib.SimpleActionServer(
             "mission_planner", MissionPlanAction, self.goal_cb, False
@@ -33,7 +36,7 @@ class MissionPlanner:
         self.triage_task = TriageTask()
 
         self.phases = queue.Queue()
-    
+
     def go_to_patient(self):
         # Extract room number and bed number from goal (bell)
         status = self.navigate_task.execute(self.room, "bed")
@@ -102,7 +105,7 @@ class MissionPlanner:
             if not status:
                 self.server.set_aborted()
                 return
-        
+
         self.server.set_succeeded()
 
     def estop_cb(self, msg):
