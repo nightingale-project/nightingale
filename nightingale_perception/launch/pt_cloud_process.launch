@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- launch file for point cloud laser scan conversion and filtering of robot body -->
+  <arg name="filtered_points_topic" default="/camera/depth/color/points_body_filtered"/>
+
+  <!-- Point cloud body filter node -->
+  <node name="pointcloud_filter" pkg="sensor_filters" type="pointcloud2_filter_chain" output="screen">
+      <rosparam command="load" file="$(find nightingale_perception)/config/movo_body_filter.yaml" />
+  
+      <remap from="~input" to="/camera/depth/color/points" />
+      <remap from="~output" to="$(arg filtered_points_topic)" />
+  </node>
+
+  <!-- Point cloud to laser scan conversion -->
+  <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan_node" output="screen">
+      <remap from="/cloud_in" to="$(arg filtered_points_topic)"/>
+      <!--remap from="/cloud_in" to="/camera/depth/color/points"/-->
+      <remap from="/scan" to="/movo/camera_scan"/>
+
+      <rosparam>
+          target_frame: "front_laser_link" #front laser link chosen for 
+          angle_min: -2.0 # value choosen to match front laser scan
+          angle_max: 2.0
+          angle_increment: 0.005563282407820225 # resolution to match front laser
+          range_min: 0.10000000149011612 # same as front laser
+          min_height: -1.4 #negative because front laser tf has Z+ downward. Max expected movo height 
+          max_height: 0.20 # determined using trial and error in sim to see which value gives points and not ground plane
+      </rosparam>
+  </node>
+
+  <!-- Laser scan merger for camera scan -->
+    <node pkg="ira_laser_tools" name="laserscan_multi_merger_camera" type="laserscan_multi_merger" output="screen">
+        <param name="destination_frame" value="base_link"/>
+        <param name="cloud_destination_topic" value="/movo/merged_cloud_camera"/>
+        <param name="scan_destination_topic" value="/movo/scan_multi_camera"/>
+        <param name="laserscan_topics" value ="/movo/scan_multi /movo/camera_scan"/>
+	<!--param name="laserscan_topics" value ="/movo/$(optenv LASER1_PREFIX front)_scan /movo/$(optenv LASER2_PREFIX rear)_scan /movo/camera_scan"/-->
+ 
+    </node>
+
+    <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="movo_laser_filter_camera" clear_params="true" respawn="true" output="screen">
+        <remap from="scan" to="/movo/scan_multi_camera" />
+        <remap from="scan_filtered" to="/movo/base_scan_filtered_camera" />
+        <param name="target_frame" value="base_link" />
+        <param name="high_fidelity" value="true" />
+        <rosparam command="load" 
+            file="$(find nightingale_perception)/config/laser_scan_filter.yaml" />
+    </node>
+
+
+</launch>

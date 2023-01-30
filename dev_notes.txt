@@ -11,4 +11,4 @@ See ROS page on vcstool for context
 Repositories can be imported with "vcs import src/ < src/nightingale/nightingale.rosinstall && vcs import src/ < src/kinova-movo/movo.rosinstall" from the root of the ws
 
 For more details of each pkg, see individual READMEs'
- 
+

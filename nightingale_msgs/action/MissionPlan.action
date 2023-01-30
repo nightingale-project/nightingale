@@ -1,0 +1,5 @@
+string name
+---
+int8 status
+---
+int8 num_tasks_remaining
