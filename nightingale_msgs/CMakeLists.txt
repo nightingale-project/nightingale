@@ -60,6 +60,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
+  InterfaceCall.srv
   RoomPoseLookup.srv
   AddMissionPlan.srv
 )
