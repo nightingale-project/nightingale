@@ -12,3 +12,13 @@ Repositories can be imported with "vcs import src/ < src/nightingale/nightingale
 
 For more details of each pkg, see individual READMEs'
 
+# Temporary workaround for internet on movo2 in e5 lab
+Movo1 should automatically have access to the internet
+for access to internet on movo2, configure packet forwarding through movo1
+ssh robohub@movo1
+sudo iptables -t nat -I POSTROUTING -o wlp2s0 -j MASQUERADE
+exit
+ssh robohub@movo2
+sudo ip route add default via 10.66.171.1
+sudo resolvectl dns br0 8.8.8.8
+exit
