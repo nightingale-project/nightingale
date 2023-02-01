@@ -54,7 +54,7 @@ class HomeScreen:
         button_data.parent.manager.transition.direction = "left"
         self.reset_wd()
         self.screen_stack.append(button_data.parent.manager.current)
-        self.pending_action = UserInputs.RETURN_HOME
+        self.pending_action = UserInputs.DISMISS
         button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
 
     def to_admin_control(self, button_data):

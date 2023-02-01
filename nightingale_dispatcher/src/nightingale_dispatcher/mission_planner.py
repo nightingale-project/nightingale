@@ -13,7 +13,11 @@ from nightingale_dispatcher.navigate_task import NavigateTask
 from nightingale_dispatcher.stock_task import StockTask
 from nightingale_dispatcher.task import Task
 from nightingale_dispatcher.triage_task import TriageTask
-from nightingale_ros_bridge.bridge_interface_config import BridgeConfig
+from nightingale_ros_bridge.bridge_interface_config import (
+    BridgeConfig,
+    RobotStatus,
+    UserInputs1,
+)
 
 
 class MissionPlanner:
@@ -49,11 +53,13 @@ class MissionPlanner:
         status = self.triage_task.execute()
         if status == Task.ERROR:
             raise NotImplementedError()
-
-        if status == TriageTask.TIMEOUT:
+        elif status == UserInputs.WD_TIMEOUT:
+            # WD timeout
+            self.phases.put(self.go_idle)
+        elif status == UserInputs.DISMISS:
             # User didn't want anything
             self.phases.put(self.go_idle)
-        else:
+        elif status == UserInputs.STOCK_ITEMS:
             # User wants some items
             self.phases.put(self.go_to_stock)
 
@@ -69,7 +75,11 @@ class MissionPlanner:
         status = self.stock_task.execute()
         if status == Task.ERROR:
             raise NotImplementedError()
-        self.phases.put(self.return_to_patient)
+        elif status == UserInputs.DELIVER_ITEMS:
+            self.phases.put(self.return_to_patient)
+        elif status == UserInputs.DISMISS:
+            # stocker dismissed for some reason
+            self.phases.put(self.go_idle)
 
     def return_to_patient(self):
         # Got items, go back to patient room

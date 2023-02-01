@@ -25,7 +25,7 @@ class UserInputs:
     NO_ROS_ACTION = 0
     STOCK_ITEMS = 1
     DELIVER_ITEMS = 2
-    RETURN_HOME = 3
+    DISMISS = 3
     START_EXTEND_ARM = 4
     ITEMS_TAKEN = 5
     START_RETRACT_ARM = 6

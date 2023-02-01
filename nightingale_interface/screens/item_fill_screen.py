@@ -23,7 +23,7 @@ class ItemFillScreen:
         # cancel and publish topic to go to home
         button_data.parent.manager.transition = NoTransition()
         self.screen_stack.append(button_data.parent.manager.current)
-        self.pending_action = UserInputs.RETURN_HOME
+        self.pending_action = UserInputs.DISMISS
         button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
 
     def item_fill_build(self):
