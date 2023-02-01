@@ -253,8 +253,3 @@ if __name__ == "__main__":
     rospy.init_node("manipulation_control")
     manipulation = ManipulationControl()
     manipulation.jnt_ctrl.home()
-
-# notes for ben, TODO: remove
-# export ROS_MASTER_URI=http://10.66.171.2:11311
-# export ROS_IP=10.66.171.250
-# export ROS_HOSTNAME=localhost
