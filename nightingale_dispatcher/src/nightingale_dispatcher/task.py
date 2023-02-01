@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import rospy
 
+
 class Task:
     ERROR = -1
     SUCCESS = 0
