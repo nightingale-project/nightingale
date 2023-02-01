@@ -15,8 +15,8 @@ class PayloadEstimator:
     def __init__(self):
         rospy.init_node("payload_estimator_node")
 
-        self.forces = np.zeros((6, 1))
-        self.last_forces = np.zeros((6, 1))
+        self.forces = np.zeros(6)
+        self.last_forces = np.zeros(6)
         self.filter_coeff = 0.5
 
         self.tf_buffer = tf2_ros.Buffer()
@@ -27,11 +27,11 @@ class PayloadEstimator:
         self.ARM_MASS = 2.5  # [kg]
         self.PAYLOAD_DETECTED_THRESHOLD = 0.1  # [kg]
 
-        self.joint_state_sub = self.Subscriber(
-            f"/movo/{self.ARM_SIDE}_arm/joint_states", JointState, self.joint_state_cb
+        self.joint_state_sub = rospy.Subscriber(
+            f"/joint_states", JointState, self.joint_state_cb
         )
 
-        self.payload_pub = self.Publisher(
+        self.payload_pub = rospy.Publisher(
             f"/nightingale/payload", Payload, queue_size=10
         )
         self.mass_num = 100
@@ -63,15 +63,25 @@ class PayloadEstimator:
 
     def joint_state_cb(self, msg):
         jacobian = self.try_get_jacobian()
-        if jacobian is None:
+        if jacobian is None or len(msg.effort) < 11:
             return
 
-        forces = jacobian.T @ msg.effort
+        # 4: right_shoulder_pan_joint
+        # 5: right_shoulder_lift_joint
+        # 6: right_arm_half_joint
+        # 7: right_elbow_joint
+        # 8: right_wrist_spherical_1_joint
+        # 9: right_wrist_spherical_2_joint
+        # 10: right_wrist_3_joint
+
+        forces = np.linalg.pinv(jacobian.T) @ msg.effort[4:11]
 
         self.forces = self.last_forces + self.filter_coeff * (forces - self.last_forces)
         self.last_forces = forces
 
-        payload_mass = self.forces[2, 0] / self.GRAVITY - self.ARM_MASS
+        rospy.loginfo(f"{forces}")
+
+        payload_mass = self.forces[2] / self.GRAVITY - self.ARM_MASS
 
         payload = Payload()
         payload.mass = payload_mass
@@ -83,10 +93,10 @@ class PayloadEstimator:
         self.avg_mass = np.mean(self.masses)
         self.var_mass = np.var(self.masses)
 
-        self.payload_pub.pub(payload)
+        self.payload_pub.publish(payload)
 
     def try_get_jacobian(self):
-        jacobian = np.empty((6, self.dof))
+        jacobian = np.zeros((6, self.dof))
 
         for idx in range(self.dof):
             from_link = self.joint_link_suffixes[0]
@@ -95,9 +105,24 @@ class PayloadEstimator:
                 link_transform = self.tf_buffer.lookup_transform(
                     from_link, to_link, rospy.Time()
                 )
-                rot_axis = tf_conversions.transformations.quaternion_matrix(
-                    link_transform.transform.rotation
-                )[:, 2]
+
+                orientation_quaternion = np.array([
+                    link_transform.transform.rotation.x,
+                    link_transform.transform.rotation.y,
+                    link_transform.transform.rotation.z,
+                    link_transform.transform.rotation.w
+                ])
+                rot_mat = tf_conversions.transformations.quaternion_matrix(
+                    orientation_quaternion
+                )
+
+                rot_axis = rot_mat[:3, 2]
+
+                transl = np.array([
+                    link_transform.transform.translation.x,
+                    link_transform.transform.translation.y,
+                    link_transform.transform.translation.z
+                ])
             except (
                 tf2_ros.LookupException,
                 tf2_ros.ConnectivityException,
@@ -106,9 +131,7 @@ class PayloadEstimator:
                 rospy.logerr(f"Arm transform lookup failed")
                 return None
 
-            jacobian[0:3, idx] = np.cross(
-                rot_axis, link_transform.transform.translation
-            )
+            jacobian[:3, idx] = np.cross(rot_axis, transl)
             jacobian[3:6, idx] = rot_axis
         return jacobian
 
