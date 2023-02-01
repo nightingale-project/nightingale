@@ -6,7 +6,7 @@ import tf_conversions
 import numpy as np
 
 from sensor_msgs.msg import JointState
-from std_msgs.msg import Bool, Float32
+from nightingale_msgs.msg import Payload
 
 
 class PayloadEstimator:
@@ -31,12 +31,12 @@ class PayloadEstimator:
             f"/movo/{self.ARM_SIDE}_arm/joint_states", JointState, self.joint_state_cb
         )
 
-        self.payload_detected_pub = self.Publisher(
-            f"/nightingale/payload_detected", Bool, queue_size=10
+        self.payload_pub = self.Publisher(
+            f"/nightingale/payload", Payload, queue_size=10
         )
-        self.payload_mass_pub = self.Publisher(
-            f"/nightingale/payload_mass", Float32, queue_size=10
-        )
+        self.mass_num = 100
+        self.mass_idx = 0
+        self.masses = np.zeros(self.mass_num)
 
         self.dof = 7
         self.joint_link_suffixes = [
@@ -72,10 +72,18 @@ class PayloadEstimator:
         self.last_forces = forces
 
         payload_mass = self.forces[2, 0] / self.GRAVITY - self.ARM_MASS
-        payload_detected = payload_mass > self.PAYLOAD_DETECTED_THRESHOLD
 
-        self.payload_mass_pub.pub(Float32(payload_mass))
-        self.payload_detected = self.payload_detected_pub.pub(Bool(payload_detected))
+        payload = Payload()
+        payload.mass = payload_mass
+        payload.detected = payload_mass > self.PAYLOAD_DETECTED_THRESHOLD
+
+        self.masses[self.mass_idx] = payload_mass
+        self.mass_idx = (self.mass_idx + 1) % self.mass_num
+
+        self.avg_mass = np.mean(self.masses)
+        self.var_mass = np.var(self.masses)
+
+        self.payload_pub.pub(payload)
 
     def try_get_jacobian(self):
         jacobian = np.empty((6, self.dof))
