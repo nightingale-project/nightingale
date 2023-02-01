@@ -1,4 +1,5 @@
 # body_part is one of {left_arm,right_arm,torso,head}
+string configuration
 int8 LEFT_ARM=0
 int8 RIGHT_ARM=1
 int8 TORSO=2
