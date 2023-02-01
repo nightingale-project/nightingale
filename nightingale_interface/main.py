@@ -77,7 +77,6 @@ class MainApp(MDApp, ScreenWrapper):
 
         try:
             while True:
-
                 # execute a queued task
                 if len(self.task_queue) > 0:
                     current = self.task_queue.pop()
