@@ -16,7 +16,7 @@ from nightingale_dispatcher.triage_task import TriageTask
 from nightingale_ros_bridge.bridge_interface_config import (
     BridgeConfig,
     RobotStatus,
-    UserInputs1,
+    UserInputs,
 )
 
 

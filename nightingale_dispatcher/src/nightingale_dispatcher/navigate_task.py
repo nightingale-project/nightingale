@@ -29,7 +29,7 @@ class NavigateTask(TaskWithInterfaceComms):
         self.action_client.send_goal(goal)
         self.action_client.wait_for_result()
         return (
-            TaskWithInterfaceComms.SUCCESS
+            Task.SUCCESS
             if self.action_client.get_state() == GoalStatus.SUCCEEDED
-            else TaskWithInterfaceComms.ERROR
+            else Task.ERROR
         )

@@ -7,7 +7,7 @@ from nightingale_dispatcher.task import Task
 
 class TaskWithInterfaceComms(Task):
     def __init__(self):
-        self.interface_comms_service_name = BridgeConfig.UPDATE_UI_SERVICE
+        super().__init__()
 
     def update_interface_state(self, robot_state):
         rospy.wait_for_service(self.interface_comms_service_name, InterfaceCall)
