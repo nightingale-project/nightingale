@@ -1,25 +1,27 @@
 #!/usr/bin/env python
-
 import rospy
 
 from geometry_msgs.msg import Pose
-from nightingale_msgs.srv import RoomPoseLookup, RoomPoseLookupResponse
+from nightingale_msgs.srv import (
+    RoomPoseLookup,
+    RoomPoseLookupResponse,
+    RobotConfigurationLookup,
+    RobotConfigurationLookupResponse,
+)
 
 
-class RoomPoseServiceNode:
+class RoomPoseService:
     def __init__(self):
-        rospy.init_node("room_pose_service_node")
-
         self.rooms = self.load_rooms()
 
         self.server = rospy.Service(
-            "room_pose_lookup", RoomPoseLookup, self.room_pose_lookup
+            "/nightingale/room_pose_lookup", RoomPoseLookup, self.room_pose_lookup
         )
 
     def load_rooms(self):
         rooms = {}
 
-        rooms_params = rospy.get_param("rooms")
+        rooms_params = rospy.get_param("/nightingale_utils/rooms")
 
         for room in rooms_params.keys():
             features = {}
@@ -56,8 +58,40 @@ class RoomPoseServiceNode:
         return res
 
 
+class RobotConfigurationService:
+    def __init__(self):
+        self.ss = rospy.Service(
+            "/nightingale/robot_configuration_lookup",
+            RobotConfigurationLookup,
+            self.robot_configuration_lookup,
+        )
+        self.configurations = rospy.get_param(
+            "/nightingale_utils/home_joint_configurations"
+        )
+
+    def robot_configuration_lookup(self, req):
+        ret = RobotConfigurationLookupResponse()
+        ret.jnt_state.header.stamp = rospy.Time.now()
+        body_part_string = {
+            req.LEFT_ARM: "left_arm",
+            req.RIGHT_ARM: "right_arm",
+            req.TORSO: "torso",
+            req.HEAD: "head",
+        }[req.body_part]
+        if body_part_string not in self.configurations.keys():
+            # returning None is well defined for rospy services
+            return None
+        ret.jnt_state.name = self.configurations[body_part_string]["names"]
+        ret.jnt_state.position = self.configurations[body_part_string]["joints"]
+        ret.jnt_state.velocity = [0.0 for _ in range(len(ret.jnt_state.name))]
+        return ret
+
+
 def main():
-    node = RoomPoseServiceNode()
+    rospy.init_node("nightingale_utils_node")
+
+    rps = RoomPoseService()
+    rcs = RobotConfigurationService()
 
     rospy.spin()
 

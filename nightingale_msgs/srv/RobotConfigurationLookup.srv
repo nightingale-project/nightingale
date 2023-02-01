@@ -1,0 +1,8 @@
+# body_part is one of {left_arm,right_arm,torso,head}
+int8 LEFT_ARM=0
+int8 RIGHT_ARM=1
+int8 TORSO=2
+int8 HEAD=3
+int8 body_part
+---
+sensor_msgs/JointState jnt_state

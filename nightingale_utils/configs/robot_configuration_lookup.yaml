@@ -1,0 +1,18 @@
+home_joint_configurations: {
+    head: {
+        names: ["pan_joint", "tilt_joint"],
+        joints: [0.0,0.0],
+    },
+    torso: {
+        names: ["linear_joint"],
+        joints: [0.1],
+    },
+    left_arm: {
+        names: ["left_shoulder_pan_joint", "left_shoulder_lift_joint", "left_arm_half_joint", "left_elbow_joint", "left_wrist_spherical_1_joint", "left_wrist_spherical_2_joint", "left_wrist_3_joint"],
+        joints: [1.6285100157139785, 1.4853564921068, -0.4129526423290365, 2.680378098157231, 0.03587460652925101, -0.45225347904488444, 1.7006671448238166],
+    },
+    right_arm: {
+        names: ["right_shoulder_pan_joint", "right_shoulder_lift_joint", "right_arm_half_joint", "right_elbow_joint", "right_wrist_spherical_1_joint", "right_wrist_spherical_2_joint", "right_wrist_3_joint"],
+        joints: [-1.3619729954335744, -1.4932225928175198, 0.4410807851642762, -2.66686424986983, 0.03346679617681403, -2.051480810941249, -1.6562489931736222],
+    }
+}

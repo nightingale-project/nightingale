@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="nightingale_utils" type="utils.py" name="nightingale_utils" output="screen">
+        <rosparam command="load" file="$(find nightingale_utils)/configs/room_pose_lookup.yaml"/>
+        <rosparam command="load" file="$(find nightingale_utils)/configs/robot_configuration_lookup.yaml"/>
+    </node>
+</launch>
