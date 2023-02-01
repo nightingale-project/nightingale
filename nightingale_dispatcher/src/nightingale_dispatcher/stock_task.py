@@ -2,10 +2,10 @@
 
 import rospy
 
-from nightingale_dispatcher.task import Task
+from nightingale_dispatcher.task_with_interface_comms import TaskWithInterfaceComms
 
 
-class StockTask(Task):
+class StockTask(TaskWithInterfaceComms):
     # Once arrived at the stock area, collect items for patient
     # TODO define parameters
     def __init__(self, *args, **kwargs):

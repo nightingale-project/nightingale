@@ -2,10 +2,10 @@
 
 import rospy
 
-from nightingale_dispatcher.task import Task
+from nightingale_dispatcher.task_with_interface_comms import TaskWithInterfaceComms
 
 
-class NavigateTask(Task):
+class NavigateTask(TaskWithInterfaceComms):
     # Go to position with given context
     # TODO define parameters
     def __init__(self, *args, **kwargs):

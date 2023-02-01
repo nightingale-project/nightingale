@@ -2,10 +2,10 @@
 
 import rospy
 
-from nightingale_dispatcher.task import Task
+from nightingale_dispatcher.task_with_interface_comms import TaskWithInterfaceComms
 
 
-class TriageTask(Task):
+class TriageTask(TaskWithInterfaceComms):
     TIMEOUT = 1
     # Once at the patient bedside, wait for a user input on the tablet
     # TODO define parameters
