@@ -42,8 +42,6 @@ class MissionPlanner:
         # Assume door is open
         # TODO: first go to doorside then bedside when door opening added
         status = self.navigate_task.execute(self.room, "bedside")
-        if status == Task.ERROR:
-            raise NotImplementedError()
         self.phases.put(self.triage_patient)
 
     def go_home(self):
@@ -51,16 +49,11 @@ class MissionPlanner:
         # Assume door is open
         # TODO: first go to doorside then bedside when door opening added
         status = self.navigate_task.execute("home", "")
-        if status == Task.ERROR:
-            raise NotImplementedError()
         self.phases.put(self.go_idle)
 
     def triage_patient(self):
         # Arrived at patient's bedside
         status = self.triage_task.execute()
-        if status == Task.ERROR:
-            raise NotImplementedError()
-
         if status == TriageTask.TIMEOUT:
             # User didn't want anything
             self.phases.put(self.go_idle)
@@ -71,15 +64,11 @@ class MissionPlanner:
     def go_to_stock(self):
         rospy.loginfo("Nightingale Mission Planner going to stock")
         status = self.navigate_task.execute("stock", "")
-        if status == Task.ERROR:
-            raise NotImplementedError()
         self.phases.put(self.get_items)
 
     def get_items(self):
         # Arrived at stock area
         status = self.stock_task.execute()
-        if status == Task.ERROR:
-            raise NotImplementedError()
         self.phases.put(self.return_to_patient)
 
     def return_to_patient(self):
@@ -88,21 +77,15 @@ class MissionPlanner:
         # Assume door is open
         # TODO: first go to doorside then bedside when door opening added
         status = self.navigate_task.execute(self.room, "bedside")
-        if status == Task.ERROR:
-            raise NotImplementedError()
         self.phases.put(self.handoff_items)
 
     def handoff_items(self):
         # Arrived at patient's bedside
         status = self.handoff_task.execute()
-        if status == Task.ERROR:
-            raise NotImplementedError()
         self.phases.put(self.triage_patient)
 
     def go_idle(self):
         status = self.idle_task.execute()
-        if status == Task.ERROR:
-            raise NotImplementedError()
 
     def goal_cb(self, goal):
         # TODO execute subtasks in order and report status
@@ -114,9 +97,11 @@ class MissionPlanner:
 
         while not self.phases.empty():
             phase = self.phases.get()
-            status = phase()
-
-            if not status:
+            try:
+                status = phase()
+            except Exception as e:
+                rospy.logerr("Exception: " + str(e))
+                rospy.logerr("Aborting...")
                 self.server.set_aborted()
                 return
 
