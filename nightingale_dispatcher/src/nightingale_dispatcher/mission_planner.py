@@ -11,7 +11,7 @@ from nightingale_dispatcher.navigate_task import NavigateTask
 from nightingale_dispatcher.move_arm_task import MoveArmTask
 from nightingale_dispatcher.send_interface_request_task import SendInterfaceRequestTask
 from nightingale_dispatcher.task import Task
-from nightingale_ros_bridge.bridge_interface_config import BridgeConfig
+from nightingale_ros_bridge.bridge_interface_config import BridgeConfig, RobotStatus
 
 
 class MissionPlanner:
@@ -37,6 +37,10 @@ class MissionPlanner:
         rospy.loginfo("Nightingale Mission Planner going to patient")
         # Assume door is open
         # TODO: first go to doorside then bedside when door opening added
+
+        # update to driving screen
+        self.send_interface_request_task.execute(RobotStatus.DRIVING)
+
         status = self.navigate_task.execute(self.room, "bedside")
         if status == Task.ERROR:
             raise NotImplementedError()
@@ -46,6 +50,10 @@ class MissionPlanner:
         rospy.loginfo("Nightingale Mission Planner going home")
         # Assume door is open
         # TODO: first go to doorside then bedside when door opening added
+
+        # update to driving screen
+        self.send_interface_request_task.execute(RobotStatus.DRIVING)
+
         status = self.navigate_task.execute("home", "")
         if status == Task.ERROR:
             raise NotImplementedError()
@@ -53,17 +61,27 @@ class MissionPlanner:
 
     def triage_patient_phase(self):
         # Arrived at patient's bedside
+        # get patient input
+        status = self.send_interface_request_task.execute(RobotStatus.BEDSIDE_IDLE)
+
         if status == Task.ERROR:
             raise NotImplementedError()
-        if status == TriageTask.TIMEOUT:
-            # User didn't want anything
+        if status == Task.WD_TIMEOUT or Task.DISMISS:
+            # User didn't want anything or timedout
             self.phases.put(self.go_home_base_phase)
-        else:
+        elif status == Task.STOCK_ITEMS:
             # User wants some items
             self.phases.put(self.go_to_stock_phase)
+        else:
+            # should never reach here
+            raise NotImplementedError()
 
     def go_to_stock_phase(self):
         rospy.loginfo("Nightingale Mission Planner going to stock")
+
+        # update to driving screen
+        self.send_interface_request_task.execute(RobotStatus.DRIVING)
+
         status = self.navigate_task.execute("stock", "")
         if status == Task.ERROR:
             raise NotImplementedError()
@@ -71,15 +89,33 @@ class MissionPlanner:
 
     def get_items_phase(self):
         # Arrived at stock area
+
+        # arm extend stuff
+
+        # get nurse input
+        status = self.send_interface_request_task.execute(
+            RobotStatus.ITEM_STOCK_REACHED
+        )
+
+        # arm retract stuff
+
         if status == Task.ERROR:
             raise NotImplementedError()
-        self.phases.put(self.return_to_patient_phase)
+        elif status == Task.DELIVER_ITEMS:
+            self.phases.put(self.return_to_patient_phase)
+        elif status == Task.DISMISS:
+            # nurse cancelled
+            self.phases.put(self.go_home_base_phase)
 
     def return_to_patient_phase(self):
         rospy.loginfo("Nightingale Mission Planner returning to patient")
         # Got items, go back to patient room
         # Assume door is open
         # TODO: first go to doorside then bedside when door opening added
+
+        # update to driving screen
+        self.send_interface_request_task.execute(RobotStatus.DRIVING)
+
         status = self.navigate_task.execute(self.room, "bedside")
         if status == Task.ERROR:
             raise NotImplementedError()
@@ -87,12 +123,33 @@ class MissionPlanner:
 
     def handoff_items_phase(self):
         # Arrived at patient's bedside
+
+        # show arm movement and get input to start
+        status = self.send_interface_request_task.execute(RobotStatus.BEDSIDE_DELIVER)
+
+        # extend arm
+
+        # arm extended
+        status = self.send_interface_request_task.execute(RobotStatus.ARM_EXTENDED)
+
+        # show arm movement and get input to start
+        # status = self.send_interface_request_task.execute(RobotStatus.RETRACTING_ARM)
+
+        # retract arm
+
+        # send to screen arm retracted
+        status = self.send_interface_request_task.execute(RobotStatus.ARM_RETRACTED)
+
         if status == Task.ERROR:
             raise NotImplementedError()
+        # when done automatically goes back to triage patient
         self.phases.put(self.triage_patient_phase)
 
     def go_idle_phase(self):
         # cleanup and exit
+        # Update idle screen
+        self.send_interface_request_task.execute(RobotStatus.IDLE_HOME)
+
         if status == Task.ERROR:
             raise NotImplementedError()
 
