@@ -2,11 +2,9 @@
 
 import rospy
 from nightingale_dispatcher.task import Task
-import actionlib
-from actionlib_msgs.msg import GoalStatus
 
 
-class InterfaceCommsTask(Task):
+class SendInterfaceRequestTask(Task):
     def __init__(self):
         pass
 
