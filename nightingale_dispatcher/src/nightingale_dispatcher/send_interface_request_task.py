@@ -11,8 +11,12 @@ class SendInterfaceRequestTask(Task):
         pass
 
     def execute(self, robot_state):
-        rospy.wait_for_service(BridgeConfig.UPDATE_UI_SERVICE, InterfaceCall)
         try:
+            rospy.loginfo("Waiting for interface service")
+            # returns exception if failed
+            rospy.wait_for_service(BridgeConfig.UPDATE_UI_SERVICE, timeout=10)
+
+            rospy.loginfo("Got interface service")
             # spin up proxy when needed
             self.interface_comms_proxy = rospy.ServiceProxy(
                 BridgeConfig.UPDATE_UI_SERVICE, InterfaceCall
@@ -33,4 +37,4 @@ class SendInterfaceRequestTask(Task):
                 pass
             return status
         except rospy.ServiceException as e:
-            print("Service call failed: %s" % e)
+            rospy.logerr("Service call failed: %s", e)
