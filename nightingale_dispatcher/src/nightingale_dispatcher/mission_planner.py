@@ -33,6 +33,8 @@ class MissionPlanner:
 
         self.phases = queue.Queue()
 
+        self.PHASE_COMPLETE = 1
+
     def go_to_patient_phase(self):
         rospy.loginfo("Nightingale Mission Planner going to patient")
         # Assume door is open
@@ -41,6 +43,7 @@ class MissionPlanner:
         if status == Task.ERROR:
             raise NotImplementedError()
         self.phases.put(self.triage_patient_phase)
+        return self.PHASE_COMPLETE
 
     def go_home_base_phase(self):
         rospy.loginfo("Nightingale Mission Planner going home")
@@ -50,17 +53,20 @@ class MissionPlanner:
         if status == Task.ERROR:
             raise NotImplementedError()
         self.phases.put(self.go_idle_phase)
+        return self.PHASE_COMPLETE
 
     def triage_patient_phase(self):
         # Arrived at patient's bedside
+        status = Task.SUCCESS
         if status == Task.ERROR:
             raise NotImplementedError()
-        if status == TriageTask.TIMEOUT:
+        if status == TasK.SUCCESS:
             # User didn't want anything
             self.phases.put(self.go_home_base_phase)
         else:
             # User wants some items
             self.phases.put(self.go_to_stock_phase)
+        return self.PHASE_COMPLETE
 
     def go_to_stock_phase(self):
         rospy.loginfo("Nightingale Mission Planner going to stock")
@@ -68,12 +74,14 @@ class MissionPlanner:
         if status == Task.ERROR:
             raise NotImplementedError()
         self.phases.put(self.get_items_phase)
+        return self.PHASE_COMPLETE
 
     def get_items_phase(self):
         # Arrived at stock area
         if status == Task.ERROR:
             raise NotImplementedError()
         self.phases.put(self.return_to_patient_phase)
+        return self.PHASE_COMPLETE
 
     def return_to_patient_phase(self):
         rospy.loginfo("Nightingale Mission Planner returning to patient")
@@ -84,24 +92,27 @@ class MissionPlanner:
         if status == Task.ERROR:
             raise NotImplementedError()
         self.phases.put(self.handoff_items_phase)
+        return self.PHASE_COMPLETE
 
     def handoff_items_phase(self):
         # Arrived at patient's bedside
         if status == Task.ERROR:
             raise NotImplementedError()
         self.phases.put(self.triage_patient_phase)
+        return self.PHASE_COMPLETE
 
     def go_idle_phase(self):
         # cleanup and exit
         if status == Task.ERROR:
             raise NotImplementedError()
+        return self.PHASE_COMPLETE
 
     def goal_cb(self, goal):
         # TODO execute subtasks in order and report status
         # Nav -> Triage -> Nav -> Stock -> Nav ->
         #   Handoff -> Home -> Idle
 
-        self.room = goal.room
+        self.room = goal.name
         self.phases.put(self.go_to_patient_phase)
 
         while not self.phases.empty():

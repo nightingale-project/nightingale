@@ -9,5 +9,4 @@ class SendInterfaceRequestTask(Task):
         pass
 
     def execute(self, robot_state):
-        user_input = self.interface_comms_request()
-        return user_input
+        pass
