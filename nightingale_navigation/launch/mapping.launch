@@ -5,6 +5,6 @@
     <!--- Run gmapping -->
     <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
         <rosparam command="load" file="$(find nightingale_navigation)/configs/gmapping.yaml"/>
-        <remap from="scan" to="/movo/base_scan_filtered" />
+        <remap from="scan" to="/movo/scan_multi" />
     </node>
 </launch>

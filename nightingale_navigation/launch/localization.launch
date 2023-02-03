@@ -1,15 +1,16 @@
 <?xml version="1.0"?>
 <launch>
-    <!-- Location is one of {sim,robohub} (and more to come!) -->
-    <arg name="location" default="robohub" />
+    <!-- Location is one of {sim,robohub,lab} -->
+    <arg name="location" default="lab" />
     <!-- Make sure to update this path if new maps are generated -->
     <arg name = "path_to_map" value="$(find nightingale_navigation)/maps/robohub/nov7.22/map.yaml" if="$(eval location  == 'robohub')" />
     <arg name = "path_to_map" value="$(find nightingale_navigation)/maps/sim_hospital/dec.23.22/map.yaml" if="$(eval location  == 'sim')" />
+    <arg name = "path_to_map" value="$(find nightingale_navigation)/maps/lab/feb.1.23/map.yaml" if="$(eval location  == 'lab')" />
     <!-- Run the map server -->
     <node name="map_server" pkg="map_server" type="map_server" args="$(arg path_to_map)" />
     <!--- Run amcl -->
     <node pkg="amcl" type="amcl" name="amcl" output="screen" clear_params="true">
         <rosparam command="load" file="$(find nightingale_navigation)/configs/amcl.yaml"/>
-        <remap from="scan" to="/movo/base_scan_filtered" />                                          
+        <remap from="scan" to="/movo/scan_multi" />
     </node>
 </launch>
