@@ -45,6 +45,7 @@ class MissionPlanner:
         if status == Task.ERROR:
             raise NotImplementedError()
         self.phases.put(self.triage_patient_phase)
+        return 1
 
     def go_home_base_phase(self):
         rospy.loginfo("Nightingale Mission Planner going home")
@@ -58,15 +59,18 @@ class MissionPlanner:
         if status == Task.ERROR:
             raise NotImplementedError()
         self.phases.put(self.go_idle_phase)
+        return 1
 
     def triage_patient_phase(self):
         # Arrived at patient's bedside
         # get patient input
+        rospy.loginfo("Nightingale Mission Planner waiting on user input")
         status = self.send_interface_request_task.execute(RobotStatus.BEDSIDE_IDLE)
+        rospy.loginfo("Input %d", status)
 
         if status == Task.ERROR:
             raise NotImplementedError()
-        if status == Task.WD_TIMEOUT or Task.DISMISS:
+        if status == Task.WD_TIMEOUT or status == Task.DISMISS:
             # User didn't want anything or timedout
             self.phases.put(self.go_home_base_phase)
         elif status == Task.STOCK_ITEMS:
@@ -75,6 +79,7 @@ class MissionPlanner:
         else:
             # should never reach here
             raise NotImplementedError()
+        return 1
 
     def go_to_stock_phase(self):
         rospy.loginfo("Nightingale Mission Planner going to stock")
@@ -86,8 +91,10 @@ class MissionPlanner:
         if status == Task.ERROR:
             raise NotImplementedError()
         self.phases.put(self.get_items_phase)
+        return 1
 
     def get_items_phase(self):
+        rospy.loginfo("Nightingale Mission Planner getting items")
         # Arrived at stock area
 
         # arm extend stuff
@@ -106,6 +113,7 @@ class MissionPlanner:
         elif status == Task.DISMISS:
             # nurse cancelled
             self.phases.put(self.go_home_base_phase)
+        return 1
 
     def return_to_patient_phase(self):
         rospy.loginfo("Nightingale Mission Planner returning to patient")
@@ -120,8 +128,10 @@ class MissionPlanner:
         if status == Task.ERROR:
             raise NotImplementedError()
         self.phases.put(self.handoff_items_phase)
+        return 1
 
     def handoff_items_phase(self):
+        rospy.loginfo("Nightingale Mission Planner starting to hand items")
         # Arrived at patient's bedside
 
         # show arm movement and get input to start
@@ -144,6 +154,7 @@ class MissionPlanner:
             raise NotImplementedError()
         # when done automatically goes back to triage patient
         self.phases.put(self.triage_patient_phase)
+        return status
 
     def go_idle_phase(self):
         # cleanup and exit
@@ -152,19 +163,22 @@ class MissionPlanner:
 
         if status == Task.ERROR:
             raise NotImplementedError()
+        return 1
 
     def goal_cb(self, goal):
         # TODO execute subtasks in order and report status
         # Nav -> Triage -> Nav -> Stock -> Nav ->
         #   Handoff -> Home -> Idle
 
-        self.room = goal.room
+        self.room = goal.name
         self.phases.put(self.go_to_patient_phase)
+        #self.phases.put(self.triage_patient_phase)
 
         while not self.phases.empty():
             phase = self.phases.get()
             status = phase()
 
+            rospy.loginfo(status)
             if not status:
                 self.server.set_aborted()
                 return
