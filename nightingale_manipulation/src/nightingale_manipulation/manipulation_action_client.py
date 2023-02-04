@@ -4,32 +4,27 @@ import actionlib
 import rospy
 
 # joint
-from moveit_action_handlers.msg import PropertyValuePair
-from moveit_action_handlers.msg import MoveToJointsMoveItAction
-from moveit_action_handlers.msg import MoveToJointsMoveItGoal
-
+from moveit_action_handlers.msg import (
+    PropertyValuePair,
+    MoveToJointsMoveItAction,
+    MoveToJointsMoveItGoal,
+)
 from sensor_msgs.msg import JointState
 
 # cartesian
-from moveit_action_handlers.msg import MoveToPoseMoveItAction
-from moveit_action_handlers.msg import MoveToPoseMoveItGoal
-from moveit_action_handlers.msg import PoseStamped
+from moveit_action_handlers.msg import (
+    MoveToPoseMoveItAction,
+    MoveToPoseMoveItGoal,
+    PoseStamped,
+)
 from geometry_msgs.msg import Pose
 
 # forward kinematics
 # from urdf_parser_py.urdf import URDF
 # from pykdl_utils.kdl_kinematics import KDLKinematics
 
-right_gripper_joint_names = ["right_gripper_finger1_joint",
-                             "right_gripper_finger2_joint",
-                             "right_gripper_finger3_joint"]
 
-left_gripper_joint_names = ["left_gripper_finger1_joint",
-                            "left_gripper_finger2_joint",
-                            "left_gripper_finger3_joint"]
-
-
-def joint_goal(joint_values, joint_names, eev=0.5, eea=0.5, timeout=10):
+def make_joint_goal(joint_values, joint_names, eev=0.5, eea=0.5, timeout=10):
     goal = MoveToJointsMoveItGoal()
     goal.endEffectorVelocity = eev
     goal.endEffectorAcceleration = eea
@@ -42,7 +37,9 @@ def joint_goal(joint_values, joint_names, eev=0.5, eea=0.5, timeout=10):
     return goal
 
 
-def cartesian_goal(x, y, z, ref_link, roll=0, pitch=0, yaw=0, eev=0.5, eea=0.5, mode=0, timeout=20):
+def make_cartesian_goal(
+    x, y, z, ref_link, roll=0, pitch=0, yaw=0, eev=0.5, eea=0.5, mode=0, timeout=20
+):
     goal = MoveToPoseMoveItGoal()
     goal.constraint_mode = mode
     goal.endEffectorVelocity = eev
@@ -61,56 +58,87 @@ def cartesian_goal(x, y, z, ref_link, roll=0, pitch=0, yaw=0, eev=0.5, eea=0.5, 
 
 
 class ManipulationJointControl:
+    right_arm_joint_names = [
+        "right_shoulder_pan_joint",
+        "right_shoulder_lift_joint",
+        "right_arm_half_joint",
+        "right_elbow_joint",
+        "right_wrist_spherical_1_joint",
+        "right_wrist_spherical_2_joint",
+        "right_wrist_3_joint",
+    ]
+
+    left_arm_joint_names = [
+        "left_shoulder_pan_joint",
+        "left_shoulder_lift_joint",
+        "left_arm_half_joint",
+        "left_elbow_joint",
+        "left_wrist_spherical_1_joint",
+        "left_wrist_spherical_2_joint",
+        "left_wrist_3_joint",
+    ]
+
     def __init__(self):
+        self.left_moveit_ah_name = "/moveit_action_handlers/left_arm/joint_ctrl"
         self.left_arm = actionlib.simple_action_client.SimpleActionClient(
-            "/moveit_action_handlers/left_arm/joint_ctrl", MoveToJointsMoveItAction)
+            self.left_moveit_ah_name, MoveToJointsMoveItAction
+        )
+        rospy.loginfo(f"Waiting for {self.left_moveit_ah_name}")
         self.left_arm.wait_for_server()
 
+        self.right_moveit_ah_name = "/moveit_action_handlers/right_arm/joint_ctrl"
         self.right_arm = actionlib.simple_action_client.SimpleActionClient(
-            "/moveit_action_handlers/right_arm/joint_ctrl", MoveToJointsMoveItAction)
+            self.right_moveit_ah_name, MoveToJointsMoveItAction
+        )
+        rospy.loginfo(f"Waiting for {self.right_moveit_ah_name}")
         self.right_arm.wait_for_server()
 
-        self.right_arm_joint_names = ["right_shoulder_pan_joint",
-                                      "right_shoulder_lift_joint",
-                                      "right_arm_half_joint",
-                                      "right_elbow_joint",
-                                      "right_wrist_spherical_1_joint",
-                                      "right_wrist_spherical_2_joint",
-                                      "right_wrist_3_joint"]
+        try:
+            self.joint_configuration_service = rospy.ServiceProxy(
+                "/nightingale/robot_configuration_lookup", RobotConfigurationLookup
+            )
+            self.left_arm_home_joints = self.joint_configuration_service(
+                "home", "left_arm"
+            ).joints
+            self.right_arm_home_joints = self.joint_configuration_service(
+                "home", "right_arm"
+            ).joints
 
-        self.left_arm_joint_names = ["left_shoulder_pan_joint",
-                                     "left_shoulder_lift_joint",
-                                     "left_arm_half_joint",
-                                     "left_elbow_joint",
-                                     "left_wrist_spherical_1_joint",
-                                     "left_wrist_spherical_2_joint",
-                                     "left_wrist_3_joint"]
+            self.right_arm_handoff_joints = self.joint_configuration_service(
+                "handoff", "right_arm"
+            ).joints
+        except rospy.ServiceException as e:
+            rospy.logerr(f"Service call failed: {e}")
 
-        self.left_arm_home_joint_values = [1.5331797090297457,
-                                           1.605558035871483,
-                                           0.722653222587827,
-                                           2.606298339748302,
-                                           -2.3331829141612968,
-                                           1.825435539687259,
-                                           -2.9605818553548513]
+            self.left_arm_home_joint_values = [
+                1.5331797090297457,
+                1.605558035871483,
+                0.722653222587827,
+                2.606298339748302,
+                -2.3331829141612968,
+                1.825435539687259,
+                -2.9605818553548513,
+            ]
 
-        self.right_arm_home_joint_values = [-1.189840720238987,
-                                            -1.8304754388921793,
-                                            -0.31277335632770153,
-                                            -2.367960136151233,
-                                            0.9231204765356429,
-                                            1.534414350511106,
-                                            2.8363235525817165]
+            self.right_arm_home_joint_values = [
+                -1.189840720238987,
+                -1.8304754388921793,
+                -0.31277335632770153,
+                -2.367960136151233,
+                0.9231204765356429,
+                1.534414350511106,
+                2.8363235525817165,
+            ]
 
     def cmd_right_arm(self, joint_values, blocking=True):
-        goal = joint_goal(joint_values, self.right_arm_joint_names)
+        goal = make_joint_goal(joint_values, self.right_arm_joint_names)
         self.right_arm.send_goal(goal)
         if blocking:
             return self.right_arm.wait_for_result()
         return True
 
     def cmd_left_arm(self, joint_values, blocking=True):
-        goal = joint_goal(joint_values, self.left_arm_joint_names)
+        goal = make_joint_goal(joint_values, self.left_arm_joint_names)
         self.left_arm.send_goal(goal)
         if blocking:
             return self.left_arm.wait_for_result()
@@ -125,27 +153,53 @@ class ManipulationJointControl:
 
 
 class ManipulationGripperControl:
+    right_gripper_joint_names = [
+        "right_gripper_finger1_joint",
+        "right_gripper_finger2_joint",
+        "right_gripper_finger3_joint",
+    ]
+
+    left_gripper_joint_names = [
+        "left_gripper_finger1_joint",
+        "left_gripper_finger2_joint",
+        "left_gripper_finger3_joint",
+    ]
+
     def __init__(self):
+        self.left_gripper_moveit_ah_name = (
+            "/moveit_action_handlers/left_arm/gripper_ctrl"
+        )
         self.left_gripper = actionlib.simple_action_client.SimpleActionClient(
-            "/moveit_action_handlers/left_arm/gripper_ctrl", MoveToJointsMoveItAction)
+            self.left_gripper_moveit_ah_name, MoveToJointsMoveItAction
+        )
+        rospy.loginfo(f"Waiting for service {self.left_gripper_moveit_ah_name}")
         self.left_gripper.wait_for_server()
 
+        self.right_gripper_moveit_ah_name = (
+            "/moveit_action_handlers/right_arm/gripper_ctrl"
+        )
         self.right_gripper = actionlib.simple_action_client.SimpleActionClient(
-            "/moveit_action_handlers/right_arm/gripper_ctrl", MoveToJointsMoveItAction)
+            self.right_gripper_moveit_ah_name, MoveToJointsMoveItAction
+        )
+        rospy.loginfo(f"Waiting for service {self.right_gripper_moveit_ah_name}")
         self.right_gripper.wait_for_server()
 
-        self.right_open_goal = joint_goal([0.23, 0.23, 0.23], right_gripper_joint_names)
-        self.right_closed_goal = joint_goal([0, 0, 0], right_gripper_joint_names)
+        self.right_open_goal = make_joint_goal(
+            [0.23, 0.23, 0.23], right_gripper_joint_names
+        )
+        self.right_closed_goal = make_joint_goal([0, 0, 0], right_gripper_joint_names)
 
-        self.left_open_goal = joint_goal([0.23, 0.23, 0.23], left_gripper_joint_names)
-        self.left_closed_goal = joint_goal([0, 0, 0], left_gripper_joint_names)
+        self.left_open_goal = make_joint_goal(
+            [0.23, 0.23, 0.23], left_gripper_joint_names
+        )
+        self.left_closed_goal = make_joint_goal([0, 0, 0], left_gripper_joint_names)
 
-        self.gripper_lock = [0, 0]
+        self.gripper_lock = {"left": True, "right": True}
         self.unlock_left_gripper()
         self.unlock_right_gripper()
 
     def cmd_right_gripper(self, goal, blocking=True):
-        if self.gripper_lock[0]:
+        if self.gripper_lock["right"]:
             self.right_gripper.send_goal(goal)
             if blocking:
                 return self.right_gripper.wait_for_result()
@@ -153,7 +207,7 @@ class ManipulationGripperControl:
         return False
 
     def cmd_left_gripper(self, goal, blocking=True):
-        if self.gripper_lock[1]:
+        if self.gripper_lock["left"]:
             self.left_gripper.send_goal(goal)
             if blocking:
                 return self.left_gripper.wait_for_result()
@@ -161,27 +215,36 @@ class ManipulationGripperControl:
         return False
 
     def lock_right_gripper(self):
-        self.gripper_lock[0] = 0
+        self.gripper_lock["right"] = True
 
     def unlock_right_gripper(self):
-        self.gripper_lock[0] = 1
+        self.gripper_lock["right"] = False
 
     def lock_left_gripper(self):
-        self.gripper_lock[1] = 0
+        self.gripper_lock["left"] = True
 
     def unlock_left_gripper(self):
-        self.gripper_lock[1] = 1
+        self.gripper_lock["left"] = False
 
 
 class ManipulationCartesianControl:
     def __init__(self):
+        self.left_arm_moveit_ah_name = "/moveit_action_handlers/left_arm/cartesian_ctrl"
+        self.left_arm = actionlib.simple_action_client.SimpleActionClient(
+            self.left_arm_moveit_ah_name, MoveToPoseMoveItAction
+        )
+        rospy.loginfo(f"Waiting for {self.left_arm_moveit_ah_name}")
+        self.left_arm.wait_for_server()
+
+        self.right_arm_moveit_ah_name = (
+            "/moveit_action_handlers/right_arm/cartesian_ctrl"
+        )
         self.right_arm = actionlib.simple_action_client.SimpleActionClient(
-            "/moveit_action_handlers/right_arm/cartesian_ctrl", MoveToPoseMoveItAction)
+            self.right_arm_moveit_ah_name, MoveToPoseMoveItAction
+        )
+        rospy.loginfo(f"Waiting for {self.right_arm_moveit_ah_name}")
         self.right_arm.wait_for_server()
 
-        self.left_arm = actionlib.simple_action_client.SimpleActionClient(
-            "/moveit_action_handlers/left_arm/cartesian_ctrl", MoveToPoseMoveItAction)
-        self.left_arm.wait_for_server()
         self.ee_ctrl_mode = 0
 
     def cmd_right_arm(self, pose: Pose, blocking=True):
@@ -239,13 +302,17 @@ class ManipulationControl:
 
     def extend_handoff(self):
         # extend right arm in cartesian space
-        self.jnt_ctrl.cmd_right_arm([-1.497173771091874,
-                                     -0.05384432355144005,
-                                     -0.0472769683033043,
-                                     -1.4575817535881566,
-                                     3.1601009435928535,
-                                     1.2459021253979168,
-                                     1.515535734175753])
+        self.jnt_ctrl.cmd_right_arm(
+            [
+                -1.497173771091874,
+                -0.05384432355144005,
+                -0.0472769683033043,
+                -1.4575817535881566,
+                3.1601009435928535,
+                1.2459021253979168,
+                1.515535734175753,
+            ]
+        )
 
 
 # test code
