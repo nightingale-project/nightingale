@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- This launch file is intended as a system level launch file -->
+    <!-- This file launches all launch files performing core nightingale functions -->
+    <include file="$(find nightingale_utils)/launch/utils.launch"/>
+    <include file="$(find nightingale_perception)/launch/pt_cloud_process.launch"/>
+    <include file="$(find nightingale_navigation)/launch/navigation.launch"/>
+    <include file="$(find nightingale_ros_bridge)/launch/interface.launch"/>
+    <include file="$(find nightingale_dispatcher)/launch/dispatcher.launch"/>
+</launch>

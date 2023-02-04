@@ -22,14 +22,14 @@ class MissionPlanner:
             BridgeConfig.USER_INPUT_TOPIC, String, self.estop_cb
         )
 
+        self.navigate_task = NavigateTask()
+        self.move_arm_task = MoveArmTask()
+        self.send_interface_request_task = SendInterfaceRequestTask()
+
         self.server = actionlib.SimpleActionServer(
             "mission_planner", MissionPlanAction, self.goal_cb, False
         )
         self.server.start()
-
-        self.navigate_task = NavigateTask()
-        self.move_arm_task = MoveArmTask()
-        self.send_interface_request_task = SendInterfaceRequestTask()
 
         self.phases = queue.Queue()
 
@@ -55,7 +55,7 @@ class MissionPlanner:
         # update to driving screen
         self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
-        status = self.navigate_task.execute("home", "")
+        status = self.navigate_task.execute("home", "default")
         if status == Task.ERROR:
             raise NotImplementedError()
         self.phases.put(self.go_idle_phase)
@@ -87,7 +87,7 @@ class MissionPlanner:
         # update to driving screen
         self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
-        status = self.navigate_task.execute("stock", "")
+        status = self.navigate_task.execute("stock", "default")
         if status == Task.ERROR:
             raise NotImplementedError()
         self.phases.put(self.get_items_phase)

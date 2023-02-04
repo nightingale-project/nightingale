@@ -6,7 +6,7 @@ import actionlib
 import queue
 from actionlib.simple_action_client import SimpleGoalState
 from nightingale_msgs.msg import MissionPlanAction, MissionPlanGoal
-from nightingale_msgs.srv import AddMissionPlan
+from nightingale_msgs.srv import AddMissionPlan, AddMissionPlanResponse
 
 
 class DispatcherNode:
@@ -22,7 +22,7 @@ class DispatcherNode:
         self.missions = queue.Queue()
 
         self.add_mission_service = rospy.Service(
-            "add_mission", AddMissionPlan, self.handle_add_mission
+            "/nightingale/add_mission", AddMissionPlan, self.handle_add_mission
         )
 
     def handle_add_mission(self, req):
@@ -36,8 +36,9 @@ class DispatcherNode:
             self.mission_planner_client.send_goal(
                 self.missions.get(), self.handle_done_task
             )
-
-        return True
+        ret = AddMissionPlanResponse()
+        ret.status = True
+        return ret
 
     def handle_done_task(self, status, result):
         if not self.missions.empty():

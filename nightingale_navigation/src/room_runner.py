@@ -6,6 +6,7 @@ from nightingale_msgs.msg import (
     RoomRunnerResult,
     RoomRunnerFeedback,
 )
+from nightingale_msgs.srv import RoomPoseLookup
 from actionlib import SimpleActionServer, SimpleActionClient
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from geometry_msgs.msg import PoseStamped
@@ -96,6 +97,14 @@ class RoomRunnerNode(object):
             logger_name=self.logger_name,
         )
         goal_pose = self.lookup_pose(goal.room_number, goal.sublocation)
+        if goal_pose is None:
+            rospy.logerr(
+                "RoomRunner Failed. Could not find room lookup",
+                logger_name=self.logger_name,
+            )
+            self.server.set_aborted()
+            return
+
         msg, fb_cb, a_cb = self.generate_goal_info(goal_pose)
 
         self.client.send_goal(msg, feedback_cb=fb_cb, active_cb=a_cb)
@@ -114,7 +123,8 @@ class RoomRunnerNode(object):
             )
         else:
             rospy.logerr(
-                "RoomRunner Failed. See return code", logger_name=self.logger_name
+                f"RoomRunner Failed. State is {self.client.get_state()}",
+                logger_name=self.logger_name,
             )
             # the action call succeeded but the actual action performance failed
             # this is why we call set_succeeded
@@ -167,21 +177,36 @@ class RoomRunnerNode(object):
             rate.sleep()
         pub.publish(msg)
 
-    def lookup_pose(self, name, subloc):
-        # TODO Service Call, currently, just always returns the same pose
+    def lookup_pose(self, room, subloc):
         ret = PoseStamped()
         ret.header.stamp = rospy.Time.now()
         ret.header.frame_id = "map"
-        ret.pose.position.x = 4.80
-        ret.pose.position.z = 0.0
-        if subloc == "doorside":
-            ret.pose.position.y = 12.24
-        else:
-            ret.pose.position.y = -3.34
-        ret.pose.orientation.x = 0.0
-        ret.pose.orientation.y = 0.0
-        ret.pose.orientation.z = 0.0
-        ret.pose.orientation.w = 1.0
+        rospy.loginfo(
+            "Nightingale Room Runner waiting for room pose lookup service server",
+            logger_name=self.logger_name,
+        )
+        room_pose_service = "/nightingale/room_pose_lookup"
+        rospy.wait_for_service(room_pose_service)
+        lookup_client = rospy.ServiceProxy(room_pose_service, RoomPoseLookup)
+        rospy.loginfo(
+            "Nightingale Room Runner found room pose lookup service server",
+            logger_name=self.logger_name,
+        )
+        try:
+            response = lookup_client(room, subloc)
+        except rospy.ServiceException as exc:
+            rospy.logerr(
+                "Nightingale Room Runner failed to make lookup service request",
+                logger_name=self.logger_name,
+            )
+            return None
+        if response.status != response.SUCCESS:
+            rospy.logerr(
+                f"Nightingale Room Runner failed to lookup pose for {room}:{subloc}. Got status {response.status}",
+                logger_name=self.logger_name,
+            )
+            return None
+        ret.pose = response.pose
         return ret
 
     def read_pose(self):
