@@ -6,6 +6,7 @@ import actionlib
 from actionlib_msgs.msg import GoalStatus
 from nightingale_manipulation.manipulation_action_client import ManipulationControl
 
+
 class MoveArmTask(Task):
     def __init__(self):
         self.manipulation = ManipulationControl()
