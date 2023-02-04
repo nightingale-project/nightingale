@@ -21,7 +21,7 @@ class MissionPlanner:
         self.estop_sub = rospy.Subscriber(
             BridgeConfig.USER_INPUT_TOPIC, String, self.estop_cb
         )
-
+        self.cfg = rospy.get_param("/nightingale_utils/joint_configurations")
         self.navigate_task = NavigateTask()
         self.move_arm_task = MoveArmTask()
         self.send_interface_request_task = SendInterfaceRequestTask()
@@ -100,13 +100,16 @@ class MissionPlanner:
         # Arrived at stock area
 
         # arm extend stuff
-
+        joint_values = self.cfg["right_arm_extended_handoff"]["joints"]
+        status = self.move_arm_task.execute(joint_values)
         # get nurse input
         status = self.send_interface_request_task.execute(
             RobotStatus.ITEM_STOCK_REACHED
         )
 
         # arm retract stuff
+        joint_values = self.cfg["right_arm_home"]["joints"]
+        status = self.move_arm_task.execute(joint_values)
 
         if status == Task.ERROR:
             raise NotImplementedError()
@@ -140,6 +143,8 @@ class MissionPlanner:
         status = self.send_interface_request_task.execute(RobotStatus.BEDSIDE_DELIVER)
 
         # extend arm
+        joint_values = self.cfg["right_arm_extended_handoff"]["joints"]
+        status = self.move_arm_task.execute(joint_values)
 
         # arm extended
         status = self.send_interface_request_task.execute(RobotStatus.ARM_EXTENDED)
@@ -148,6 +153,8 @@ class MissionPlanner:
         # status = self.send_interface_request_task.execute(RobotStatus.RETRACTING_ARM)
 
         # retract arm
+        joint_values = self.cfg["right_arm_home"]["joints"]
+        status = self.move_arm_task.execute(joint_values)
 
         # send to screen arm retracted
         status = self.send_interface_request_task.execute(RobotStatus.ARM_RETRACTED)
