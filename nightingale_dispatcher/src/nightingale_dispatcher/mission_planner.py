@@ -172,7 +172,7 @@ class MissionPlanner:
 
         self.room = goal.name
         self.phases.put(self.go_to_patient_phase)
-        #self.phases.put(self.triage_patient_phase)
+        # self.phases.put(self.triage_patient_phase)
 
         while not self.phases.empty():
             phase = self.phases.get()
