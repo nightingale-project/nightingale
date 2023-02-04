@@ -79,56 +79,19 @@ class ManipulationJointControl:
     ]
 
     def __init__(self):
-        self.left_moveit_ah_name = "/moveit_action_handlers/left_arm/joint_ctrl"
+        self.left_arm_moveit_ah_name = "/moveit_action_handlers/left_arm/joint_ctrl"
         self.left_arm = actionlib.simple_action_client.SimpleActionClient(
-            self.left_moveit_ah_name, MoveToJointsMoveItAction
+            self.left_arm_moveit_ah_name, MoveToJointsMoveItAction
         )
-        rospy.loginfo(f"Waiting for {self.left_moveit_ah_name}")
+        rospy.loginfo(f"Waiting for {self.left_arm_moveit_ah_name}")
         self.left_arm.wait_for_server()
 
-        self.right_moveit_ah_name = "/moveit_action_handlers/right_arm/joint_ctrl"
+        self.right_arm_moveit_ah_name = "/moveit_action_handlers/right_arm/joint_ctrl"
         self.right_arm = actionlib.simple_action_client.SimpleActionClient(
-            self.right_moveit_ah_name, MoveToJointsMoveItAction
+            self.right_arm_moveit_ah_name, MoveToJointsMoveItAction
         )
-        rospy.loginfo(f"Waiting for {self.right_moveit_ah_name}")
+        rospy.loginfo(f"Waiting for {self.right_arm_moveit_ah_name}")
         self.right_arm.wait_for_server()
-
-        try:
-            self.joint_configuration_service = rospy.ServiceProxy(
-                "/nightingale/robot_configuration_lookup", RobotConfigurationLookup
-            )
-            self.left_arm_home_joints = self.joint_configuration_service(
-                "home", "left_arm"
-            ).joints
-            self.right_arm_home_joints = self.joint_configuration_service(
-                "home", "right_arm"
-            ).joints
-
-            self.right_arm_handoff_joints = self.joint_configuration_service(
-                "handoff", "right_arm"
-            ).joints
-        except rospy.ServiceException as e:
-            rospy.logerr(f"Service call failed: {e}")
-
-            self.left_arm_home_joint_values = [
-                1.5331797090297457,
-                1.605558035871483,
-                0.722653222587827,
-                2.606298339748302,
-                -2.3331829141612968,
-                1.825435539687259,
-                -2.9605818553548513,
-            ]
-
-            self.right_arm_home_joint_values = [
-                -1.189840720238987,
-                -1.8304754388921793,
-                -0.31277335632770153,
-                -2.367960136151233,
-                0.9231204765356429,
-                1.534414350511106,
-                2.8363235525817165,
-            ]
 
     def cmd_right_arm(self, joint_values, blocking=True):
         goal = make_joint_goal(joint_values, self.right_arm_joint_names)
@@ -144,12 +107,35 @@ class ManipulationJointControl:
             return self.left_arm.wait_for_result()
         return True
 
-    def home(self):
-        self.cmd_left_arm(self.left_arm_home_joint_values, blocking=False)
-        self.left_arm.wait_for_result()
-        self.cmd_right_arm(self.right_arm_home_joint_values, blocking=False)
-        self.right_arm.wait_for_result()
-        return True
+
+class ManipulationCartesianControl:
+    def __init__(self):
+        self.left_arm_moveit_ah_name = "/moveit_action_handlers/left_arm/cartesian_ctrl"
+        self.left_arm = actionlib.simple_action_client.SimpleActionClient(
+            self.left_arm_moveit_ah_name, MoveToPoseMoveItAction
+        )
+        rospy.loginfo(f"Waiting for {self.left_arm_moveit_ah_name}")
+        self.left_arm.wait_for_server()
+
+        self.right_arm_moveit_ah_name = (
+            "/moveit_action_handlers/right_arm/cartesian_ctrl"
+        )
+        self.right_arm = actionlib.simple_action_client.SimpleActionClient(
+            self.right_arm_moveit_ah_name, MoveToPoseMoveItAction
+        )
+        rospy.loginfo(f"Waiting for {self.right_arm_moveit_ah_name}")
+        self.right_arm.wait_for_server()
+
+        self.ee_ctrl_mode = 0
+
+    def cmd_right_arm(self, pose: Pose, blocking=True):
+        pass
+
+    def cmd_left_arm(self, pose: Pose, blocking=True):
+        pass
+
+    def set_ee_ctrl_mode(self, mode):
+        self.ee_ctrl_mode = mode
 
 
 class ManipulationGripperControl:
@@ -227,36 +213,6 @@ class ManipulationGripperControl:
         self.gripper_lock["left"] = False
 
 
-class ManipulationCartesianControl:
-    def __init__(self):
-        self.left_arm_moveit_ah_name = "/moveit_action_handlers/left_arm/cartesian_ctrl"
-        self.left_arm = actionlib.simple_action_client.SimpleActionClient(
-            self.left_arm_moveit_ah_name, MoveToPoseMoveItAction
-        )
-        rospy.loginfo(f"Waiting for {self.left_arm_moveit_ah_name}")
-        self.left_arm.wait_for_server()
-
-        self.right_arm_moveit_ah_name = (
-            "/moveit_action_handlers/right_arm/cartesian_ctrl"
-        )
-        self.right_arm = actionlib.simple_action_client.SimpleActionClient(
-            self.right_arm_moveit_ah_name, MoveToPoseMoveItAction
-        )
-        rospy.loginfo(f"Waiting for {self.right_arm_moveit_ah_name}")
-        self.right_arm.wait_for_server()
-
-        self.ee_ctrl_mode = 0
-
-    def cmd_right_arm(self, pose: Pose, blocking=True):
-        pass
-
-    def cmd_left_arm(self, pose: Pose, blocking=True):
-        pass
-
-    def set_ee_ctrl_mode(self, mode):
-        self.ee_ctrl_mode = mode
-
-
 class ManipulationControl:
     def __init__(self):
         self.jnt_ctrl = ManipulationJointControl()
@@ -266,44 +222,44 @@ class ManipulationControl:
         self.crt_ctrl = ManipulationCartesianControl()
         rospy.loginfo("initialized cartesian ctrl")
 
-        self.right_joint_states = [0, 0, 0, 0, 0, 0, 0]
-        self.left_joint_states = [0, 0, 0, 0, 0, 0, 0]
-        self.linear_joint_state = [0]
-        self.right_ee_pose = None
-        self.left_ee_pose = None
-        # self.update_joint_states()
-        rospy.loginfo("joint states received, initialization successful")
+        try:
+            self.joint_configuration_service = rospy.ServiceProxy(
+                "/nightingale/robot_configuration_lookup", RobotConfigurationLookup
+            )
+            self.left_arm_home_joint_values = self.joint_configuration_service(
+                "home", "left_arm"
+            ).joints
+            self.right_arm_home_joint_values = self.joint_configuration_service(
+                "home", "right_arm"
+            ).joints
 
-    def update_joint_states(self):
-        joint_states = rospy.client.wait_for_message("/joint_states", JointState)
-        p = joint_states.position
-        self.right_joint_states = [p[14], p[13], p[10], p[11], p[15], p[16], p[17]]
-        self.left_joint_states = [p[4], p[3], p[0], p[1], p[5], p[6], p[7]]
-        self.linear_joint_state = [p[8]]
+            self.right_arm_handoff_joint_values = self.joint_configuration_service(
+                "handoff", "right_arm"
+            ).joints
+        except rospy.ServiceException as e:
+            rospy.logerr(f"Service call failed: {e}")
 
-    def update_ee_pose(self):
-        """
-        robot_urdf = URDF.from_xml_string("urdf_str")
-        self.update_joint_states()
-        # base -> right ee
-        kdl_kin = KDLKinematics(robot_urdf, "base_link", "right_ee_link")
-        self.right_ee_pose = kdl_kin.forward(self.linear_joint_state + self.right_joint_states)
+            self.left_arm_home_joint_values = [
+                1.5331797090297457,
+                1.605558035871483,
+                0.722653222587827,
+                2.606298339748302,
+                -2.3331829141612968,
+                1.825435539687259,
+                -2.9605818553548513,
+            ]
 
-        # base -> left ee
-        kdl_kin = KDLKinematics(robot_urdf, "base_link", "left_ee_link")
-        self.left_ee_pose = kdl_kin.forward(self.linear_joint_state + self.left_joint_states)
-        """
-        raise NotImplementedError()
+            self.right_arm_home_joint_values = [
+                -1.189840720238987,
+                -1.8304754388921793,
+                -0.31277335632770153,
+                -2.367960136151233,
+                0.9231204765356429,
+                1.534414350511106,
+                2.8363235525817165,
+            ]
 
-    def home(self):
-        # home left arm in joint space and home right arm in cart or joint space
-        # use self.jnt_ctrl.home() for now
-        raise NotImplementedError()
-
-    def extend_handoff(self):
-        # extend right arm in cartesian space
-        self.jnt_ctrl.cmd_right_arm(
-            [
+            self.right_arm_handoff_joint_values = [
                 -1.497173771091874,
                 -0.05384432355144005,
                 -0.0472769683033043,
@@ -312,7 +268,19 @@ class ManipulationControl:
                 1.2459021253979168,
                 1.515535734175753,
             ]
+
+    def home(self):
+        left_status = self.jnt_ctrl.cmd_left_arm(
+            self.left_arm_home_joint_values, blocking=False
         )
+        right_status = self.jnt_ctrl.cmd_right_arm(
+            self.right_arm_home_joint_values, blocking=False
+        )
+
+        return left_status and right_status
+
+    def extend_handoff(self):
+        self.jnt_ctrl.cmd_right_arm(self.right_arm_handoff_joint_values)
 
 
 # test code
