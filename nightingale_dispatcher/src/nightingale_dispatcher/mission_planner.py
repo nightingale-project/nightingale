@@ -99,14 +99,14 @@ class MissionPlanner:
         rospy.loginfo("Nightingale Mission Planner getting items")
         # Arrived at stock area
 
-        # arm extend stuff
+        status = self.move_arm_task.execute("handoff")
 
         # get nurse input
         status = self.send_interface_request_task.execute(
             RobotStatus.ITEM_STOCK_REACHED
         )
 
-        # arm retract stuff
+        status = self.move_arm_task.execute("home")
 
         if status == Task.ERROR:
             raise NotImplementedError()

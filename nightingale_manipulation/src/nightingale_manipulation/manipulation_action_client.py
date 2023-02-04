@@ -279,7 +279,7 @@ class ManipulationControl:
 
         return left_status and right_status
 
-    def extend_handoff(self):
+    def handoff(self):
         self.jnt_ctrl.cmd_right_arm(self.right_arm_handoff_joint_values)
 
 
