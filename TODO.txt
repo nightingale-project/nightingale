@@ -1,0 +1,1 @@
+the stock task is wrong bc status gets overwritten and we use the 

@@ -29,7 +29,7 @@ class SendInterfaceRequestTask(Task):
             if input_code == UserInputs.STOCK_ITEMS:
                 status = Task.STOCK_ITEMS
             elif input_code == UserInputs.DELIVER_ITEMS:
-                status = Task.DELIVER
+                status = Task.DELIVER_ITEMS
             elif input_code == UserInputs.RETURN_HOME:
                 status = Task.DISMISS
             elif input_code == UserInputs.WD_TIMEOUT:
