@@ -30,40 +30,36 @@ class PayloadEstimator:
         self.masses = np.zeros(self.mass_num)
 
         self.dof = 7
-        self.joint_link_suffixes = [
-            f"{self.ARM_SIDE}_{link}"
-            for link in [
-                "base_link",
-                "shoulder_link",
-                "arm_half_1_link",
-                "arm_half_2_link",
-                "forearm_link",
-                "wrist_spherical_1_link",
-                "wrist_spherical_2_link",
-                "wrist_3_link",
-                "ee_link",
-                "gripper_base_link",
-                "gripper_finger1_knuckle_link",
-                "gripper_finger1_finger_tip_link",
-                "gripper_finger2_knuckle_link",
-                "gripper_finger2_finger_tip_link",
-                "gripper_finger3_knuckle_link",
-                "gripper_finger3_finger_tip_link",
-            ]
+        self.joint_link_names = [
+            "base_link",
+            "shoulder_link",
+            "arm_half_1_link",
+            "arm_half_2_link",
+            "forearm_link",
+            "wrist_spherical_1_link",
+            "wrist_spherical_2_link",
+            "wrist_3_link",
+            "ee_link",
+            "gripper_base_link",
+            "gripper_finger1_knuckle_link",
+            "gripper_finger1_finger_tip_link",
+            "gripper_finger2_knuckle_link",
+            "gripper_finger2_finger_tip_link",
+            "gripper_finger3_knuckle_link",
+            "gripper_finger3_finger_tip_link",
         ]
 
         # Replace with rosparam
-        self.ARM_SIDE = "right"
         self.ARM_MASS = 2.5  # [kg]
         self.PAYLOAD_DETECTED_THRESHOLD = 0.1  # [kg]
 
         self.joint_state_sub = self.Subscriber(
-            f"/movo/{self.ARM_SIDE}_arm/joint_states", JointState, self.joint_state_cb
+            "/joint_states", JointState, self.joint_state_cb
         )
 
     def joint_state_cb(self, msg):
-        jacobian = self.try_get_jacobian()
-        if jacobian is None or len(msg.effort) < 11:
+        jacobian = self.try_get_jacobian("right")
+        if jacobian is None:
             return
 
         # 4: right_shoulder_pan_joint
@@ -79,8 +75,6 @@ class PayloadEstimator:
         self.forces = self.last_forces + self.filter_coeff * (forces - self.last_forces)
         self.last_forces = forces
 
-        rospy.loginfo(f"{forces}")
-
         payload_mass = self.forces[2] / self.GRAVITY - self.ARM_MASS
 
         payload = Payload()
@@ -95,12 +89,12 @@ class PayloadEstimator:
 
         self.payload_pub.publish(payload)
 
-    def try_get_jacobian(self):
+    def try_get_jacobian(self, arm_side):
         jacobian = np.zeros((6, self.dof))
 
         for idx in range(self.dof):
-            from_link = self.joint_link_suffixes[0]
-            to_link = self.joint_link_suffixes[idx + 1]
+            from_link = self.joint_link_names[0]
+            to_link = f"{arm_side}_{self.joint_link_suffixes[idx + 1]}"
             try:
                 link_transform = self.tf_buffer.lookup_transform(
                     from_link, to_link, rospy.Time()
