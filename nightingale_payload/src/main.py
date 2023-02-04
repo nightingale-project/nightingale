@@ -22,16 +22,7 @@ class PayloadEstimator:
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
 
-        # Replace with rosparam
-        self.ARM_SIDE = "right"
-        self.ARM_MASS = 2.5  # [kg]
-        self.PAYLOAD_DETECTED_THRESHOLD = 0.1  # [kg]
-
-        self.joint_state_sub = rospy.Subscriber(
-            f"/joint_states", JointState, self.joint_state_cb
-        )
-
-        self.payload_pub = rospy.Publisher(
+        self.payload_pub = self.Publisher(
             f"/nightingale/payload", Payload, queue_size=10
         )
         self.mass_num = 100
@@ -60,6 +51,15 @@ class PayloadEstimator:
                 "gripper_finger3_finger_tip_link",
             ]
         ]
+
+        # Replace with rosparam
+        self.ARM_SIDE = "right"
+        self.ARM_MASS = 2.5  # [kg]
+        self.PAYLOAD_DETECTED_THRESHOLD = 0.1  # [kg]
+
+        self.joint_state_sub = self.Subscriber(
+            f"/movo/{self.ARM_SIDE}_arm/joint_states", JointState, self.joint_state_cb
+        )
 
     def joint_state_cb(self, msg):
         jacobian = self.try_get_jacobian()
@@ -106,23 +106,27 @@ class PayloadEstimator:
                     from_link, to_link, rospy.Time()
                 )
 
-                orientation_quaternion = np.array([
-                    link_transform.transform.rotation.x,
-                    link_transform.transform.rotation.y,
-                    link_transform.transform.rotation.z,
-                    link_transform.transform.rotation.w
-                ])
+                orientation_quaternion = np.array(
+                    [
+                        link_transform.transform.rotation.x,
+                        link_transform.transform.rotation.y,
+                        link_transform.transform.rotation.z,
+                        link_transform.transform.rotation.w,
+                    ]
+                )
                 rot_mat = tf_conversions.transformations.quaternion_matrix(
                     orientation_quaternion
                 )
 
                 rot_axis = rot_mat[:3, 2]
 
-                transl = np.array([
-                    link_transform.transform.translation.x,
-                    link_transform.transform.translation.y,
-                    link_transform.transform.translation.z
-                ])
+                transl = np.array(
+                    [
+                        link_transform.transform.translation.x,
+                        link_transform.transform.translation.y,
+                        link_transform.transform.translation.z,
+                    ]
+                )
             except (
                 tf2_ros.LookupException,
                 tf2_ros.ConnectivityException,
