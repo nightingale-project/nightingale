@@ -4,23 +4,13 @@ import rospy
 from nightingale_dispatcher.task import Task
 import actionlib
 from actionlib_msgs.msg import GoalStatus
-
+from nightingale_manipulation.manipulation_action_client import ManipulationControl
 
 class MoveArmTask(Task):
     def __init__(self):
-        # IMPLEMENT ARM STUFF
-        # rospy.loginfo(f"Waiting for {action_name} action server")
-        # # add arm action stuff
-        # if self.action_client.wait_for_server():
-        #     rospy.loginfo(
-        #         f"Found the {action_name} action server",
-        #     )
-        # else:
-        #     rospy.logfatal(
-        #         f"Failed to find the {action_name} action server",
-        #     )
-        pass
+        self.manipulation = ManipulationControl()
 
     def execute(self, end_pose):
-        # do arm stuff
-        return Task.Success
+        assert len(end_pose) is 7
+        self.manipulation.jnt_ctrl.cmd_right_arm(end_pose)
+        return Task.SUCCESS
