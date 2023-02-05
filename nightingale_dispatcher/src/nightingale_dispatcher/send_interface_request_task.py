@@ -23,7 +23,7 @@ class SendInterfaceRequestTask(Task):
             )
             interface_response = self.interface_comms_proxy(robot_state)
             input_code = interface_response.user_input
-            rospy.loginfo("USER INPUT %d", input_code)
+            rospy.loginfo(f"USER INPUT {input_code}")
             # convert input to return code
             status = Task.SUCCESS
             if input_code == UserInputs.STOCK_ITEMS:
@@ -39,4 +39,4 @@ class SendInterfaceRequestTask(Task):
                 pass
             return status
         except rospy.ServiceException as e:
-            rospy.logerr("Service call failed: %s", e)
+            rospy.logerr(f"Service call failed: {e}")

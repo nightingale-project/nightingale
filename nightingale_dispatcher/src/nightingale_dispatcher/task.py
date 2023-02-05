@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
+from enum import Enum
 
 
-class Task:
+class Task(Enum):
     ERROR = -1
     SUCCESS = 0
     STOCK_ITEMS = 1
