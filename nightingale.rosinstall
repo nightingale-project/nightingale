@@ -9,3 +9,23 @@ repositories:
     url: https://github.com/aws-robotics/aws-robomaker-hospital-world.git
     version: ros1
 
+  rosbridge-suite:
+    type: git
+    url: https://github.com/RobotWebTools/rosbridge_suite.git
+    version: ros1
+
+  robot-body-filter:
+    type: git
+    url: https://github.com/peci1/robot_body_filter.git
+    version: master
+
+  pointcloud-to-laserscan:
+    type: git
+    url: https://github.com/ros-perception/pointcloud_to_laserscan.git
+    version: lunar-devel
+
+  ira-laser-tools:
+    type: git
+    url: https://github.com/iralabdisco/ira_laser_tools.git
+    version: ros1-master
+
