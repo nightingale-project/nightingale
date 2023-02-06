@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-
-import rospy
-from nightingale_dispatcher.task import Task, TaskCodes
 import actionlib
 from actionlib_msgs.msg import GoalStatus
+import rospy
+from nightingale_dispatcher.task import Task, TaskCodes
 from nightingale_msgs.msg import RoomRunnerAction, RoomRunnerGoal
 
 

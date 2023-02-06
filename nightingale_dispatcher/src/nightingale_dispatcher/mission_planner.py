@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-
-import rospy
-import actionlib
 import queue
 from enum import Enum
 
+import rospy
+import actionlib
 from actionlib_msgs.msg import GoalStatus
 from std_msgs.msg import String
 from nightingale_msgs.msg import MissionPlanAction
@@ -46,7 +45,7 @@ class MissionPlanner(PhaseStatus):
         # TODO: first go to doorside then bedside when door opening added
 
         # update to driving screen
-        self.send_interface_request_task.execute(RobotStatus.DRIVING)
+        task_reponse = self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
         status = self.navigate_task.execute(self.room, "bedside")
         if status == TaskCodes.ERROR:
@@ -60,7 +59,7 @@ class MissionPlanner(PhaseStatus):
         # TODO: first go to doorside then bedside when door opening added
 
         # update to driving screen
-        self.send_interface_request_task.execute(RobotStatus.DRIVING)
+        task_reponse = self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
         status = self.navigate_task.execute("home", "default")
         if status == TaskCodes.ERROR:
@@ -94,7 +93,7 @@ class MissionPlanner(PhaseStatus):
         rospy.loginfo("Nightingale Mission Planner going to stock")
 
         # update to driving screen
-        self.send_interface_request_task.execute(RobotStatus.DRIVING)
+        task_reponse = self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
         status = self.navigate_task.execute("stock", "default")
         if status == TaskCodes.ERROR:
@@ -118,6 +117,8 @@ class MissionPlanner(PhaseStatus):
         joint_values = self.cfg["right_arm_home"]["joints"]
         status = self.move_arm_task.execute(joint_values)
 
+        # add a block to check arm status first before interpreting input
+
         if task_reponse == TaskCodes.ERROR:
             raise NotImplementedError()
         elif task_reponse == TaskCodes.DELIVER_ITEMS:
@@ -138,7 +139,7 @@ class MissionPlanner(PhaseStatus):
         # TODO: first go to doorside then bedside when door opening added
 
         # update to driving screen
-        self.send_interface_request_task.execute(RobotStatus.DRIVING)
+        task_reponse = self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
         status = self.navigate_task.execute(self.room, "bedside")
         if status == TaskCodes.ERROR:
@@ -176,6 +177,8 @@ class MissionPlanner(PhaseStatus):
             RobotStatus.ARM_RETRACTED
         )
 
+        # add a block to check arm status first before interpreting input
+
         if status == TaskCodes.ERROR:
             raise NotImplementedError()
         # when done automatically goes back to triage patient
@@ -185,11 +188,12 @@ class MissionPlanner(PhaseStatus):
     def go_idle_phase(self):
         # cleanup and exit
         # Update idle screen
-        status = self.send_interface_request_task.execute(RobotStatus.IDLE_HOME)
+        task_response = self.send_interface_request_task.execute(RobotStatus.IDLE_HOME)
 
         # move arms to home position?
+        # add a block to check arm status first before interpreting input
 
-        if status == TaskCodes.ERROR:
+        if task_response == TaskCodes.ERROR:
             raise NotImplementedError()
         return PhaseStatus.PHASE_COMPLETE
 
