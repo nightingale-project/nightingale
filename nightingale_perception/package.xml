@@ -54,18 +54,21 @@
   <build_depend>robot_body_filter</build_depend>
   <build_depend>sensor_filters</build_depend>
   <build_depend>pointcloud_to_laserscan</build_depend>
+  <build_depend>ira_laser_tools</build_depend>
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>std_msgs</build_export_depend>
   <build_export_depend>robot_body_filter</build_export_depend>
   <build_export_depend>sensor_filters</build_export_depend>
   <build_export_depend>pointcloud_to_laserscan</build_export_depend>
+  <build_export_depend>ira_laser_tools</build_export_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>robot_body_filter</exec_depend>
   <exec_depend>sensor_filters</exec_depend>
   <exec_depend>pointcloud_to_laserscan</exec_depend>
+  <exec_depend>ira_laser_tools</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
