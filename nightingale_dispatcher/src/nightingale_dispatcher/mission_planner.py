@@ -11,7 +11,7 @@ from nightingale_msgs.msg import MissionPlanAction
 from nightingale_dispatcher.navigate_task import NavigateTask
 from nightingale_dispatcher.move_arm_task import MoveArmTask
 from nightingale_dispatcher.send_interface_request_task import SendInterfaceRequestTask
-from nightingale_dispatcher.task import Task
+from nightingale_dispatcher.task import Task, TaskCodes
 from nightingale_ros_bridge.bridge_interface_config import BridgeConfig, RobotStatus
 
 
@@ -49,7 +49,7 @@ class MissionPlanner(PhaseStatus):
         self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
         status = self.navigate_task.execute(self.room, "bedside")
-        if status == Task.ERROR:
+        if status == TaskCodes.ERROR:
             raise NotImplementedError()
         self.phases.put(self.triage_patient_phase)
         return PhaseStatus.PHASE_COMPLETE
@@ -63,7 +63,7 @@ class MissionPlanner(PhaseStatus):
         self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
         status = self.navigate_task.execute("home", "default")
-        if status == Task.ERROR:
+        if status == TaskCodes.ERROR:
             raise NotImplementedError()
         self.phases.put(self.go_idle_phase)
         return PhaseStatus.PHASE_COMPLETE
@@ -76,12 +76,12 @@ class MissionPlanner(PhaseStatus):
             RobotStatus.BEDSIDE_IDLE
         )
 
-        if task_response == Task.ERROR:
+        if task_response == TaskCodes.ERROR:
             raise NotImplementedError()
-        if task_response == Task.WD_TIMEOUT or task_response == Task.DISMISS:
+        if task_response == TaskCodes.WD_TIMEOUT or task_response == TaskCodes.DISMISS:
             # User didn't want anything or timedout
             self.phases.put(self.go_home_base_phase)
-        elif task_response == Task.STOCK_ITEMS:
+        elif task_response == TaskCodes.STOCK_ITEMS:
             # User wants some items
             self.phases.put(self.go_to_stock_phase)
         else:
@@ -97,7 +97,7 @@ class MissionPlanner(PhaseStatus):
         self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
         status = self.navigate_task.execute("stock", "default")
-        if status == Task.ERROR:
+        if status == TaskCodes.ERROR:
             raise NotImplementedError()
         self.phases.put(self.get_items_phase)
         return PhaseStatus.PHASE_COMPLETE
@@ -118,11 +118,11 @@ class MissionPlanner(PhaseStatus):
         joint_values = self.cfg["right_arm_home"]["joints"]
         status = self.move_arm_task.execute(joint_values)
 
-        if task_reponse == Task.ERROR:
+        if task_reponse == TaskCodes.ERROR:
             raise NotImplementedError()
-        elif task_reponse == Task.DELIVER_ITEMS:
+        elif task_reponse == TaskCodes.DELIVER_ITEMS:
             self.phases.put(self.return_to_patient_phase)
-        elif task_reponse == Task.DISMISS:
+        elif task_reponse == TaskCodes.DISMISS:
             # nurse cancelled
             self.phases.put(self.go_home_base_phase)
         else:
@@ -141,7 +141,7 @@ class MissionPlanner(PhaseStatus):
         self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
         status = self.navigate_task.execute(self.room, "bedside")
-        if status == Task.ERROR:
+        if status == TaskCodes.ERROR:
             raise NotImplementedError()
         self.phases.put(self.handoff_items_phase)
         return PhaseStatus.PHASE_COMPLETE
@@ -176,7 +176,7 @@ class MissionPlanner(PhaseStatus):
             RobotStatus.ARM_RETRACTED
         )
 
-        if status == Task.ERROR:
+        if status == TaskCodes.ERROR:
             raise NotImplementedError()
         # when done automatically goes back to triage patient
         self.phases.put(self.triage_patient_phase)
@@ -189,7 +189,7 @@ class MissionPlanner(PhaseStatus):
 
         # move arms to home position?
 
-        if status == Task.ERROR:
+        if status == TaskCodes.ERROR:
             raise NotImplementedError()
         return PhaseStatus.PHASE_COMPLETE
 

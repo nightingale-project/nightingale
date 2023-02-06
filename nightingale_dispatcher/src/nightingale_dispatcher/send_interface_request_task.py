@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import rospy
-from nightingale_dispatcher.task import Task
+from nightingale_dispatcher.task import Task, TaskCodes
 from nightingale_ros_bridge.bridge_interface_config import BridgeConfig, UserInputs
 from nightingale_msgs.srv import InterfaceCall
 
@@ -25,15 +25,15 @@ class SendInterfaceRequestTask(Task):
             input_code = interface_response.user_input
             rospy.loginfo(f"USER INPUT {input_code}")
             # convert input to return code
-            status = Task.SUCCESS
+            status = TaskCodes.SUCCESS
             if input_code == UserInputs.STOCK_ITEMS:
-                status = Task.STOCK_ITEMS
+                status = TaskCodes.STOCK_ITEMS
             elif input_code == UserInputs.DELIVER_ITEMS:
-                status = Task.DELIVER_ITEMS
+                status = TaskCodes.DELIVER_ITEMS
             elif input_code == UserInputs.RETURN_HOME:
-                status = Task.DISMISS
+                status = TaskCodes.DISMISS
             elif input_code == UserInputs.WD_TIMEOUT:
-                status = Task.WD_TIMEOUT
+                status = TaskCodes.WD_TIMEOUT
             elif input_code == UserInputs.NO_INPUT:
                 # return success
                 pass

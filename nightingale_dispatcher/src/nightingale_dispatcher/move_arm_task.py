@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import rospy
-from nightingale_dispatcher.task import Task
+from nightingale_dispatcher.task import Task, TaskCodes
 import actionlib
 from actionlib_msgs.msg import GoalStatus
 from nightingale_manipulation.manipulation_action_client import ManipulationControl
