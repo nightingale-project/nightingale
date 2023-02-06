@@ -71,9 +71,9 @@ class ManipulationJointControl:
         self.right_arm.wait_for_server()
 
         # TODO: replace with service call
-        self.right_arm_joint_names = CFG["right_arm_home"]["names"]
         self.left_arm_joint_names = CFG["left_arm_home"]["names"]
-        self.left_arm_home_joint_values = CFG["right_arm_home"]["joints"]
+        self.right_arm_joint_names = CFG["right_arm_home"]["names"]
+        self.left_arm_home_joint_values = CFG["left_arm_home"]["joints"]
         self.right_arm_home_joint_values = CFG["right_arm_home"]["joints"]
 
     def cmd_right_arm(self, joint_values, blocking=True):
@@ -127,12 +127,12 @@ class ManipulationGripperControl:
             [closed, closed, closed], CFG["left_gripper"]["joints"]
         )
 
-        self.gripper_lock = {"left": 0, "right": 0}
+        self.gripper_lock = {"left": True, "right": True}
         self.unlock_left_gripper()
         self.unlock_right_gripper()
 
     def cmd_right_gripper(self, goal, blocking=True):
-        if self.gripper_lock[0]:
+        if self.gripper_lock["right"]:
             self.right_gripper.send_goal(goal)
             if blocking:
                 return self.right_gripper.wait_for_result()
@@ -140,7 +140,7 @@ class ManipulationGripperControl:
         return False
 
     def cmd_left_gripper(self, goal, blocking=True):
-        if self.gripper_lock[1]:
+        if self.gripper_lock["left"]:
             self.left_gripper.send_goal(goal)
             if blocking:
                 return self.left_gripper.wait_for_result()
@@ -148,16 +148,16 @@ class ManipulationGripperControl:
         return False
 
     def lock_right_gripper(self):
-        self.gripper_lock["right"] = 0
+        self.gripper_lock["right"] = True
 
     def unlock_right_gripper(self):
-        self.gripper_lock["right"] = 1
+        self.gripper_lock["right"] = False
 
     def lock_left_gripper(self):
-        self.gripper_lock["left"] = 0
+        self.gripper_lock["left"] = True
 
     def unlock_left_gripper(self):
-        self.gripper_lock["left"] = 1
+        self.gripper_lock["left"] = False
 
 
 class ManipulationCartesianControl:
