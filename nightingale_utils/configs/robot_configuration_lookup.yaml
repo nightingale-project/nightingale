@@ -10,43 +10,37 @@ joint_configurations: {
         },
         left_arm: {
             names: ["left_shoulder_pan_joint", "left_shoulder_lift_joint", "left_arm_half_joint", "left_elbow_joint", "left_wrist_spherical_1_joint", "left_wrist_spherical_2_joint", "left_wrist_3_joint"],
-            joints: [1.6285100157139785, 1.4853564921068, -0.4129526423290365, 2.680378098157231, 0.03587460652925101, -0.45225347904488444, 1.7006671448238166],
+            joints: [1.5331797090297457, 1.605558035871483, 0.722653222587827, 2.606298339748302, -2.3331829141612968, 1.825435539687259, -2.9605818553548513],
         },
         right_arm: {
             names: ["right_shoulder_pan_joint", "right_shoulder_lift_joint", "right_arm_half_joint", "right_elbow_joint", "right_wrist_spherical_1_joint", "right_wrist_spherical_2_joint", "right_wrist_3_joint"],
-            joints: [-1.3619729954335744, -1.4932225928175198, 0.4410807851642762, -2.66686424986983, 0.03346679617681403, -2.051480810941249, -1.6562489931736222],
+            joints: [-1.189840720238987, -1.8304754388921793, -0.31277335632770153, -2.367960136151233, 0.9231204765356429, 1.534414350511106, 2.8363235525817165],
         }
     },
     handoff: {
         right_arm: {
             names: ["right_shoulder_pan_joint", "right_shoulder_lift_joint", "right_arm_half_joint", "right_elbow_joint", "right_wrist_spherical_1_joint", "right_wrist_spherical_2_joint", "right_wrist_3_joint"],
-            joints: [-1.3805385006229827, -0.367722359099307, 0.37472254460360777, -2.065029556896355, 0.32164880671358187, -1.4908161397795825, -2.106156420715312],
+            joints: [-1.497173771091874, -0.05384432355144005, -0.0472769683033043, -1.4575817535881566, 3.1601009435928535, 1.2459021253979168, 1.515535734175753],
         }
     },
-
-    right_arm_home: {
-        names: ["right_shoulder_pan_joint", "right_shoulder_lift_joint", "right_arm_half_joint", "right_elbow_joint", "right_wrist_spherical_1_joint", "right_wrist_spherical_2_joint", "right_wrist_3_joint"],
-        joints: [-1.189840720238987, -1.8304754388921793, -0.31277335632770153, -2.367960136151233, 0.9231204765356429, 1.534414350511106, 2.8363235525817165],
+    open_gripper: {
+        left_gripper: {
+            names: ["left_gripper_finger1_joint", "left_gripper_finger2_joint", "left_gripper_finger3_joint"],
+            joints: [0.23, 0.23, 0.23],
+        },
+        right_gripper: {
+            names: ["right_gripper_finger1_joint", "right_gripper_finger2_joint", "right_gripper_finger3_joint" ]
+            joints: [0.23, 0.23, 0.23],
+        }
     },
-
-    left_arm_home: {
-        names: ["left_shoulder_pan_joint", "left_shoulder_lift_joint", "left_arm_half_joint", "left_elbow_joint", "left_wrist_spherical_1_joint", "left_wrist_spherical_2_joint", "left_wrist_3_joint" ],
-        joints: [1.5331797090297457, 1.605558035871483, 0.722653222587827, 2.606298339748302, -2.3331829141612968, 1.825435539687259, -2.9605818553548513]
+    closed_gripper: {
+        left_gripper: {
+            names: ["left_gripper_finger1_joint", "left_gripper_finger2_joint", "left_gripper_finger3_joint"],
+            joints: [0, 0, 0],
+        },
+        right_gripper: {
+            names: ["right_gripper_finger1_joint", "right_gripper_finger2_joint", "right_gripper_finger3_joint" ]
+            joints: [0, 0, 0],
+        }
     },
-
-    right_arm_extended_handoff: {
-        names: [ "right_shoulder_pan_joint", "right_shoulder_lift_joint", "right_arm_half_joint", "right_elbow_joint", "right_wrist_spherical_1_joint", "right_wrist_spherical_2_joint", "right_wrist_3_joint" ],
-        joints: [-1.497173771091874, -0.05384432355144005, -0.0472769683033043, -1.4575817535881566, 3.1601009435928535, 1.2459021253979168, 1.515535734175753 ]
-    },
-
-    left_gripper: {
-        joints: ["left_gripper_finger1_joint", "left_gripper_finger2_joint", "left_gripper_finger3_joint"]
-    },
-    right_gripper: {
-        joints: ["right_gripper_finger1_joint", "right_gripper_finger2_joint", "right_gripper_finger3_joint" ]
-    },
-
-    closed_gripper: 0,
-    open_gripper: 0.23,
-
 }
