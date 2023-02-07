@@ -2,6 +2,7 @@
 
 import actionlib
 import rospy
+import tf2_ros
 
 # joint
 from moveit_action_handlers.msg import (
@@ -20,6 +21,7 @@ from moveit_action_handlers.msg import (
 from geometry_msgs.msg import Pose
 
 from nightingale_msgs.srv import RobotConfigurationLookup
+from nightingale_manipulation.payload import Payload
 
 
 def joint_goal(joint_values, joint_names, eev=0.5, eea=0.5, timeout=10):
@@ -209,12 +211,57 @@ class ManipulationControl:
                 logger_name=self.logger_name,
             )
 
+        self.arm_link_names = [
+            "base_link",
+            "shoulder_link",
+            "arm_half_1_link",
+            "arm_half_2_link",
+            "forearm_link",
+            "wrist_spherical_1_link",
+            "wrist_spherical_2_link",
+            "wrist_3_link",
+            "ee_link",
+            "gripper_base_link",
+            "gripper_finger1_knuckle_link",
+            "gripper_finger1_finger_tip_link",
+            "gripper_finger2_knuckle_link",
+            "gripper_finger2_finger_tip_link",
+            "gripper_finger3_knuckle_link",
+            "gripper_finger3_finger_tip_link",
+        ]
+        self.right_arm_link_transforms = {
+            f"right_{link_name}": None for link_name in self.arm_link_names
+        }
+
+        self.payload_estimator = PayloadEstimator("right", 0.1)
+
         self.joint_states_sub = rospy.Subscriber(
             "/joint_states", JointState, self.update_joint_states
         )
 
-    def update_joint_states(self):
-        raise NotImplementedError()
+    def update_joint_states(self, msg):
+        self.update_link_poses("right")
+
+        # TODO remove [4:11] range in favour of left / right indices
+        self.payload_estimator.run(
+            self.right_arm_link_transforms, msg.velocity[4:11], msg.effort[4:11]
+        )
+
+    def update_link_poses(self, arm_side):
+        for idx in range(7):
+            from_link = f"{arm_side}_base_link"
+            to_link = f"{arm_side}_{self.arm_link_names[idx + 1]}"
+            try:
+                self.link_transforms[to_link] = self.tf_buffer.lookup_transform(
+                    from_link, to_link, rospy.Time()
+                )
+            except (
+                tf2_ros.LookupException,
+                tf2_ros.ConnectivityException,
+                tf2_ros.ExtrapolationException,
+            ):
+                rospy.logerr(f"{arm_side} arm transform lookup failed")
+                continue
 
     def home(self):
         # home left arm in joint space and home right arm in cart or joint space
