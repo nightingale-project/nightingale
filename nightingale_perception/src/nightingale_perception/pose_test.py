@@ -24,28 +24,25 @@ class Landmarks:
     LEFT_HIP = 23
     RIGHT_HIP = 24
 
-class coordinate:
-    def __init__(self, landmark):
-        self.x = landmark.x
-        self.y = landmark.y
-        self.z = landmark.z
-
-def euclid_dist_3d(coord_1, coord_2):
-    # coords -> {'x': num, 'y': num, 'z': num}
-    x_dist = coord_1.x - coord_2.x
-    y_dist = coord_1.y - coord_2.y
-    z_dist = coord_1.z - coord_2.z
+def euclid_dist_3d(lm_1, lm_2):
+    x_dist = lm_1.x - lm_2.x
+    y_dist = lm_1.y - lm_2.y
+    z_dist = lm_1.z - lm_2.z
 
     distance = math.sqrt(x_dist**2 + y_dist**2 + z_dist**2) 
     return distance
 
+def euclid_dist_2d(lm_1, lm_2):
+    x_dist = lm_1.x - lm_2.x
+    y_dist = lm_1.y - lm_2.y
+
+    distance = math.sqrt(x_dist**2 + y_dist**2) 
+    return distance
+
 def calc_arm_len(thumb_lm, elbow_lm, shoulder_lm):
     arm_length = 0
-    shoulder_coord = coordinate(shoulder_lm)
-    elbow_coord = coordinate(elbow_lm)
-    thumb_lm = coordinate(thumb_lm)
-    bicep_length = euclid_dist_3d(shoulder_coord, elbow_coord)
-    forearm_length = euclid_dist_3d(elbow_coord, thumb_lm)
+    bicep_length = euclid_dist_3d(shoulder_lm, elbow_lm)
+    forearm_length = euclid_dist_3d(elbow_lm, thumb_lm)
     return bicep_length + forearm_length
 
 def main():
@@ -82,10 +79,32 @@ def main():
         image.flags.writeable = False
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         results = pose.process(image)
-        landmarks_list = results.pose_world_landmarks.landmark
-        #print("thumb", landmarks_list[lm.RIGHT_THUMB])
-        #print("eb", landmarks_list[lm.RIGHT_ELBOW])
-        #print("shoulder", landmarks_list[lm.RIGHT_SHOULDER])
+        #landmarks_list = results.pose_world_landmarks.landmark
+        landmarks_list = results.pose_landmarks.landmark
+
+        # hand pose detection
+        visible_thresh = 0.7
+        landmark_poses = []
+        hand_pose_confirmed = 5
+        hand_pose_counter = 0
+        total_time = 0
+        allowed_time = 45 # seconds
+        while hand_pose_counter < hand_pose_confirmed and total_time < allowed_time:
+            # probably start up the media pose pipeline in here
+
+            for landmark in hand_lm:
+                if landmark.visibility > visible_thresh:
+                    if abs(euclid_dist_2d(lm_new, lm_old)) not in range(hand_delta_thresh):
+                        landmark_poses[lm_enum] = lm_new
+                        hand_pose_counter = -0.5 
+            hand_pose_counter = hand_pose_counter + 0.5
+            time.sleep(0.5)
+        # should have landmarks to use
+
+
+
+
+
 
         if landmarks_list[lm.RIGHT_THUMB] and landmarks_list[lm.RIGHT_ELBOW] and landmarks_list[lm.RIGHT_SHOULDER]:
             right_thumb_lm = landmarks_list[lm.RIGHT_THUMB]
@@ -108,6 +127,17 @@ def main():
         if cv2.waitKey(5) & 0xFF == 27:
           break
     cap.release()
+
+
+def point_overlay(point, depth_img):
+    # depth img is ros image message
+    data = depth_img.data
+    x_pos = int(point.x * data.width)
+    y_pos = int(point.y * data.height)
+    z_pos = y_pos*data.step + x_pos
+    # possible some conversion factor to meters
+    return z_pos
+    
 
 
 if __name__ == "__main__":
