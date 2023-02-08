@@ -168,7 +168,7 @@ class MissionPlanner:
     def go_idle_phase(self):
         # cleanup and exit
         # Update idle screen
-        self.send_interface_request_task.execute(RobotStatus.IDLE_HOME)
+        status = self.send_interface_request_task.execute(RobotStatus.IDLE_HOME)
 
         if status == Task.ERROR:
             raise NotImplementedError()
@@ -181,7 +181,6 @@ class MissionPlanner:
 
         self.room = goal.name
         self.phases.put(self.go_to_patient_phase)
-        # self.phases.put(self.triage_patient_phase)
 
         while not self.phases.empty():
             phase = self.phases.get()
