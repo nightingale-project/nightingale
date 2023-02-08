@@ -2,11 +2,15 @@
 
 import actionlib
 import rospy
+import math
 
 # joint
 from moveit_action_handlers.msg import PropertyValuePair
 from moveit_action_handlers.msg import MoveToJointsMoveItAction
 from moveit_action_handlers.msg import MoveToJointsMoveItGoal
+from moveit_action_handlers.msg import MoveToJointsMoveItResult
+from moveit_action_handlers.msg import ActionResultStatusConstants
+
 
 from sensor_msgs.msg import JointState
 
@@ -39,7 +43,7 @@ def joint_goal(joint_values, joint_names, eev=0.5, eea=0.5, timeout=10):
 
 
 def cartesian_goal(
-    x, y, z, ref_link, roll=0, pitch=0, yaw=0, eev=0.5, eea=0.5, mode=0, timeout=20
+        x, y, z, ref_link, roll=0, pitch=0, yaw=0, eev=0.5, eea=0.5, mode=0, timeout=20
 ):
     goal = MoveToPoseMoveItGoal()
     goal.constraint_mode = mode
@@ -59,7 +63,7 @@ def cartesian_goal(
 
 
 class ManipulationJointControl:
-    def __init__(self):
+    def __init__(self, joint_tolerance=0.01):
         self.left_arm = actionlib.simple_action_client.SimpleActionClient(
             "/moveit_action_handlers/left_arm/joint_ctrl", MoveToJointsMoveItAction
         )
@@ -76,19 +80,111 @@ class ManipulationJointControl:
         self.left_arm_home_joint_values = CFG["left_arm_home"]["joints"]
         self.right_arm_home_joint_values = CFG["right_arm_home"]["joints"]
 
-    def cmd_right_arm(self, joint_values, blocking=True):
-        goal = joint_goal(joint_values, self.right_arm_joint_names)
-        self.right_arm.send_goal(goal)
-        if blocking:
-            return self.right_arm.wait_for_result()  # TODO: action_server.get_result()
-        return True
+        self._right_joint_states = None
+        self._left_joint_states = None
+        self._joint_tolerance = joint_tolerance
 
-    def cmd_left_arm(self, joint_values, blocking=True):
-        goal = joint_goal(joint_values, self.left_arm_joint_names)
-        self.left_arm.send_goal(goal)
-        if blocking:
-            return self.left_arm.wait_for_result()  # TODO: action_server.get_result()
-        return True
+    def update_joint_states(self):
+        """
+        Updates the _right_joint_states and _left_joint_states members
+
+        @return: True if successful
+        """
+        try:
+            joint_states = rospy.client.wait_for_message("/joint_states", JointState, timeout=0.2)
+            pos = joint_states.position
+            names = joint_states.name
+            names_pos_dict = {}
+            for i in range(len(names)):
+                names_pos_dict[names[i]] = pos[i]
+
+            self._right_joint_states = []
+            self._left_joint_states = []
+
+            # probably a redundant check but making sure the joint names exist from the /joint_states data
+            if not (all(key in names_pos_dict.keys() for key in self.right_arm_joint_names)
+                    and all(key in names_pos_dict.keys() for key in self.right_arm_joint_names)):
+                rospy.logerr("Invalid or missing joint name in data received from /joint_states")
+                return False
+
+            for i in range(7):
+                self._right_joint_states.append(names_pos_dict[self.right_arm_joint_names[i]])
+                self._left_joint_states.append(names_pos_dict[self.left_arm_joint_names[i]])
+
+            return True
+        except rospy.ROSException:
+            rospy.logwarn("Unable to get data from /joint_states, wait_for_message timeout")
+            return False
+
+    def get_joint_states(self):
+        if self.update_joint_states():
+            return {
+                'left_arm': self._left_joint_states,
+                'right_arm': self._right_joint_states
+            }
+        return False
+
+    def verify_joint_target(self, joint_target: list, joint_states: list) -> bool:
+        """
+        Verifies that the joint target list is valid, and that it is not the same as the current joint state
+
+        @param joint_target:
+        @param joint_states:
+        @return: True if any targets are different from the current state,
+                 False if all targets are the same as current state
+        """
+        if not self.update_joint_states():
+            return False
+
+        if len(joint_target) != 7:
+            raise Exception("Invalid joint value length")
+        error_count = 7
+        for i in range(7):
+            if math.isclose(abs(joint_target[i]), abs(joint_states[i]), rel_tol=self._joint_tolerance):
+                error_count -= 1
+        return bool(error_count)
+
+    def cmd_right_arm(self, joint_target: list, blocking=True) -> bool:
+        """
+        Commands movement of the right arm through the right_arm action server
+
+        @param joint_target: list of target joint values
+        @param blocking: default True, if blocking, function will wait for action server response
+        @return: result of verify_joint_target and action server state if blocking
+        """
+        if self.verify_joint_target(joint_target, self._right_joint_states):
+            goal = joint_goal(joint_target, self.right_arm_joint_names)
+            self.right_arm.send_goal(goal)
+            if blocking:
+                self.right_arm.wait_for_result()
+                status = self.right_arm.get_result().status
+                if status == ActionResultStatusConstants.SUCCEEDED:
+                    return True
+                rospy.logwarn("cmd_right_arm failed with status: " + str(status))
+                return False
+            return True
+        return False
+
+    def cmd_left_arm(self, joint_target, blocking=True):
+        """
+        Commands the movement of the left arm through the left_arm action server
+
+        @param joint_target: list of target joint values
+        @param blocking: default True, if blocking, function will wait for action server response
+        @return: boolean result of verify_joint_target and action server state if blocking
+        """
+        if self.verify_joint_target(joint_target, self._left_joint_states):
+            goal = joint_goal(joint_target, self.left_arm_joint_names)
+            self.left_arm.send_goal(goal)
+            if blocking:
+                self.left_arm.wait_for_result()
+                status = self.left_arm.get_result().status
+                if status == ActionResultStatusConstants.SUCCEEDED:
+                    return True
+                rospy.logwarn("cmd_left_arm failed with status: " + str(status))
+                return False
+            return True
+        return False
 
     def home(self):
         self.cmd_left_arm(self.left_arm_home_joint_values, blocking=False)
