@@ -67,18 +67,17 @@ class ManipulationJointControl:
         )
         self.right_arm.wait_for_server()
 
+    def cmd_left_arm(self, joint_values, blocking=True):
+        self.left_arm.send_goal(goal)
+        if blocking:
+            return self.left_arm.wait_for_result()  # TODO: action_server.get_result()
+        return True
+
     def cmd_right_arm(self, joint_values, blocking=True):
         goal = joint_goal(joint_values, self.right_arm_joint_names)
         self.right_arm.send_goal(goal)
         if blocking:
             return self.right_arm.wait_for_result()  # TODO: action_server.get_result()
-        return True
-
-    def cmd_left_arm(self, joint_values, blocking=True):
-        goal = joint_goal(joint_values, self.left_arm_joint_names)
-        self.left_arm.send_goal(goal)
-        if blocking:
-            return self.left_arm.wait_for_result()  # TODO: action_server.get_result()
         return True
 
 
@@ -218,24 +217,46 @@ class ManipulationControl:
 
     def home(self):
         # home left arm in joint space and home right arm in cart or joint space
-        self.jnt_ctrl.cmd_left_arm(self.left_arm_home_joint_values)
-        self.jnt_ctrl.cmd_right_arm(self.right_arm_home_joint_values)
+        self.jnt_ctrl.cmd_left_arm(
+            joint_goal(self.left_arm_home_joint_values, self.left_arm_joint_names)
+        )
+        self.jnt_ctrl.cmd_right_arm(
+            joint_goal(self.right_arm_home_joint_values, self.right_arm_joint_names)
+        )
 
     def extend_handoff(self):
         # extend right arm in cartesian space
-        self.jnt_ctrl.cmd_right_arm(self.left_arm_handoff_joint_values)
+        self.jnt_ctrl.cmd_right_arm(
+            joint_goal(self.right_arm_handoff_joint_values, self.left_arm_joint_names)
+        )
 
     def open_left_gripper(self):
-        self.gpr_ctrl.cmd_left_gripper(self.left_gripper_open_joint_values)
+        self.gpr_ctrl.cmd_left_gripper(
+            joint_goal(
+                self.left_gripper_open_joint_values, self.left_gripper_joint_names
+            )
+        )
 
     def open_right_gripper(self):
-        self.gpr_ctrl.cmd_right_gripper(self.right_gripper_open_joint_values)
+        self.gpr_ctrl.cmd_right_gripper(
+            joint_goal(
+                self.right_gripper_open_joint_values, self.right_gripper_joint_names
+            )
+        )
 
     def close_left_gripper(self):
-        self.gpr_ctrl.cmd_left_gripper(self.left_gripper_open_joint_values)
+        self.gpr_ctrl.cmd_left_gripper(
+            joint_goal(
+                self.left_gripper_closed_joint_values, self.left_gripper_joint_names
+            )
+        )
 
     def close_right_gripper(self):
-        self.gpr_ctrl.cmd_right_gripper(self.right_gripper_open_joint_values)
+        self.gpr_ctrl.cmd_right_gripper(
+            joint_goal(
+                self.right_gripper_closed_joint_values, self.right_gripper_joint_names
+            )
+        )
 
 
 # test code
