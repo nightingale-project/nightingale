@@ -67,14 +67,13 @@ class ManipulationJointControl:
         )
         self.right_arm.wait_for_server()
 
-    def cmd_left_arm(self, joint_values, blocking=True):
+    def cmd_left_arm(self, goal, blocking=True):
         self.left_arm.send_goal(goal)
         if blocking:
             return self.left_arm.wait_for_result()  # TODO: action_server.get_result()
         return True
 
-    def cmd_right_arm(self, joint_values, blocking=True):
-        goal = joint_goal(joint_values, self.right_arm_joint_names)
+    def cmd_right_arm(self, goal, blocking=True):
         self.right_arm.send_goal(goal)
         if blocking:
             return self.right_arm.wait_for_result()  # TODO: action_server.get_result()
@@ -97,33 +96,33 @@ class ManipulationGripperControl:
         self.unlock_left_gripper()
         self.unlock_right_gripper()
 
-    def cmd_right_gripper(self, goal, blocking=True):
-        if self.gripper_lock["right"]:
-            self.right_gripper.send_goal(goal)
-            if blocking:
-                return self.right_gripper.wait_for_result()
-            return True  # TODO: action_server.get_result()
-        return False
-
     def cmd_left_gripper(self, goal, blocking=True):
-        if self.gripper_lock["left"]:
+        if not self.gripper_lock["left"]:
             self.left_gripper.send_goal(goal)
             if blocking:
                 return self.left_gripper.wait_for_result()
             return True  # TODO: action_server.get_result()
         return False
 
-    def lock_right_gripper(self):
-        self.gripper_lock["right"] = True
-
-    def unlock_right_gripper(self):
-        self.gripper_lock["right"] = False
+    def cmd_right_gripper(self, goal, blocking=True):
+        if not self.gripper_lock["right"]:
+            self.right_gripper.send_goal(goal)
+            if blocking:
+                return self.right_gripper.wait_for_result()
+            return True  # TODO: action_server.get_result()
+        return False
 
     def lock_left_gripper(self):
         self.gripper_lock["left"] = True
 
     def unlock_left_gripper(self):
         self.gripper_lock["left"] = False
+
+    def lock_right_gripper(self):
+        self.gripper_lock["right"] = True
+
+    def unlock_right_gripper(self):
+        self.gripper_lock["right"] = False
 
 
 class ManipulationCartesianControl:
@@ -139,10 +138,10 @@ class ManipulationCartesianControl:
         self.left_arm.wait_for_server()
         self.ee_ctrl_mode = 0
 
-    def cmd_right_arm(self, pose: Pose, blocking=True):
+    def cmd_right_arm(self, goal, blocking=True):
         raise NotImplementedError()
 
-    def cmd_left_arm(self, pose: Pose, blocking=True):
+    def cmd_left_arm(self, goal, blocking=True):
         raise NotImplementedError()
 
     def set_ee_ctrl_mode(self, mode):
