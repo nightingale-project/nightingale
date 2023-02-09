@@ -22,7 +22,6 @@ from geometry_msgs.msg import Pose
 
 
 # TODO: replace with service call, requires refactoring of service to include gripper info
-CFG = rospy.get_param("/nightingale_utils/joint_configurations")
 
 
 def joint_goal(joint_values, joint_names, eev=0.5, eea=0.5, timeout=10):

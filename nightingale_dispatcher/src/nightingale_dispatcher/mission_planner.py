@@ -20,14 +20,13 @@ class PhaseStatus(Enum):
     PHASE_FAIL = 0
 
 
-class MissionPlanner(PhaseStatus):
+class MissionPlanner:
     def __init__(self):
         rospy.init_node("mission_planner_node")
 
         self.estop_sub = rospy.Subscriber(
             BridgeConfig.USER_INPUT_TOPIC, String, self.estop_cb
         )
-        self.cfg = rospy.get_param("/nightingale_utils/joint_configurations")
         self.navigate_task = NavigateTask()
         self.move_arm_task = MoveArmTask()
         self.send_interface_request_task = SendInterfaceRequestTask()
