@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
+import queue
 import rospy
 import actionlib
 
-import queue
 from actionlib.simple_action_client import SimpleGoalState
 from nightingale_msgs.msg import MissionPlanAction, MissionPlanGoal
 from nightingale_msgs.srv import AddMissionPlan, AddMissionPlanResponse

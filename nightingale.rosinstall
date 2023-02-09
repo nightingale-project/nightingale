@@ -9,3 +9,7 @@ repositories:
     url: https://github.com/aws-robotics/aws-robomaker-hospital-world.git
     version: ros1
 
+  moveit_action_handlers:
+    type: git
+    url: https://github.com/panagelak/moveit_action_handlers.git
+    version: main

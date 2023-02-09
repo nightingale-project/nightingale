@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-
-import rospy
-from nightingale_dispatcher.task import Task
 import actionlib
 from actionlib_msgs.msg import GoalStatus
+import rospy
+from nightingale_dispatcher.task import Task, TaskCodes
 from nightingale_msgs.msg import RoomRunnerAction, RoomRunnerGoal
 
 
@@ -28,7 +27,7 @@ class NavigateTask(Task):
         self.action_client.send_goal(goal)
         self.action_client.wait_for_result()
         return (
-            Task.SUCCESS
+            TaskCodes.SUCCESS
             if self.action_client.get_state() == GoalStatus.SUCCEEDED
-            else Task.ERROR
+            else TaskCodes.ERROR
         )

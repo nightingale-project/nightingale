@@ -40,7 +40,6 @@ class RosBridgeInterface:
 
     # callback on M.P service call
     def interface_service_cb(self, request_data):
-        # rospy.loginfo(f"Received status {status}")
         # publish to UI tablet
         self.set_robot_status_pub.publish(str(request_data.status))
 
