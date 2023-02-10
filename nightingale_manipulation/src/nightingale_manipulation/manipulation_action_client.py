@@ -9,16 +9,15 @@ from moveit_action_handlers.msg import PropertyValuePair
 from moveit_action_handlers.msg import MoveToJointsMoveItAction
 from moveit_action_handlers.msg import MoveToJointsMoveItGoal
 from moveit_action_handlers.msg import MoveToJointsMoveItResult
+
 from moveit_action_handlers.msg import ActionResultStatusConstants
-
-
 from sensor_msgs.msg import JointState
 
 # cartesian
 from moveit_action_handlers.msg import MoveToPoseMoveItAction
 from moveit_action_handlers.msg import MoveToPoseMoveItGoal
+from moveit_action_handlers.msg import MoveToPoseMoveItResult
 from moveit_action_handlers.msg import PoseStamped
-from geometry_msgs.msg import Pose
 
 # forward kinematics
 # from urdf_parser_py.urdf import URDF
@@ -269,10 +268,10 @@ class ManipulationCartesianControl:
         self.left_arm.wait_for_server()
         self.ee_ctrl_mode = 0
 
-    def cmd_right_arm(self, pose: Pose, blocking=True):
+    def cmd_right_arm(self, pose: PoseStamped, blocking=True):
         raise NotImplementedError()
 
-    def cmd_left_arm(self, pose: Pose, blocking=True):
+    def cmd_left_arm(self, pose: PoseStamped, blocking=True):
         raise NotImplementedError()
 
     def set_ee_ctrl_mode(self, mode):
