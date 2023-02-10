@@ -20,12 +20,77 @@ from moveit_action_handlers.msg import MoveToPoseMoveItResult
 from moveit_action_handlers.msg import PoseStamped
 
 # forward kinematics
-# from urdf_parser_py.urdf import URDF
-# from pykdl_utils.kdl_kinematics import KDLKinematics
-
+from urdf_parser_py.urdf import Robot
+import tf_conversions, tf2_ros
+from geometry_msgs.msg import Pose as GeometryPose
+from geometry_msgs.msg import Quaternion, Point
 
 # TODO: replace with service call, requires refactoring of service to include gripper info
 CFG = rospy.get_param("/nightingale_utils/joint_configurations")
+
+
+# overriding the geometry msgs Pose class to add tolerance on equivalence check
+class Pose(GeometryPose):
+    def __init__(self, tolerance=0.01):
+        super.__init__()
+        self.tol = tolerance
+
+    def __eq__(self, other):
+        if type(other) not in [GeometryPose, Pose]:
+            return False
+        return all(
+            [
+                math.isclose(self.position.x, other.position.x, rel_tol=self.tol),
+                math.isclose(self.position.y, other.position.y, rel_tol=self.tol),
+                math.isclose(self.position.z, other.position.z, rel_tol=self.tol),
+                math.isclose(self.orientation.x, other.orientation.x, rel_tol=self.tol),
+                math.isclose(self.orientation.y, other.orientation.y, rel_tol=self.tol),
+                math.isclose(self.orientation.z, other.orientation.z, rel_tol=self.tol),
+                math.isclose(self.orientation.w, other.orientation.w, rel_tol=self.tol),
+            ]
+        )
+
+
+class Orientation:
+    def __init__(self, roll=None, pitch=None, yaw=None, tolerance=0.01):
+        self.roll = roll
+        self.pitch = pitch
+        self.yaw = yaw
+        self.tol = tolerance
+
+    def __eq__(self, other):
+        if not type(other) is Orientation:
+            return False
+        return all(
+            [
+                math.isclose(self.roll, other.roll, rel_tol=self.tol),
+                math.isclose(self.pitch, other.pitch, rel_tol=self.tol),
+                math.isclose(self.yaw, other.yaw, rel_tol=self.tol),
+            ]
+        )
+
+
+def quaternion_to_euler(q: Quaternion):
+    """
+    Convert a quaternion into euler angles (roll, pitch, yaw)
+    roll is rotation around x in radians (counterclockwise)
+    pitch is rotation around y in radians (counterclockwise)
+    yaw is rotation around z in radians (counterclockwise)
+    """
+    t0 = +2.0 * (q.w * q.x + q.y * q.z)
+    t1 = +1.0 - 2.0 * (q.x * q.x + q.y * q.y)
+    roll_x = math.atan2(t0, t1)
+
+    t2 = +2.0 * (q.w * q.y - q.z * q.x)
+    t2 = +1.0 if t2 > +1.0 else t2
+    t2 = -1.0 if t2 < -1.0 else t2
+    pitch_y = math.asin(t2)
+
+    t3 = +2.0 * (q.w * q.z + q.x * q.y)
+    t4 = +1.0 - 2.0 * (q.y * q.y + q.z * q.z)
+    yaw_z = math.atan2(t3, t4)
+    orientation = Orientation(roll=roll_x, pitch=pitch_y, yaw=yaw_z)
+    return orientation  # in radians
 
 
 def joint_goal(joint_values, joint_names, eev=0.5, eea=0.5, timeout=10):
@@ -42,7 +107,13 @@ def joint_goal(joint_values, joint_names, eev=0.5, eea=0.5, timeout=10):
 
 
 def cartesian_goal(
-        x, y, z, ref_link, roll=0, pitch=0, yaw=0, eev=0.5, eea=0.5, mode=0, timeout=20
+    point: Point,
+    ref_link,
+    orientation: Orientation,
+    eev=0.5,
+    eea=0.5,
+    mode=0,
+    timeout=20,
 ):
     goal = MoveToPoseMoveItGoal()
     goal.constraint_mode = mode
@@ -51,12 +122,10 @@ def cartesian_goal(
     goal.timeoutSeconds = timeout
     target_pose = PoseStamped()
     target_pose.header.frame_id = ref_link
-    target_pose.pose.position.x = x
-    target_pose.pose.position.y = y
-    target_pose.pose.position.z = z
-    target_pose.pose.orientation.roll = roll
-    target_pose.pose.orientation.pitch = pitch
-    target_pose.pose.orientation.yaw = yaw
+    target_pose.pose.position = point
+    target_pose.pose.orientation.roll = orientation.roll
+    target_pose.pose.orientation.pitch = orientation.pitch
+    target_pose.pose.orientation.yaw = orientation.yaw
     goal.target_pose = target_pose
     return goal
 
@@ -90,7 +159,9 @@ class ManipulationJointControl:
         @return: True if successful
         """
         try:
-            joint_states = rospy.client.wait_for_message("/joint_states", JointState, timeout=0.2)
+            joint_states = rospy.client.wait_for_message(
+                "/joint_states", JointState, timeout=0.2
+            )
             pos = joint_states.position
             names = joint_states.name
             names_pos_dict = {}
@@ -101,25 +172,37 @@ class ManipulationJointControl:
             self._left_joint_states = []
 
             # probably a redundant check but making sure the joint names exist from the /joint_states data
-            if not (all(key in names_pos_dict.keys() for key in self.right_arm_joint_names)
-                    and all(key in names_pos_dict.keys() for key in self.right_arm_joint_names)):
-                rospy.logerr("Invalid or missing joint name in data received from /joint_states")
+            if not (
+                all(key in names_pos_dict.keys() for key in self.right_arm_joint_names)
+                and all(
+                    key in names_pos_dict.keys() for key in self.left_arm_joint_names
+                )
+            ):
+                rospy.logerr(
+                    "Invalid or missing joint name in data received from /joint_states"
+                )
                 return False
 
             for i in range(7):
-                self._right_joint_states.append(names_pos_dict[self.right_arm_joint_names[i]])
-                self._left_joint_states.append(names_pos_dict[self.left_arm_joint_names[i]])
+                self._right_joint_states.append(
+                    names_pos_dict[self.right_arm_joint_names[i]]
+                )
+                self._left_joint_states.append(
+                    names_pos_dict[self.left_arm_joint_names[i]]
+                )
 
             return True
         except rospy.ROSException:
-            rospy.logwarn("Unable to get data from /joint_states, wait_for_message timeout")
+            rospy.logwarn(
+                "Unable to get data from /joint_states, wait_for_message timeout"
+            )
             return False
 
     def get_joint_states(self):
         if self.update_joint_states():
             return {
-                'left_arm': self._left_joint_states,
-                'right_arm': self._right_joint_states
+                "left_arm": self._left_joint_states,
+                "right_arm": self._right_joint_states,
             }
         return False
 
@@ -139,7 +222,11 @@ class ManipulationJointControl:
             raise Exception("Invalid joint value length")
         error_count = 7
         for i in range(7):
-            if math.isclose(abs(joint_target[i]), abs(joint_states[i]), rel_tol=self._joint_tolerance):
+            if math.isclose(
+                abs(joint_target[i]),
+                abs(joint_states[i]),
+                rel_tol=self._joint_tolerance,
+            ):
                 error_count -= 1
         return bool(error_count)
 
@@ -230,52 +317,142 @@ class ManipulationGripperControl:
         if self.gripper_lock["right"]:
             self.right_gripper.send_goal(goal)
             if blocking:
-                return self.right_gripper.wait_for_result()
-            return True  # TODO: action_server.get_result()
+                self.right_gripper.wait_for_result()
+                return self.right_gripper.get_results()
+            return True
         return False
 
     def cmd_left_gripper(self, goal, blocking=True):
         if self.gripper_lock["left"]:
             self.left_gripper.send_goal(goal)
             if blocking:
-                return self.left_gripper.wait_for_result()
-            return True  # TODO: action_server.get_result()
+                self.left_gripper.wait_for_result()
+                return self.left_gripper.get_results()
         return False
 
     def lock_right_gripper(self):
-        self.gripper_lock["right"] = True
-
-    def unlock_right_gripper(self):
         self.gripper_lock["right"] = False
 
+    def unlock_right_gripper(self):
+        self.gripper_lock["right"] = True
+
     def lock_left_gripper(self):
-        self.gripper_lock["left"] = True
+        self.gripper_lock["left"] = False
 
     def unlock_left_gripper(self):
-        self.gripper_lock["left"] = False
+        self.gripper_lock["left"] = True
 
 
 class ManipulationCartesianControl:
-    def __init__(self):
-        self.right_arm = actionlib.simple_action_client.SimpleActionClient(
-            "/moveit_action_handlers/right_arm/cartesian_ctrl", MoveToPoseMoveItAction
+    def __init__(self, prefix):
+        self.arm = actionlib.simple_action_client.SimpleActionClient(
+            f"/moveit_action_handlers/{prefix}_arm/cartesian_ctrl",
+            MoveToPoseMoveItAction,
         )
-        self.right_arm.wait_for_server()
+        self.arm.wait_for_server(timeout=10)
+        self.prefix = prefix
+        self.ee_ctrl_mode = 0
+        self.orientation = Orientation()
+        self.pose = Pose()
+        self.ref_link = "base_link"
+        self.ee_link = f"{prefix}_ee_link"
+        # TODO: include correct home pose
+        self.home_pose = None
 
-        self.left_arm = actionlib.simple_action_client.SimpleActionClient(
-            "/moveit_action_handlers/left_arm/cartesian_ctrl", MoveToPoseMoveItAction
-        )
-        self.left_arm.wait_for_server()
+        self.robot = Robot.from_parameter_server()
+        self.tf_buffer = tf2_ros.Buffer()
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
+        if self.update_ee_pose():
+            rospy.loginfo(f"{prefix} arm cartesian control initialized")
+        else:
+            rospy.logerr(f"{prefix} arm failed to initialize")
+
+    def update_ee_pose(self):
+        """
+        Uses the robot transform to update the end effector Pose and Orientation
+
+        @return: True if successful
+        """
+        try:
+            link_transform = self.tf_buffer.lookup_transform(
+                self.ref_link, self.ee_link, rospy.Time()
+            )
+
+            q = link_transform.transform.rotation
+            self.orientation = quaternion_to_euler(q)
+            p = link_transform.transform.translation
+            self.pose.position = p
+            self.pose.orientation = q
+            return True
+
+        except (
+            tf2_ros.LookupException,
+            tf2_ros.ConnectivityException,
+            tf2_ros.ExtrapolationException,
+        ):
+            rospy.logerr(f"{self.prefix} arm transformation lookup failed")
+            return False
+
+    def cmd_arm(self, pose: GeometryPose, blocking=True, ee_relative=False):
+        """
+        Commands the arm to move to a Pose in the cartesian space relative to the robot base_link
+
+        @param pose: geometry_msgs.msg Pose
+        @param blocking: if true, wait for action server result
+        @param ee_relative: if true, use ee_link as base link
+        @return: Result of action
+        """
+        if not self.update_ee_pose():
+            return False
+        if self.pose == pose:
+            return True
+
+        if ee_relative:
+            ref_link = self.ee_link
+        else:
+            ref_link = self.ref_link
+
+        # locked end effector control mode
+        if self.ee_ctrl_mode:
+            goal = cartesian_goal(
+                pose.position, ref_link, self.orientation, mode=self.ee_ctrl_mode
+            )
+
+        # free end effector control mode
+        else:
+            goal = cartesian_goal(
+                pose.position, ref_link, quaternion_to_euler(pose.orientation)
+            )
+
+        self.arm.send_goal(goal)
+        if blocking:
+            self.arm.wait_for_result()
+            return self.arm.get_result()
+        return True
+
+    def set_fixed_ee_ctrl_mode(self):
+        self.ee_ctrl_mode = 1
+
+    def set_free_ee_ctrl_mode(self):
         self.ee_ctrl_mode = 0
 
-    def cmd_right_arm(self, pose: PoseStamped, blocking=True):
-        raise NotImplementedError()
+    def set_ref_link(self, ref):
+        self.ref_link = ref
 
-    def cmd_left_arm(self, pose: PoseStamped, blocking=True):
-        raise NotImplementedError()
+    def aproximate_home(self):
+        self.set_ref_link("base_link")
+        self.set_fixed_ee_ctrl_mode()
+        return self.cmd_arm(self.home_pose)
 
-    def set_ee_ctrl_mode(self, mode):
-        self.ee_ctrl_mode = mode
+    def get_pose(self):
+        if not self.update_ee_pose():
+            return False
+        return self.pose
+
+    def get_orientation(self):
+        if not self.update_ee_pose():
+            return False
+        return self.orientation
 
 
 class ManipulationControl:
@@ -285,8 +462,9 @@ class ManipulationControl:
         rospy.loginfo("initialized joint ctrl")
         self.gpr_ctrl = ManipulationGripperControl()
         rospy.loginfo("initialized gripper ctrl")
-        self.crt_ctrl = ManipulationCartesianControl()
-        rospy.loginfo("initialized cartesian ctrl")
+
+        self.right_cartesian = ManipulationCartesianControl("right")
+        self.left_cartesian = ManipulationCartesianControl("left")
 
         self.right_joint_states = [0, 0, 0, 0, 0, 0, 0]
         self.left_joint_states = [0, 0, 0, 0, 0, 0, 0]
@@ -295,27 +473,6 @@ class ManipulationControl:
         self.left_ee_pose = None
         self.update_joint_states()
         rospy.loginfo("joint states received, initialization successful")
-
-    def update_joint_states(self):
-        joint_states = rospy.client.wait_for_message("/joint_states", JointState)
-        p = joint_states.position
-        self.right_joint_states = [p[14], p[13], p[10], p[11], p[15], p[16], p[17]]
-        self.left_joint_states = [p[4], p[3], p[0], p[1], p[5], p[6], p[7]]
-        self.linear_joint_state = [p[8]]
-
-    def update_ee_pose(self):
-        """
-        robot_urdf = URDF.from_xml_string("urdf_str")
-        self.update_joint_states()
-        # base -> right ee
-        kdl_kin = KDLKinematics(robot_urdf, "base_link", "right_ee_link")
-        self.right_ee_pose = kdl_kin.forward(self.linear_joint_state + self.right_joint_states)
-
-        # base -> left ee
-        kdl_kin = KDLKinematics(robot_urdf, "base_link", "left_ee_link")
-        self.left_ee_pose = kdl_kin.forward(self.linear_joint_state + self.left_joint_states)
-        """
-        raise NotImplementedError()
 
     def home(self):
         # home left arm in joint space and home right arm in cart or joint space
