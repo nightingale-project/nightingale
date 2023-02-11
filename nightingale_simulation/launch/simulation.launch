@@ -13,11 +13,6 @@
         args="5 movo_7dof_moveit_config movo_moveit_planning_execution.launch sim:=true info:=true"
         name="moveit_bringup" output="screen"/>
 
-    <!-- Run the simulation initialization procedure (ie tuck arms and more) -->
-    <node pkg="si_utils" type="timed_roslaunch"
-        args="10 movo_gazebo init_sim.xml"
-        name="init_sim_bringup" output="screen"/>
-
     <!-- Bring up RVIZ -->
     <node pkg="si_utils" type="timed_roslaunch"
         args="20 nightingale_visualization viz.launch"
