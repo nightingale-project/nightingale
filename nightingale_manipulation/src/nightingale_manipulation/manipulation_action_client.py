@@ -159,7 +159,9 @@ class ManipulationControl:
         rospy.loginfo("Initialized cartesian ctrl")
 
         robot_config_service = "/nightingale/robot_configuration_lookup"
+        rospy.loginfo(f"Manipulation Control: waiting for robot configuration service")
         rospy.wait_for_service(robot_config_service)
+        rospy.loginfo(f"Manipulation Control: found robot configuration service")
         lookup_client = rospy.ServiceProxy(
             robot_config_service, RobotConfigurationLookup
         )
