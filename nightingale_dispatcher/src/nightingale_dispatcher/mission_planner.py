@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#/usr/bin/env python3
 import queue
 from enum import Enum
 
@@ -12,6 +12,7 @@ from nightingale_dispatcher.move_arm_task import MoveArmTask
 from nightingale_dispatcher.send_interface_request_task import SendInterfaceRequestTask
 from nightingale_dispatcher.task import Task, TaskCodes
 from nightingale_ros_bridge.bridge_interface_config import BridgeConfig, RobotStatus
+from nightingale_dispatcher.estimate_pose_task import EstimatePoseTask
 
 
 # enum for phase status
@@ -29,6 +30,7 @@ class MissionPlanner:
         )
         self.navigate_task = NavigateTask()
         self.move_arm_task = MoveArmTask()
+        self.estimate_pose_task = EstimatePoseTask()
         self.send_interface_request_task = SendInterfaceRequestTask()
 
         self.server = actionlib.SimpleActionServer(
@@ -149,6 +151,10 @@ class MissionPlanner:
     def handoff_items_phase(self):
         rospy.loginfo("Nightingale Mission Planner starting to hand items")
         # Arrived at patient's bedside
+
+        # pose estimation
+        status, bin_goal = self.estimate_pose_task.execute("body")
+        rospy.loginfo(f"node returns {bin_goal}")
 
         # show arm movement and get input to start
         task_response = self.send_interface_request_task.execute(
