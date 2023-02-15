@@ -3,6 +3,7 @@
 import actionlib
 import rospy
 import math
+import time
 
 # joint
 from moveit_action_handlers.msg import PropertyValuePair
@@ -24,6 +25,7 @@ from urdf_parser_py.urdf import Robot
 import tf_conversions, tf2_ros
 from geometry_msgs.msg import Pose as GeometryPose
 from geometry_msgs.msg import Quaternion, Point
+from tf.transformations import euler_from_quaternion
 
 # TODO: replace with service call, requires refactoring of service to include gripper info
 CFG = rospy.get_param("/nightingale_utils/joint_configurations")
@@ -32,7 +34,7 @@ CFG = rospy.get_param("/nightingale_utils/joint_configurations")
 # overriding the geometry msgs Pose class to add tolerance on equivalence check
 class Pose(GeometryPose):
     def __init__(self, tolerance=0.01):
-        super.__init__()
+        super().__init__()
         self.tol = tolerance
 
     def __eq__(self, other):
@@ -49,6 +51,17 @@ class Pose(GeometryPose):
                 math.isclose(self.orientation.w, other.orientation.w, rel_tol=self.tol),
             ]
         )
+
+    def copy(self):
+        new_pose = Pose()
+        new_pose.position.x = self.position.x
+        new_pose.position.y = self.position.y
+        new_pose.position.z = self.position.z
+        new_pose.orientation.x = self.orientation.x
+        new_pose.orientation.y = self.orientation.y
+        new_pose.orientation.z = self.orientation.z
+        new_pose.orientation.w = self.orientation.w
+        return new_pose
 
 
 class Orientation:
@@ -148,8 +161,8 @@ class ManipulationJointControl:
         self.left_arm_home_joint_values = CFG["left_arm_home"]["joints"]
         self.right_arm_home_joint_values = CFG["right_arm_home"]["joints"]
 
-        self._right_joint_states = None
-        self._left_joint_states = None
+        self._right_joint_states = [0, 0, 0, 0, 0, 0, 0]
+        self._left_joint_states = [0, 0, 0, 0, 0, 0, 0]
         self._joint_tolerance = joint_tolerance
 
     def update_joint_states(self):
@@ -215,8 +228,6 @@ class ManipulationJointControl:
         @return: True if any targets are different from the current state,
                  False if all targets are the same as current state
         """
-        if not self.update_joint_states():
-            return False
 
         if len(joint_target) != 7:
             raise Exception("Invalid joint value length")
@@ -228,7 +239,7 @@ class ManipulationJointControl:
                 rel_tol=self._joint_tolerance,
             ):
                 error_count -= 1
-        return bool(error_count)
+        return error_count > 0
 
     def cmd_right_arm(self, joint_target: list, blocking=True) -> bool:
         """
@@ -238,18 +249,21 @@ class ManipulationJointControl:
         @param blocking: default True, if blocking, function will wait for action server response
         @return: result of verify_joint_target and action server state if blocking
         """
-        if self.verify_joint_target(joint_target, self._right_joint_states):
-            goal = joint_goal(joint_target, self.right_arm_joint_names)
-            self.right_arm.send_goal(goal)
-            if blocking:
-                self.right_arm.wait_for_result()
-                status = self.right_arm.get_result().status
-                if status == ActionResultStatusConstants.SUCCEEDED:
-                    return True
-                rospy.logwarn("cmd_right_arm failed with status: " + str(status))
-                return False
+        if not self.update_joint_states():
+            return False
+        if not self.verify_joint_target(joint_target, self._right_joint_states):
             return True
-        return False
+
+        goal = joint_goal(joint_target, self.right_arm_joint_names)
+        self.right_arm.send_goal(goal)
+        if blocking:
+            self.right_arm.wait_for_result()
+            status = self.right_arm.get_result().status
+            if status == "Success":
+                return True
+            rospy.logwarn("cmd_right_arm failed with status: " + str(status))
+            return False
+        return True
 
     def cmd_left_arm(self, joint_target, blocking=True):
         """
@@ -259,25 +273,26 @@ class ManipulationJointControl:
         @param blocking: default True, if blocking, function will wait for action server response
         @return: boolean result of verify_joint_target and action server state if blocking
         """
-        if self.verify_joint_target(joint_target, self._left_joint_states):
-            goal = joint_goal(joint_target, self.left_arm_joint_names)
-            self.left_arm.send_goal(goal)
-            if blocking:
-                self.left_arm.wait_for_result()
-                status = self.left_arm.get_result().status
-                if status == ActionResultStatusConstants.SUCCEEDED:
-                    return True
-                rospy.logwarn("cmd_left_arm failed with status: " + str(status))
-                return False
+        if not self.update_joint_states():
+            return False
+        if not self.verify_joint_target(joint_target, self._left_joint_states):
             return True
-        return False
+
+        goal = joint_goal(joint_target, self.left_arm_joint_names)
+        self.left_arm.send_goal(goal)
+        if blocking:
+            self.left_arm.wait_for_result()
+            status = self.left_arm.get_result().status
+            if status == "Success":
+                return True
+            rospy.logwarn("cmd_left_arm failed with status: " + str(status))
+            return False
+        return True
 
     def home(self):
-        self.cmd_left_arm(self.left_arm_home_joint_values, blocking=False)
-        self.left_arm.wait_for_result()
-        self.cmd_right_arm(self.right_arm_home_joint_values, blocking=False)
-        self.right_arm.wait_for_result()
-        return True  # TODO: action_server.get_result()
+        left_status = self.cmd_left_arm(self.left_arm_home_joint_values)
+        right_status = self.cmd_right_arm(self.right_arm_home_joint_values)
+        return left_status and right_status
 
 
 class ManipulationGripperControl:
@@ -349,7 +364,7 @@ class ManipulationCartesianControl:
             f"/moveit_action_handlers/{prefix}_arm/cartesian_ctrl",
             MoveToPoseMoveItAction,
         )
-        self.arm.wait_for_server(timeout=10)
+        self.arm.wait_for_server()
         self.prefix = prefix
         self.ee_ctrl_mode = 0
         self.orientation = Orientation()
@@ -359,9 +374,10 @@ class ManipulationCartesianControl:
         # TODO: include correct home pose
         self.home_pose = None
 
-        self.robot = Robot.from_parameter_server()
+        # self.robot = Robot.from_parameter_server()
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
+        time.sleep(1)
         if self.update_ee_pose():
             rospy.loginfo(f"{prefix} arm cartesian control initialized")
         else:
@@ -375,27 +391,29 @@ class ManipulationCartesianControl:
         """
         try:
             link_transform = self.tf_buffer.lookup_transform(
-                self.ref_link, self.ee_link, rospy.Time()
+                self.ref_link, self.ee_link, rospy.Time(0)
             )
-
-            q = link_transform.transform.rotation
-            self.orientation = quaternion_to_euler(q)
-            p = link_transform.transform.translation
-            self.pose.position = p
-            self.pose.orientation = q
-            return True
-
-        except (
-            tf2_ros.LookupException,
-            tf2_ros.ConnectivityException,
-            tf2_ros.ExtrapolationException,
-        ):
+        except Exception as e:
+            rospy.logerr(str(e))
             rospy.logerr(f"{self.prefix} arm transformation lookup failed")
             return False
 
+        q = link_transform.transform.rotation
+
+        quaternion_list = [q.x, q.y, q.z, q.w]
+        (roll, pitch, yaw) = euler_from_quaternion(quaternion_list)
+        self.orientation.roll = roll
+        self.orientation.pitch = pitch
+        self.orientation.yaw = yaw
+
+        p = link_transform.transform.translation
+        self.pose.position = p
+        self.pose.orientation = q
+        return True
+
     def cmd_arm(self, pose: GeometryPose, blocking=True, ee_relative=False):
         """
-        Commands the arm to move to a Pose in the cartesian space relative to the robot base_link
+        Commands the arm to move to a Pose in the cartesian space relative to the robot base link
 
         @param pose: geometry_msgs.msg Pose
         @param blocking: if true, wait for action server result
@@ -420,9 +438,18 @@ class ManipulationCartesianControl:
 
         # free end effector control mode
         else:
-            goal = cartesian_goal(
-                pose.position, ref_link, quaternion_to_euler(pose.orientation)
-            )
+            quaternion_list = [
+                pose.orientation.x,
+                pose.orientation.y,
+                pose.orientation.z,
+                pose.orientation.w,
+            ]
+            (roll, pitch, yaw) = euler_from_quaternion(quaternion_list)
+            euler_orientation = Orientation(roll=roll, pitch=pitch, yaw=yaw)
+            goal = cartesian_goal(pose.position, ref_link, euler_orientation)
+
+        print("goal: ")
+        print(goal)
 
         self.arm.send_goal(goal)
         if blocking:
@@ -447,7 +474,7 @@ class ManipulationCartesianControl:
     def get_pose(self):
         if not self.update_ee_pose():
             return False
-        return self.pose
+        return self.pose.copy()
 
     def get_orientation(self):
         if not self.update_ee_pose():
@@ -471,13 +498,12 @@ class ManipulationControl:
         self.linear_joint_state = [0]
         self.right_ee_pose = None
         self.left_ee_pose = None
-        self.update_joint_states()
-        rospy.loginfo("joint states received, initialization successful")
+        rospy.loginfo("Manipulation initialization successful")
 
     def home(self):
         # home left arm in joint space and home right arm in cart or joint space
         # use self.jnt_ctrl.home() for now
-        raise NotImplementedError()
+        self.jnt_ctrl.home()
 
     def extend_handoff(self):
         # extend right arm in cartesian space
@@ -489,4 +515,19 @@ class ManipulationControl:
 if __name__ == "__main__":
     rospy.init_node("manipulation_control")
     manipulation = ManipulationControl()
-    manipulation.jnt_ctrl.home()
+
+    manipulation.home()
+    print("reached home")
+    time.sleep(2)
+
+    print("starting pose: ")
+    pose = manipulation.right_cartesian.get_pose()
+    print(pose)
+
+    pose = GeometryPose()
+    pose.position.y = 0.3
+    print("goal pose: ")
+    print(pose)
+
+    manipulation.right_cartesian.set_free_ee_ctrl_mode()
+    print(manipulation.right_cartesian.cmd_arm(pose, ee_relative=True))
