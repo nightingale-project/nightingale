@@ -10,28 +10,13 @@ from nightingale_msgs.msg import Payload
 
 
 class PayloadEstimator:
-    GRAVITY = 9.8
+    GRAVITY = 9.8  # [m/sec^2]
+    PAYLOAD_DETECTION_THRESHOLD = 1  # [kg]
 
     def __init__(self):
-        rospy.init_node("payload_estimator_node")
-
-        self.forces = np.zeros(6)
-        self.last_forces = np.zeros(6)
-        self.filter_coeff = 0.5
-
-        self.tf_buffer = tf2_ros.Buffer()
-        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
-
-        self.payload_pub = self.Publisher(
-            f"/nightingale/payload", Payload, queue_size=10
-        )
-        self.mass_num = 100
-        self.mass_idx = 0
-        self.masses = np.zeros(self.mass_num)
-
         self.dof = 7
+        self.ref_link_name = "base_link"
         self.joint_link_names = [
-            "base_link",
             "shoulder_link",
             "arm_half_1_link",
             "arm_half_2_link",
@@ -49,16 +34,27 @@ class PayloadEstimator:
             "gripper_finger3_finger_tip_link",
         ]
 
-        # Replace with rosparam
-        self.ARM_MASS = 2.5  # [kg]
-        self.PAYLOAD_DETECTED_THRESHOLD = 0.1  # [kg]
+        self.forces = np.zeros(6)
+        self.last_forces = np.zeros(6)
+        self.filter_coeff = 0.5
+
+        self.mass_num = 100
+        self.mass_idx = 0
+        self.masses = np.zeros(self.mass_num)
+
+        self.tf_buffer = tf2_ros.Buffer()
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
+
+        self.payload_pub = self.Publisher(
+            f"/nightingale/payload", Payload, queue_size=10
+        )
 
         self.joint_state_sub = self.Subscriber(
             "/joint_states", JointState, self.joint_state_cb
         )
 
     def joint_state_cb(self, msg):
-        jacobian = self.try_get_jacobian("right")
+        jacobian, arm_forces = self.try_get_jacobian("right")
         if jacobian is None:
             return
 
@@ -70,12 +66,12 @@ class PayloadEstimator:
         # 9: right_wrist_spherical_2_joint
         # 10: right_wrist_3_joint
 
-        forces = np.linalg.pinv(jacobian.T) @ msg.effort[4:11]
+        forces = np.linalg.pinv(jacobian.T) @ msg.effort[4:11] - arm_forces
 
         self.forces = self.last_forces + self.filter_coeff * (forces - self.last_forces)
         self.last_forces = forces
 
-        payload_mass = self.forces[2] / self.GRAVITY - self.ARM_MASS
+        payload_mass = self.forces[2] / self.GRAVITY
 
         payload = Payload()
         payload.mass = payload_mass
@@ -90,11 +86,12 @@ class PayloadEstimator:
         self.payload_pub.publish(payload)
 
     def try_get_jacobian(self, arm_side):
+        arm_forces = np.zeros(6)
         jacobian = np.zeros((6, self.dof))
 
         for idx in range(self.dof):
-            from_link = self.joint_link_names[0]
-            to_link = f"{arm_side}_{self.joint_link_suffixes[idx + 1]}"
+            from_link = self.ref_link_name
+            to_link = f"{arm_side}_{self.joint_link_suffixes[idx]}"
             try:
                 link_transform = self.tf_buffer.lookup_transform(
                     from_link, to_link, rospy.Time()
@@ -127,11 +124,20 @@ class PayloadEstimator:
                 tf2_ros.ExtrapolationException,
             ):
                 rospy.logerr(f"Arm transform lookup failed")
-                return None
+                return None, None
+
+            arm_forces[:3] += np.array(
+                [0, 0, -self.robot.link_map[to_link].inertial.mass * self.GRAVITY]
+            ).T
+            arm_forces[3:] += (
+                self.robot.link_map[to_link].inertial.mass
+                * self.GRAVITY
+                * np.array([-transl[1], transl[0], 0]).T
+            )
 
             jacobian[:3, idx] = np.cross(rot_axis, transl)
             jacobian[3:6, idx] = rot_axis
-        return jacobian
+        return jacobian, arm_forces
 
 
 if __name__ == "__main__":
