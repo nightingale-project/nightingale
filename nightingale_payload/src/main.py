@@ -14,6 +14,11 @@ class PayloadEstimator:
     PAYLOAD_DETECTION_THRESHOLD = 1  # [kg]
 
     def __init__(self):
+        rospy.init_node("payload_estimator_node")
+
+        self.robot = Robot.from_parameter_server()
+        rospy.loginfo(f"{self.robot.link_map['right_shoulder_link'].inertial}")
+
         self.dof = 7
         self.ref_link_name = "base_link"
         self.joint_link_names = [
@@ -91,7 +96,7 @@ class PayloadEstimator:
 
         for idx in range(self.dof):
             from_link = self.ref_link_name
-            to_link = f"{arm_side}_{self.joint_link_suffixes[idx]}"
+            to_link = f"{arm_side}_{self.joint_link_names[idx]}"
             try:
                 link_transform = self.tf_buffer.lookup_transform(
                     from_link, to_link, rospy.Time()

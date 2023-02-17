@@ -4,11 +4,11 @@ import rospy
 import tf2_ros
 import tf_conversions
 import numpy as np
-import matplotlib.pyplot as plt
 
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Bool
 from nightingale_msgs.msg import Payload
+from urdf_parser_py.urdf import Robot
 
 
 class PayloadEstimator:
@@ -16,9 +16,14 @@ class PayloadEstimator:
     PAYLOAD_DETECTION_THRESHOLD = 1  # [kg]
 
     def __init__(self):
+        rospy.init_node("payload_estimator_node")
+
+        self.robot = Robot.from_parameter_server()
+        rospy.loginfo(f"{self.robot.link_map['right_shoulder_link'].inertial}")
+
         self.dof = 7
-        self.ref_link_name = "base_link"
-        self.joint_link_names = [
+        self.joint_link_suffixes = [
+            "base_link",
             "shoulder_link",
             "arm_half_1_link",
             "arm_half_2_link",
@@ -56,25 +61,22 @@ class PayloadEstimator:
         )
 
         self.analysis_service = rospy.Subscriber("analyze_arm_forces", Bool, self.analyze_arm_forces)
-        self.analysis_num = 100
-        self.analysis_dec = 10
+        self.analysis_num = 1000
+        self.analysis_dec = 5
         self.analysis_idx = 0
-        self.analysis_forces = np.zeros(6, 100)
+        self.analysis_forces = np.zeros((6, self.analysis_num))
 
     def analyze_arm_forces(self, msg):
         mean = np.mean(self.analysis_forces, axis=1)
         covariance = np.cov((self.analysis_forces.T - mean).T)
 
         evals, evecs = np.linalg.eig(covariance)
-        rospy.loginfo(mean)
-        rospy.loginfo(covariance)
+        principal_axes = np.sqrt(evals) * evecs
 
-        if msg.data:
-            labels = ["Fx", "Fy", "Fz", "Mx", "My", "Mz"]
-            for idx, label in zip(self.analysis_forces.shape[0], labels):
-                plt.hist(self.analysis_forces[idx])
-                plt.set_title(label)
-            plt.show()
+        np.savez("arm_force_analysis.npz", self.analysis_forces, mean, covariance, evals, evecs, principal_axes)
+
+        rospy.loginfo(mean)
+        rospy.loginfo(covariance)    
 
     def joint_state_cb(self, msg):
         jacobian, arm_forces = self.try_get_jacobian("right")
@@ -96,13 +98,16 @@ class PayloadEstimator:
 
         if self.analysis_idx % self.analysis_dec == 0:
             self.analysis_forces[:, (self.analysis_idx // self.analysis_dec) % self.analysis_num] = self.forces
+            if self.analysis_idx // self.analysis_dec == self.analysis_num:
+                rospy.loginfo("Ready to analyze")
         self.analysis_idx += 1
 
         payload_mass = self.forces[2] / self.GRAVITY
 
         payload = Payload()
         payload.mass = payload_mass
-        payload.detected = payload_mass > self.PAYLOAD_DETECTED_THRESHOLD
+        payload.detected = payload_mass > self.PAYLOAD_DETECTION_THRESHOLD
+        payload.arm_forces = self.forces.tolist()
 
         self.masses[self.mass_idx] = payload_mass
         self.mass_idx = (self.mass_idx + 1) % self.mass_num
@@ -117,8 +122,8 @@ class PayloadEstimator:
         jacobian = np.zeros((6, self.dof))
 
         for idx in range(self.dof):
-            from_link = self.ref_link_name
-            to_link = f"{arm_side}_{self.joint_link_suffixes[idx]}"
+            from_link = f"{arm_side}_{self.joint_link_suffixes[0]}"
+            to_link = f"{arm_side}_{self.joint_link_suffixes[idx + 1]}"
             try:
                 link_transform = self.tf_buffer.lookup_transform(
                     from_link, to_link, rospy.Time()
@@ -146,7 +151,7 @@ class PayloadEstimator:
                 tf2_ros.ConnectivityException,
                 tf2_ros.ExtrapolationException,
             ):
-                rospy.logerr(f"Arm transform lookup failed")
+                rospy.logerr(f"Arm transform lookup from {from_link} to {to_link} failed")
                 return None, None
 
             arm_forces[:3] += np.array(
@@ -166,3 +171,15 @@ class PayloadEstimator:
 if __name__ == "__main__":
     payload_estimator = PayloadEstimator()
     rospy.spin()
+
+"""
+mean=[ 1.48798556  4.02257134 36.51546116]
+cov=[[ 0.00392623  0.00094428  0.00076409]
+ [ 0.00094428  0.00468538 -0.00017132]
+ [ 0.00076409 -0.00017132  0.00159611]]
+
+mean=[ 0.85829068 26.44326372 31.79634967]
+cov=[[ 2.60679306e-03 -9.14328342e-05  1.97105243e-05]
+ [-9.14328342e-05  1.52748140e-03 -2.44626672e-04]
+ [ 1.97105243e-05 -2.44626672e-04  1.51252473e-03]]
+"""
