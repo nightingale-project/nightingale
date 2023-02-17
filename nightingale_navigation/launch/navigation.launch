@@ -19,5 +19,7 @@
         <param name="save_pose" value="false" />
         <param name="pose_filename" value="/home/$(optenv USER robohub)/.nightingale_room_runner_cache" />
         <param name="pose_write_period" value="10" />
+        <param name="deflation_hysteresis_low" value="2.5" />
+        <param name="deflation_hysteresis_high" value="7.0" />
     </node>
 </launch>
