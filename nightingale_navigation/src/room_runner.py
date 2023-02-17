@@ -14,6 +14,7 @@ import tf2_ros
 import tf_conversions
 from actionlib_msgs.msg import GoalStatus
 from geometry_msgs.msg import PoseWithCovarianceStamped
+from dynamic_reconfigure.client import Client as DynamicReconfigureClient
 import numpy as np
 
 
@@ -83,6 +84,21 @@ class RoomRunnerNode(object):
                 logger_name=self.logger_name,
             )
 
+        # Localcostmap inflation is dynamically configured when close to goal
+        # This allows robot to drive right up to the bed
+        rospy.loginfo(
+            f"Waiting for dynamic reconfigure client for local costmap",
+            logger_name=self.logger_name,
+        )
+        self.dynamic_reconfigure_client = DynamicReconfigureClient('/move_base/local_costmap/inflation_layer')
+        self.local_inflation = self.dynamic_reconfigure_client.get_configuration()['inflation_radius']
+        self.deflation_hysteresis_low = rospy.get_param("/room_runner/deflation_hysteresis_low", 5.0)
+        self.deflation_hysteresis_high = rospy.get_param("/room_runner/deflation_hysteresis_high", 10.0)
+        rospy.loginfo(
+            f"Got the dynamic reconfigure client for local costmap",
+            logger_name=self.logger_name,
+        )
+
         self.timer = (
             rospy.Timer(rospy.Duration(self.pose_write_period), self.write_pose)
             if self.save_pose
@@ -147,6 +163,10 @@ class RoomRunnerNode(object):
                 [fb.base_position.pose.position.x, fb.base_position.pose.position.y]
             )
             euclidean_distance = np.linalg.norm(target - cur)
+            if euclidean_distance < self.deflation_hysteresis_low:
+                self.dynamic_reconfigure_client.update_configuration({'inflation_radius':self.local_inflation/3})
+            elif euclidean_distance > self.deflation_hysteresis_high:
+                self.dynamic_reconfigure_client.update_configuration({'inflation_radius':self.local_inflation})
             ret = RoomRunnerFeedback()
             ret.euclidean_distance_to_goal = euclidean_distance
             self.server.publish_feedback(ret)
