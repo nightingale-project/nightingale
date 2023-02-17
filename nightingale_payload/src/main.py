@@ -45,11 +45,11 @@ class PayloadEstimator:
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
 
-        self.payload_pub = self.Publisher(
+        self.payload_pub = rospy.Publisher(
             f"/nightingale/payload", Payload, queue_size=10
         )
 
-        self.joint_state_sub = self.Subscriber(
+        self.joint_state_sub = rospy.Subscriber(
             "/joint_states", JointState, self.joint_state_cb
         )
 
@@ -97,7 +97,7 @@ class PayloadEstimator:
                     from_link, to_link, rospy.Time()
                 )
 
-                orientation_quaternion = np.array(
+                rot_mat = tf_conversions.transformations.quaternion_matrix(
                     [
                         link_transform.transform.rotation.x,
                         link_transform.transform.rotation.y,
@@ -105,10 +105,6 @@ class PayloadEstimator:
                         link_transform.transform.rotation.w,
                     ]
                 )
-                rot_mat = tf_conversions.transformations.quaternion_matrix(
-                    orientation_quaternion
-                )
-
                 rot_axis = rot_mat[:3, 2]
 
                 transl = np.array(
