@@ -60,8 +60,10 @@ class PayloadEstimator:
             "/joint_states", JointState, self.joint_state_cb
         )
 
-        self.analysis_service = rospy.Subscriber("analyze_arm_forces", Bool, self.analyze_arm_forces)
-        self.analysis_num = 1000
+        self.analysis_service = rospy.Subscriber(
+            "analyze_arm_forces", Bool, self.analyze_arm_forces
+        )
+        self.analysis_num = 100
         self.analysis_dec = 5
         self.analysis_idx = 0
         self.analysis_forces = np.zeros((6, self.analysis_num))
@@ -73,10 +75,18 @@ class PayloadEstimator:
         evals, evecs = np.linalg.eig(covariance)
         principal_axes = np.sqrt(evals) * evecs
 
-        np.savez("arm_force_analysis.npz", self.analysis_forces, mean, covariance, evals, evecs, principal_axes)
+        np.savez(
+            f"/home/lyndon/Documents/mte_4812/arm_force_analysis.npz",
+            self.analysis_forces,
+            mean,
+            covariance,
+            evals,
+            evecs,
+            principal_axes,
+        )
 
         rospy.loginfo(mean)
-        rospy.loginfo(covariance)    
+        rospy.loginfo(covariance)
 
     def joint_state_cb(self, msg):
         jacobian, arm_forces = self.try_get_jacobian("right")
@@ -91,13 +101,15 @@ class PayloadEstimator:
         # 9: right_wrist_spherical_2_joint
         # 10: right_wrist_3_joint
 
-        forces = np.linalg.pinv(jacobian.T) @ msg.effort[4:11] - arm_forces
+        forces = np.linalg.pinv(jacobian.T) @ msg.effort[4:11]  # - arm_forces
 
         self.forces = self.last_forces + self.filter_coeff * (forces - self.last_forces)
         self.last_forces = forces
 
         if self.analysis_idx % self.analysis_dec == 0:
-            self.analysis_forces[:, (self.analysis_idx // self.analysis_dec) % self.analysis_num] = self.forces
+            self.analysis_forces[
+                :, (self.analysis_idx // self.analysis_dec) % self.analysis_num
+            ] = self.forces
             if self.analysis_idx // self.analysis_dec == self.analysis_num:
                 rospy.loginfo("Ready to analyze")
         self.analysis_idx += 1
@@ -123,7 +135,7 @@ class PayloadEstimator:
 
         for idx in range(self.dof):
             from_link = f"{arm_side}_{self.joint_link_suffixes[0]}"
-            to_link = f"{arm_side}_{self.joint_link_suffixes[idx + 1]}"
+            to_link = f"{arm_side}_{self.joint_link_suffixes[idx]}"
             try:
                 link_transform = self.tf_buffer.lookup_transform(
                     from_link, to_link, rospy.Time()
@@ -151,7 +163,9 @@ class PayloadEstimator:
                 tf2_ros.ConnectivityException,
                 tf2_ros.ExtrapolationException,
             ):
-                rospy.logerr(f"Arm transform lookup from {from_link} to {to_link} failed")
+                rospy.logerr(
+                    f"Arm transform lookup from {from_link} to {to_link} failed"
+                )
                 return None, None
 
             arm_forces[:3] += np.array(

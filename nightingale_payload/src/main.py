@@ -7,21 +7,23 @@ import numpy as np
 
 from sensor_msgs.msg import JointState
 from nightingale_msgs.msg import Payload
+from urdf_parser_py.urdf import Robot
 
 
 class PayloadEstimator:
-    GRAVITY = 9.8  # [m/sec^2]
+    GRAVITATIONAL_ACCELERATION = -9.8  # [m/sec^2]
     PAYLOAD_DETECTION_THRESHOLD = 1  # [kg]
 
-    def __init__(self):
+    def __init__(self, arm_side):
         rospy.init_node("payload_estimator_node")
 
         self.robot = Robot.from_parameter_server()
         rospy.loginfo(f"{self.robot.link_map['right_shoulder_link'].inertial}")
 
         self.dof = 7
-        self.ref_link_name = "base_link"
-        self.joint_link_names = [
+        self.arm_side = arm_side
+        self.joint_link_suffixes = [
+            "base_link",
             "shoulder_link",
             "arm_half_1_link",
             "arm_half_2_link",
@@ -39,6 +41,12 @@ class PayloadEstimator:
             "gripper_finger3_finger_tip_link",
         ]
 
+        self.rotation_axes = np.zeros((self.dof, 3))
+        self.translations = np.zeros((self.dof, 3))
+
+        self.jacobian = np.zeros((6, self.dof))
+        self.gravity_forces = np.zeros(6)
+
         self.forces = np.zeros(6)
         self.last_forces = np.zeros(6)
         self.filter_coeff = 0.5
@@ -47,21 +55,22 @@ class PayloadEstimator:
         self.mass_idx = 0
         self.masses = np.zeros(self.mass_num)
 
-        self.tf_buffer = tf2_ros.Buffer()
-        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
-
         self.payload_pub = rospy.Publisher(
             f"/nightingale/payload", Payload, queue_size=10
         )
+
+        self.tf_buffer = tf2_ros.Buffer()
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
 
         self.joint_state_sub = rospy.Subscriber(
             "/joint_states", JointState, self.joint_state_cb
         )
 
     def joint_state_cb(self, msg):
-        jacobian, arm_forces = self.try_get_jacobian("right")
-        if jacobian is None:
-            return
+        self.lookup_tf()
+
+        self.get_jacobian()
+        self.get_gravity()
 
         # 4: right_shoulder_pan_joint
         # 5: right_shoulder_lift_joint
@@ -70,33 +79,36 @@ class PayloadEstimator:
         # 8: right_wrist_spherical_1_joint
         # 9: right_wrist_spherical_2_joint
         # 10: right_wrist_3_joint
+        self.compute_arm_forces(msg.effort[4:11])
 
-        forces = np.linalg.pinv(jacobian.T) @ msg.effort[4:11] - arm_forces
+    def lookup_tf(self):
+        try:
+            base_link_transform = self.tf_buffer.lookup_transform(
+                "base_link", f"{self.arm_side}_base_link", rospy.Time()
+            )
 
-        self.forces = self.last_forces + self.filter_coeff * (forces - self.last_forces)
-        self.last_forces = forces
+            rot_mat = tf_conversions.transformations.quaternion_matrix(
+                [
+                    link_transform.transform.rotation.x,
+                    link_transform.transform.rotation.y,
+                    link_transform.transform.rotation.z,
+                    link_transform.transform.rotation.w,
+                ]
+            )
+            self.gravity = self.GRAVITATIONAL_ACCELERATION * rot_mat[:3, 2]
+        except (
+            tf2_ros.LookupException,
+            tf2_ros.ConnectivityException,
+            tf2_ros.ExtrapolationException,
+        ):
+            rospy.logerr(f"Arm transform lookup from {from_link} to {to_link} failed")
 
-        payload_mass = self.forces[2] / self.GRAVITY
-
-        payload = Payload()
-        payload.mass = payload_mass
-        payload.detected = payload_mass > self.PAYLOAD_DETECTED_THRESHOLD
-
-        self.masses[self.mass_idx] = payload_mass
-        self.mass_idx = (self.mass_idx + 1) % self.mass_num
-
-        self.avg_mass = np.mean(self.masses)
-        self.var_mass = np.var(self.masses)
-
-        self.payload_pub.publish(payload)
-
-    def try_get_jacobian(self, arm_side):
-        arm_forces = np.zeros(6)
-        jacobian = np.zeros((6, self.dof))
+        rotation_axes = np.zeros((self.dof, 3))
+        translations = np.zeros((self.dof, 3))
 
         for idx in range(self.dof):
-            from_link = self.ref_link_name
-            to_link = f"{arm_side}_{self.joint_link_names[idx]}"
+            from_link = f"{self.arm_side}_{self.joint_link_suffixes[0]}"
+            to_link = f"{self.arm_side}_{self.joint_link_names[idx]}"
             try:
                 link_transform = self.tf_buffer.lookup_transform(
                     from_link, to_link, rospy.Time()
@@ -110,35 +122,72 @@ class PayloadEstimator:
                         link_transform.transform.rotation.w,
                     ]
                 )
-                rot_axis = rot_mat[:3, 2]
+                rotation_axes[idx, :] = rot_mat[:3, 2]
 
-                transl = np.array(
-                    [
-                        link_transform.transform.translation.x,
-                        link_transform.transform.translation.y,
-                        link_transform.transform.translation.z,
-                    ]
-                )
+                translations[idx, :] = [
+                    link_transform.transform.translation.x,
+                    link_transform.transform.translation.y,
+                    link_transform.transform.translation.z,
+                ]
             except (
                 tf2_ros.LookupException,
                 tf2_ros.ConnectivityException,
                 tf2_ros.ExtrapolationException,
             ):
-                rospy.logerr(f"Arm transform lookup failed")
-                return None, None
+                rospy.logerr(
+                    f"Arm transform lookup from {from_link} to {to_link} failed"
+                )
 
-            arm_forces[:3] += np.array(
-                [0, 0, -self.robot.link_map[to_link].inertial.mass * self.GRAVITY]
-            ).T
-            arm_forces[3:] += (
-                self.robot.link_map[to_link].inertial.mass
-                * self.GRAVITY
-                * np.array([-transl[1], transl[0], 0]).T
+        self.rotation_axes = rotation_axes
+        self.translations = translations
+
+    def get_jacobian(self):
+        jacobian = np.zeros((6, self.dof))
+
+        for idx in range(self.dof):
+            ee_translation = self.translations[-1, :] - self.translations[idx, :]
+            rotation_axis = self.rotation_axes[idx, :]
+
+            jacobian[:3, idx] = np.cross(rotation_axis, ee_translation)
+            jacobian[3:, idx] = rotation_axis
+
+        self.jacobian = jacobian
+
+    def get_gravity(self):
+        gravity_forces = np.zeros(6)
+
+        for idx in range(self.dof):
+            ee_translation = self.translations[-1, :] - self.translations[idx, :]
+
+            to_link = f"{self.arm_side}_{self.joint_link_suffixes[idx]}"
+            gravity_forces[:3] += (
+                self.robot.link_map[to_link].inertial.mass * self.gravity
+            )
+            gravity_forces[3:] += self.robot.link_map[to_link].inertial.mass * np.cross(
+                self.gravity, ee_translation
             )
 
-            jacobian[:3, idx] = np.cross(rot_axis, transl)
-            jacobian[3:6, idx] = rot_axis
-        return jacobian, arm_forces
+        self.gravity_forces = gravity_forces
+
+    def compute_arm_forces(self, torques):
+        forces = np.linalg.pinv(self.jacobian.T) @ torques - self.gravity_forces
+
+        self.forces = self.last_forces + self.filter_coeff * (forces - self.last_forces)
+        self.last_forces = forces
+
+        payload_mass = self.forces[2] / self.GRAVITATIONAL_ACCELERATION
+
+        payload = Payload()
+        payload.mass = payload_mass
+        payload.detected = payload_mass > self.PAYLOAD_DETECTION_THRESHOLD
+
+        self.masses[self.mass_idx] = payload_mass
+        self.mass_idx = (self.mass_idx + 1) % self.mass_num
+
+        self.avg_mass = np.mean(self.masses)
+        self.var_mass = np.var(self.masses)
+
+        self.payload_pub.publish(payload)
 
 
 if __name__ == "__main__":
