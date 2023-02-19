@@ -79,11 +79,7 @@ class Orientation:
 
 
 def joint_goal(
-        joint_values: list,
-        joint_names: list,
-        eev=0.5,
-        eea=0.5,
-        timeout=5
+    joint_values: list, joint_names: list, eev=0.5, eea=0.5, timeout=5
 ) -> MoveToJointsMoveItGoal:
     goal = MoveToJointsMoveItGoal()
     goal.endEffectorVelocity = eev
@@ -98,13 +94,13 @@ def joint_goal(
 
 
 def cartesian_goal(
-        point: Point,
-        ref_link,
-        orientation: Orientation,
-        eev=0.5,
-        eea=0.5,
-        mode=0,
-        timeout=5,
+    point: Point,
+    ref_link,
+    orientation: Orientation,
+    eev=0.5,
+    eea=0.5,
+    mode=0,
+    timeout=5,
 ) -> MoveToPoseMoveItGoal:
     goal = MoveToPoseMoveItGoal()
     goal.constraint_mode = mode
@@ -171,10 +167,8 @@ class ManipulationJointControl:
 
         # probably a redundant check but making sure the joint names exist from the /joint_states data
         if not (
-                all(key in names_pos_dict.keys() for key in self.right_arm_joint_names)
-                and all(
-            key in names_pos_dict.keys() for key in self.left_arm_joint_names
-        )
+            all(key in names_pos_dict.keys() for key in self.right_arm_joint_names)
+            and all(key in names_pos_dict.keys() for key in self.left_arm_joint_names)
         ):
             rospy.logerr(
                 "Invalid or missing joint name in data received from /joint_states"
@@ -185,9 +179,7 @@ class ManipulationJointControl:
             self._right_joint_states.append(
                 names_pos_dict[self.right_arm_joint_names[i]]
             )
-            self._left_joint_states.append(
-                names_pos_dict[self.left_arm_joint_names[i]]
-            )
+            self._left_joint_states.append(names_pos_dict[self.left_arm_joint_names[i]])
 
         return True
 
@@ -214,9 +206,9 @@ class ManipulationJointControl:
         error_count = 7
         for i in range(7):
             if math.isclose(
-                    abs(joint_target[i]),
-                    abs(joint_states[i]),
-                    rel_tol=self._joint_tolerance,
+                abs(joint_target[i]),
+                abs(joint_states[i]),
+                rel_tol=self._joint_tolerance,
             ):
                 error_count -= 1
         return error_count > 0
@@ -538,9 +530,9 @@ class ManipulationControl:
 
     def home(self):
         self.right_cartesian.approximate_home()
-        print(self.jnt_ctrl.get_joint_states()['right_arm'])
+        print(self.jnt_ctrl.get_joint_states()["right_arm"])
         self.jnt_ctrl.home()
-        print(self.jnt_ctrl.get_joint_states()['right_arm'])
+        print(self.jnt_ctrl.get_joint_states()["right_arm"])
 
     def extend_handoff(self):
         # extend right arm in cartesian space
