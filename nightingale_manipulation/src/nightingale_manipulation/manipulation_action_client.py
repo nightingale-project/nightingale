@@ -119,24 +119,32 @@ def cartesian_goal(
 
 class ManipulationJointControl:
     def __init__(self, joint_tolerance=0.01):
-        self.left_arm = actionlib.simple_action_client.SimpleActionClient(
-            "/moveit_action_handlers/left_arm/joint_ctrl", MoveToJointsMoveItAction
+        self.client = actionlib.simple_action_client.SimpleActionClient(
+            "/moveit_action_handlers/joint_ctrl", MoveToJointsMoveItAction
         )
-        self.left_arm.wait_for_server()
-
-        self.right_arm = actionlib.simple_action_client.SimpleActionClient(
-            "/moveit_action_handlers/right_arm/joint_ctrl", MoveToJointsMoveItAction
-        )
-        self.right_arm.wait_for_server()
+        self.client.wait_for_server()
 
         # TODO: replace with service call
         self.left_arm_joint_names = CFG["left_arm_home"]["names"]
         self.right_arm_joint_names = CFG["right_arm_home"]["names"]
-        self.left_arm_home_joint_values = CFG["left_arm_home"]["joints"]
-        self.right_arm_home_joint_values = CFG["right_arm_home"]["joints"]
+        self.torso_joint_names = ['linear_joint']
+        self.pan_tilt_joint_names = ['pan_joint', 'tilt_joint']
 
         self._right_joint_states = [0, 0, 0, 0, 0, 0, 0]
         self._left_joint_states = [0, 0, 0, 0, 0, 0, 0]
+        self._pan_tilt_joint_states = [0, 0]
+        self._torso_joint_states = [0]
+
+        self._left_target = None
+        self._right_target = None
+        self._pan_tilt_target = None
+        self._torso_target = None
+
+        self.left_arm_home_joint_values = CFG["left_arm_home"]["joints"]
+        self.right_arm_home_joint_values = CFG["right_arm_home"]["joints"]
+        self.pan_tilt_home_joint_values = [0, 0]
+        self.torso_home_joint_values = [0.1]
+
         self._joint_tolerance = joint_tolerance
 
     def update_joint_states(self):
@@ -164,6 +172,8 @@ class ManipulationJointControl:
 
         self._right_joint_states = []
         self._left_joint_states = []
+        self._pan_tilt_joint_states = []
+        self._torso_joint_states = []
 
         # probably a redundant check but making sure the joint names exist from the /joint_states data
         if not (
@@ -181,6 +191,10 @@ class ManipulationJointControl:
             )
             self._left_joint_states.append(names_pos_dict[self.left_arm_joint_names[i]])
 
+        self._pan_tilt_joint_states.append(names_pos_dict[self.pan_tilt_joint_names[0]])
+        self._pan_tilt_joint_states.append(names_pos_dict[self.pan_tilt_joint_names[1]])
+        self._torso_joint_states.append(names_pos_dict[self.torso_joint_names[0]])
+
         return True
 
     def get_joint_states(self):
@@ -188,10 +202,12 @@ class ManipulationJointControl:
             return {
                 "left_arm": self._left_joint_states.copy(),
                 "right_arm": self._right_joint_states.copy(),
+                "pan_tilt": self._pan_tilt_joint_states.copy(),
+                "torso": self._torso_joint_states.copy(),
             }
         return False
 
-    def verify_joint_target(self, joint_target: list, joint_states: list) -> bool:
+    def verify_arm_joint_target(self, joint_target: list, joint_states: list) -> bool:
         """
         Verifies that the joint target list is valid, and that it is not the same as the current joint state
 
@@ -213,56 +229,133 @@ class ManipulationJointControl:
                 error_count -= 1
         return error_count > 0
 
-    def cmd_right_arm(self, joint_target: list) -> bool:
+    def cmd_right_arm(self, joint_target: list, execute=True) -> bool:
         """
-        Commands movement of the right arm through the right_arm action server
+        Commands movement of the right arm through the joint_space action server
 
         @param joint_target: list of target joint values
-        @param blocking: default True, if blocking, function will wait for action server response
+        @param execute: if True, arm will move without waiting, else self.execute() must be called after
         @return: result of verify_joint_target and action server state if blocking
         """
         if not self.update_joint_states():
             return False
-        if not self.verify_joint_target(joint_target, self._right_joint_states):
+        if not self.verify_arm_joint_target(joint_target, self._right_joint_states):
             return True
 
-        goal = joint_goal(joint_target, self.right_arm_joint_names)
-        self.right_arm.send_goal(goal)
-
-        self.right_arm.wait_for_result()
-        status = self.right_arm.get_result().status
-        if status == "Success":
+        self._right_target = joint_target.copy()
+        if not execute:
             return True
-        rospy.logwarn("cmd_right_arm failed with status: " + str(status))
-        return False
 
-    def cmd_left_arm(self, joint_target):
+        return self.execute()
+
+    def cmd_left_arm(self, joint_target: list, execute=True) -> bool:
         """
-        Commands the movement of the left arm through the left_arm action server
+        Commands the movement of the left arm through the joint_space action server
 
         @param joint_target: list of target joint values
-        @param blocking: default True, if blocking, function will wait for action server response
+        @param execute: if True, arm will move without waiting, else self.execute() must be called after
         @return: boolean result of verify_joint_target and action server state if blocking
         """
         if not self.update_joint_states():
             return False
-        if not self.verify_joint_target(joint_target, self._left_joint_states):
+        if not self.verify_arm_joint_target(joint_target, self._left_joint_states):
             return True
 
-        goal = joint_goal(joint_target, self.left_arm_joint_names)
-        self.left_arm.send_goal(goal)
+        self._left_target = joint_target.copy()
 
-        self.left_arm.wait_for_result()
-        status = self.left_arm.get_result().status
+        if not execute:
+            return True
+
+        return self.execute()
+
+    def cmd_pan_tilt(self, joint_target: list, execute=True) -> bool:
+        """
+        Commands the movement of the pan tilt through the joint_space action server
+
+        @param joint_target: list of target joint values
+        @param execute: if True, arm will move without waiting, else self.execute() must be called after
+        @return: status
+        """
+        if not self.update_joint_states():
+            return False
+
+        try:
+            if not len(joint_target) == 2:
+                return False
+        except TypeError:
+            return False
+
+        self._pan_tilt_target = joint_target.copy()
+
+        if not execute:
+            return True
+
+        return self.execute()
+
+    def cmd_torso(self, joint_target: list, execute=True) -> bool:
+        """
+        Commands the movement of the torso through the joint_space action server
+
+        @param joint_target: list of target joint values
+        @param execute: if True, arm will move without waiting, else self.execute() must be called after
+        @return: status
+        """
+        if not self.update_joint_states():
+            return False
+
+        try:
+            if not len(joint_target) == 1:
+                return False
+        except TypeError:
+            return False
+
+        self._torso_target = joint_target.copy()
+
+        if not execute:
+            return True
+
+        return self.execute()
+
+    def execute(self, velocity=0.5):
+        goal_names = []
+        goal_values = []
+
+        if self._left_target:
+            goal_names += self.left_arm_joint_names
+            goal_values += self._left_target.copy()
+            self._left_target = None
+
+        if self._right_target:
+            goal_names += self.right_arm_joint_names
+            goal_values += self._right_target.copy()
+            self._right_target = None
+
+        if self._pan_tilt_target:
+            goal_names += self.pan_tilt_joint_names
+            goal_values += self._pan_tilt_target.copy()
+            self._pan_tilt_target = None
+
+        if self._torso_target:
+            goal_names += self.torso_joint_names
+            goal_values += self._torso_target.copy()
+            self._torso_target = None
+
+        goal = joint_goal(goal_values, goal_names, eev=velocity)
+        self.client.send_goal(goal)
+        self.client.wait_for_result()
+        status = self.client.get_result().status
+
         if status == "Success":
             return True
-        rospy.logwarn("cmd_left_arm failed with status: " + str(status))
+        rospy.logwarn("joint control execute failed with status: " + str(status))
         return False
 
     def home(self):
-        left_status = self.cmd_left_arm(self.left_arm_home_joint_values)
-        right_status = self.cmd_right_arm(self.right_arm_home_joint_values)
-        return left_status and right_status
+        self.cmd_left_arm(self.left_arm_home_joint_values, execute=False)
+        self.cmd_right_arm(self.right_arm_home_joint_values, execute=False)
+        # self.cmd_pan_tilt(self.pan_tilt_home_joint_values, execute=False)
+        # self.cmd_torso(self.torso_home_joint_values, execute=False)
+        return self.execute(velocity=1)
 
 
 class ManipulationGripperControl:
@@ -429,9 +522,6 @@ class ManipulationCartesianControl:
             euler_orientation = Orientation(roll=roll, pitch=pitch, yaw=yaw)
             goal = cartesian_goal(pose.position, ref_link, euler_orientation)
 
-        print("goal: ")
-        print(goal)
-
         self.arm.send_goal(goal)
         if blocking:
             self.arm.wait_for_result()
@@ -530,14 +620,59 @@ class ManipulationControl:
 
     def home(self):
         self.right_cartesian.approximate_home()
-        print(self.jnt_ctrl.get_joint_states()["right_arm"])
         self.jnt_ctrl.home()
-        print(self.jnt_ctrl.get_joint_states()["right_arm"])
 
-    def extend_handoff(self):
-        # extend right arm in cartesian space
-        # TODO: replace with service call
-        self.jnt_ctrl.cmd_right_arm(CFG["right_arm_extended_handoff"]["joints"])
+    def extend_handoff(self, goal_point: Point):
+        point1 = Point()
+        point1.x = 0.727
+        point1.y = -0.03
+        point1.z = 0.616
+        self.right_cartesian.cmd_position(point1)
+
+        orientation1 = Quaternion()
+        orientation1.x = -0.7395762387263899
+        orientation1.y = -0.015843133434378723
+        orientation1.z = -0.07349393339288811
+        orientation1.w = 0.668860691017755
+        self.right_cartesian.cmd_orientation(orientation1)
+
+        self.right_cartesian.cmd_position(goal_point)
+
+
+def temp():
+    print("starting cartesian control test")
+    pose = manipulation.right_cartesian.get_pose()
+    pose.position.x += 0.3
+    manipulation.right_cartesian.set_fixed_ee_ctrl_mode()
+    manipulation.right_cartesian.cmd_arm(pose)
+    print("reached position 1")
+    time.sleep(5)
+
+    print("starting pan tilt and torso test")
+    # manipulation.jnt_ctrl.cmd_pan_tilt([0, -0.1])
+    # time.sleep(1)
+    # manipulation.jnt_ctrl.cmd_pan_tilt([0, 0])
+    # time.sleep(1)
+    # manipulation.jnt_ctrl.cmd_torso([0.2])
+    # manipulation.jnt_ctrl.cmd_torso([0.1])
+    print("pan tilt and torso test complete")
+    # time.sleep(5)
+
+    print("starting cartesian home sequence test")
+    manipulation.home()
+    print("reached manipulation.home")
+
+    print("starting extend handoff test")
+    point = Point()
+    point.x = 0.7
+    point.z = 0.5
+    manipulation.extend_handoff(point)
+    print("finished extend handoff test")
+    time.sleep(5)
+
+    print("returning to joint space home")
+    manipulation.jnt_ctrl.home()
+    print("done")
 
 
 # test code
@@ -545,16 +680,8 @@ if __name__ == "__main__":
     rospy.init_node("manipulation_control")
     manipulation = ManipulationControl()
 
-    manipulation.home()
-    print("reached home")
+    # joint space homing
+    manipulation.jnt_ctrl.home()
+    print("reached joint_control.home")
     time.sleep(2)
 
-    pose = manipulation.right_cartesian.get_pose()
-    print(pose)
-
-    pose.position.x += 0.3
-
-    manipulation.right_cartesian.set_fixed_ee_ctrl_mode()
-    print(manipulation.right_cartesian.cmd_arm(pose))
-
-    print(manipulation.right_cartesian.get_pose())
