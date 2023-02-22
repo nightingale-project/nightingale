@@ -2,6 +2,7 @@
 
 import actionlib
 import rospy
+import np
 
 # joint
 from moveit_action_handlers.msg import PropertyValuePair
@@ -13,7 +14,7 @@ from sensor_msgs.msg import JointState
 # cartesian
 from moveit_action_handlers.msg import MoveToPoseMoveItAction
 from moveit_action_handlers.msg import MoveToPoseMoveItGoal
-from moveit_action_handlers.msg import PoseStamped
+from moveit_action_handlers.msg import PoseStamped, PointStamped
 from geometry_msgs.msg import Pose
 
 # forward kinematics
@@ -55,6 +56,28 @@ def cartesian_goal(
     target_pose.pose.orientation.yaw = yaw
     goal.target_pose = target_pose
     return goal
+
+
+def get_head_angles(head_point):
+    """
+    :param: head_point PointStamped object
+    :return: angles in xy and xz plane to align with point
+    """
+    # 2D unit vector that represents axis in both
+    # XY and XZ planes
+    axis_u_vect = np.array([1, 0])
+    head_xy_vect = np.array([head_point.point.x, head_point.point.y])
+    head_xz_vect = np.array([head_point.point.x, head_point.point.z])
+    # return euler angles: alpha - XY, gamma - XZ
+    alpha = np.arccos(
+        np.dot(axis_u_vect, head_xy_vect)
+        / (np.linalg.norm(head_xy_vect) * np.linalg.norm(axis_u_vect))
+    )
+    gamma = np.arccos(
+        np.dot(axis_u_vect, head_xz_vect)
+        / (np.linalg.norm(head_xz_vect) * np.linalg.norm(axis_u_vect))
+    )
+    return [alpha, gamma]
 
 
 class ManipulationJointControl:
