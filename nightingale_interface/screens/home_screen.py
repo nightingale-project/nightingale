@@ -92,16 +92,6 @@ class HomeScreen:
 
         screen.add_widget(
             MDRectangleFlatButton(
-                text="Nurse Assistance",
-                font_style="H4",
-                pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.75},
-                size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
-                on_release=self.to_nurse_alert,
-            )
-         )
-
-        screen.add_widget(
-            MDRectangleFlatButton(
                 text="Dismiss",
                 font_style="H4",
                 pos_hint={"center_x": 0.125, "center_y": 0.1},
@@ -130,6 +120,16 @@ class HomeScreen:
         #        },
         #        size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
         #        on_release=self.to_video_call,
+        #    )
+        # )
+
+        # screen.add_widget(
+        #    MDRectangleFlatButton(
+        #        text="Nurse Assistance",
+        #        font_style="H4",
+        #        pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.75},
+        #        size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
+        #        on_release=self.to_nurse_alert,
         #    )
         # )
 

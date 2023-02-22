@@ -7,7 +7,6 @@ from screens.screen_config import ScreenConfig as cfg
 
 
 class StartDriveScreen:
-
     def drive_to_homescreen_override(self, button_data):
         button_data.parent.manager.transition = NoTransition()
         self.screen_stack.append(button_data.parent.manager.current)

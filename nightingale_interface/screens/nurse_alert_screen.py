@@ -18,7 +18,7 @@ class NurseAlertScreen:
         self.screen_stack.append(button_data.parent.manager.current)
         self.pending_action = UserInputs.NO_ROS_ACTION
 
-        # Also need to send alert or message to topic to nurse station 
+        # Also need to send alert or message to topic to nurse station
 
         button_data.parent.manager.current = cfg.CONFIRMATION_SCREEN_NAME
 
@@ -51,9 +51,7 @@ class NurseAlertScreen:
                 text="Cancel Alert",
                 font_size=cfg.CANCEL_BUTTON_FONTSIZE,
                 size_hint=(cfg.LONG_RECT_WIDTH_CONFIRM, cfg.LONG_RECT_HEIGHT_CONFIRM),
- 
                 pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.2},
- 
                 on_release=self.nurse_alert_cancel,
             )
         )

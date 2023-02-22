@@ -21,21 +21,21 @@ class RetractArmScreen:
         # respond to M.P to extend arm
         self.call_ros_action(UserInputs.START_RETRACT_ARM)
 
-        # popup feedback 
-        layout = GridLayout(cols = 1, padding = 10)
-        popupLabel = Label(text = "Retracting arm! Tap to dismiss")
+        # popup feedback
+        layout = GridLayout(cols=1, padding=10)
+        popupLabel = Label(text="Retracting arm! Tap to dismiss")
         layout.add_widget(popupLabel)
         # Instantiate the modal popup and display
-        popup = Popup(title ='Nightingale Action Center',
-                content = layout,
-                size_hint=(None, None),
-                size =(300, 100),
-                pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.9},
-                )
+        popup = Popup(
+            title="Nightingale Action Center",
+            content=layout,
+            size_hint=(None, None),
+            size=(300, 100),
+            pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.9},
+        )
         popup.open()
         # Schedule pop up auto dismiss for 2 seconds
         Clock.schedule_once(popup.dismiss, 2)
-
 
     def retract_arm_build(self):
         screen = Screen(name=cfg.RETRACT_ARM_SCREEN_NAME)

@@ -43,7 +43,7 @@ class ScreenConfig:
     NURSE_ALERT_SCREEN_NAME = "nursealertscreen"
     VIDEO_CALL_SCREEN_NAME = "videocallscreen"
     WATCHDOG_TIMEOUT_SCREEN_NAME = "watchdogscreen"
-    START_DRIVE_SCREEN_NAME ="startdrivescreen"
+    START_DRIVE_SCREEN_NAME = "startdrivescreen"
 
     # screen id nums
     ITEM_SELECT_SCREEN_ID = 9

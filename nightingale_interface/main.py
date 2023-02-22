@@ -1,6 +1,7 @@
 # follow environment variable is needed to be set so Kivy doesn't take
 # over the commmand line for reading arguments
 import os
+
 os.environ["KIVY_NO_ARGS"] = "1"
 
 import MovoConfig
@@ -83,7 +84,6 @@ class MainApp(MDApp, ScreenWrapper):
 
         try:
             while True:
-
                 # execute a queued task
                 if len(self.task_queue) > 0:
                     current = self.task_queue.pop()
@@ -161,7 +161,7 @@ class MainApp(MDApp, ScreenWrapper):
         self.client = None
         if on_movo == True:
             self.client = roslibpy.Ros(
-               MovoConfig.Config["Movo2"]["IP"], MovoConfig.Config["RosBridgePort"]
+                MovoConfig.Config["Movo2"]["IP"], MovoConfig.Config["RosBridgePort"]
             )
         else:
             self.client = roslibpy.Ros(
@@ -232,7 +232,9 @@ class MainApp(MDApp, ScreenWrapper):
             # switch to start driving screen for 5 secs and then switch to face screen
             self.call_ros_action(UserInputs.NO_ROS_ACTION)
             next_screen = ScreenConfig.START_DRIVE_SCREEN_NAME
-            Clock.schedule_once(partial(self.set_screen_delayed, ScreenConfig.FACE_SCREEN_NAME),  5)
+            Clock.schedule_once(
+                partial(self.set_screen_delayed, ScreenConfig.FACE_SCREEN_NAME), 5
+            )
 
         elif status == RobotStatus.BEDSIDE_IDLE:
             next_screen = ScreenConfig.HUB_SCREEN_NAME
@@ -268,15 +270,15 @@ class MainApp(MDApp, ScreenWrapper):
         return True
 
     def set_screen_delayed(self, screen_name, dt):
-        # able to set any screen name after a delay. 
+        # able to set any screen name after a delay.
         # meant to be used with Kivy.Clock scheduling calls
-        self.root.current = screen_name 
- 
+        self.root.current = screen_name
+
     def robot_state_screen_change_task(self, next_screen):
         # update screen upon new state
         if next_screen is not None and self.get_screen(next_screen):
             self.root.current = next_screen
-            self.screen_stack.append(self.root.current) 
+            self.screen_stack.append(self.root.current)
 
     def reset_wd(self):
         # reset watchdog to max time
@@ -285,10 +287,18 @@ class MainApp(MDApp, ScreenWrapper):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ros_comms", action='store_true', help="If set then True to use ROS bridge, False otherwise")
-    parser.add_argument("--on_movo", action='store_true', help="If set then True to run on movo, False if on own computer")
+    parser.add_argument(
+        "--ros_comms",
+        action="store_true",
+        help="If set then True to use ROS bridge, False otherwise",
+    )
+    parser.add_argument(
+        "--on_movo",
+        action="store_true",
+        help="If set then True to run on movo, False if on own computer",
+    )
 
-    args = parser.parse_args() 
+    args = parser.parse_args()
     # initialize the app and event loop
     loop = asyncio.get_event_loop()
     app = MainApp()
