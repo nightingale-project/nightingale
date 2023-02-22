@@ -24,7 +24,7 @@ from tf.transformations import euler_from_quaternion
 
 # TODO: replace with service call, requires refactoring of service to include gripper info
 CFG = rospy.get_param("/nightingale_utils/joint_configurations")
-
+global manipulation
 
 # overriding the geometry msgs Pose class to add tolerance on equivalence check
 class Pose(GeometryPose):
@@ -530,31 +530,67 @@ class ManipulationControl:
 
     def home(self):
         self.right_cartesian.approximate_home()
-        print(self.jnt_ctrl.get_joint_states()["right_arm"])
         self.jnt_ctrl.home()
-        print(self.jnt_ctrl.get_joint_states()["right_arm"])
 
-    def extend_handoff(self):
-        # extend right arm in cartesian space
-        # TODO: replace with service call
-        self.jnt_ctrl.cmd_right_arm(CFG["right_arm_extended_handoff"]["joints"])
+    def extend_handoff(self, goal_point: Point):
+        point1 = Point()
+        point1.x = 0.727
+        point1.y = -0.03
+        point1.z = 0.616
+        self.right_cartesian.cmd_position(point1)
+
+        orientation1 = Quaternion()
+        orientation1.x = -0.7395762387263899
+        orientation1.y = -0.015843133434378723
+        orientation1.z = -0.07349393339288811
+        orientation1.w = 0.668860691017755
+        self.right_cartesian.cmd_orientation(orientation1)
+
+        self.right_cartesian.cmd_position(goal_point)
+
+
+def test_joint_control_home():
+    print("starting joint space home test")
+    manipulation.jnt_ctrl.home()
+    print("reached joint_control.home")
+    time.sleep(2)
+
+
+def test_cartesian_relative_movement():
+    print("starting cartesian control test")
+    pose = manipulation.right_cartesian.get_pose()
+    pose.position.x += 0.3
+    manipulation.right_cartesian.set_fixed_ee_ctrl_mode()
+    manipulation.right_cartesian.cmd_arm(pose)
+    print("reached position 1")
+    time.sleep(5)
+
+
+def test_cartesian_homing_sequence():
+    print("starting cartesian home sequence test")
+    manipulation.home()
+    print("reached manipulation.home")
+    time.sleep(5)
+
+
+def test_extend_handoff():
+    print("starting extend handoff test")
+    point = Point()
+    point.x = 0.7
+    point.z = 0.5
+    manipulation.extend_handoff(point)
+    print("finished extend handoff test")
+    time.sleep(5)
 
 
 # test code
 if __name__ == "__main__":
     rospy.init_node("manipulation_control")
+    global manipulation
     manipulation = ManipulationControl()
 
-    manipulation.home()
-    print("reached home")
-    time.sleep(2)
-
-    pose = manipulation.right_cartesian.get_pose()
-    print(pose)
-
-    pose.position.x += 0.3
-
-    manipulation.right_cartesian.set_fixed_ee_ctrl_mode()
-    print(manipulation.right_cartesian.cmd_arm(pose))
-
-    print(manipulation.right_cartesian.get_pose())
+    test_joint_control_home()
+    test_cartesian_relative_movement()
+    test_cartesian_homing_sequence()
+    test_extend_handoff()
+    test_joint_control_home()
