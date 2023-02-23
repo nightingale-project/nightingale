@@ -10,7 +10,8 @@ joint_configurations: {
         },
         left_arm: {
             names: ["left_shoulder_pan_joint", "left_shoulder_lift_joint", "left_arm_half_joint", "left_elbow_joint", "left_wrist_spherical_1_joint", "left_wrist_spherical_2_joint", "left_wrist_3_joint"],
-            joints: [1.6285100157139785, 1.4853564921068, -0.4129526423290365, 2.680378098157231, 0.03587460652925101, -0.45225347904488444, 1.7006671448238166],
+            joints: [1.4463922159520797, 1.596695035763699, 0.9848071437070933, 2.5494744715692814, -2.004909960289334, 1.8316609450514283, -2.8256088565680004],
+
         },
         right_arm: {
             names: ["right_shoulder_pan_joint", "right_shoulder_lift_joint", "right_arm_half_joint", "right_elbow_joint", "right_wrist_spherical_1_joint", "right_wrist_spherical_2_joint", "right_wrist_3_joint"],
@@ -31,7 +32,7 @@ joint_configurations: {
 
     left_arm_home: {
         names: ["left_shoulder_pan_joint", "left_shoulder_lift_joint", "left_arm_half_joint", "left_elbow_joint", "left_wrist_spherical_1_joint", "left_wrist_spherical_2_joint", "left_wrist_3_joint" ],
-        joints: [1.5331797090297457, 1.605558035871483, 0.722653222587827, 2.606298339748302, -2.3331829141612968, 1.825435539687259, -2.9605818553548513]
+        joints: [1.4463922159520797, 1.596695035763699, 0.9848071437070933, 2.5494744715692814, -2.004909960289334, 1.8316609450514283, -2.8256088565680004],
     },
 
     right_arm_extended_handoff: {

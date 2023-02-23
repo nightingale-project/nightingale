@@ -9,7 +9,7 @@ from nightingale_manipulation.manipulation_action_client import ManipulationCont
 class MoveArmTask(Task):
     def __init__(self):
         self.manipulation = ManipulationControl()
-        if not self.manipulation.home():
+        if not self.manipulation.home_left() or not self.manipulation.home_right():
             rospy.logfatal("MoveArmTask: Failed to home arms. This is unrecoverable")
 
     def extend_restock(self):
@@ -18,7 +18,7 @@ class MoveArmTask(Task):
         return TaskCodes.SUCCESS if result else TaskCodes.ERROR
 
     def retract_right_arm(self):
-        result = self.manipulation.home()
+        result = self.manipulation.home_right()
         assert type(result) is bool
         return TaskCodes.SUCCESS if result else TaskCodes.ERROR
 
