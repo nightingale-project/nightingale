@@ -184,15 +184,6 @@ class MissionPlanner:
             raise NotImplementedError()
         rospy.loginfo("Nightingale Mission Planner retracted arm after handoff")
 
-        # send to screen arm retracted
-        task_response = self.send_interface_request_task.execute(
-            RobotStatus.ARM_RETRACTED
-        )
-
-        # add a block to check arm status first before interpreting input
-
-        if status == TaskCodes.ERROR:
-            raise NotImplementedError()
         # when done automatically goes back to triage patient
         self.phases.put(self.triage_patient_phase)
         return PhaseStatus.PHASE_COMPLETE
