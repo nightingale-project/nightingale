@@ -531,8 +531,10 @@ class ManipulationControl:
         # CAUTION: This function should only ever home the arms. Don't add homing of other things here
         # right gripper is openend on bootup by kinova. not sure where, but not in init
         if not self.gpr_ctrl.close_right():
+            rospy.logerr("ManipulationControl failed to close right gripper")
             return False
         if not self.jnt_ctrl.cmd_left_arm(self.jnt_ctrl.left_arm_home_joint_values):
+            rospy.logerr("ManipulationControl failed to home left arm")
             return False
         home_pose = GeometryPose()
         # TODO get this from the service
@@ -544,8 +546,10 @@ class ManipulationControl:
         home_pose.orientation.z = 0.430
         home_pose.orientation.w = 0.517
         if not self.right_cartesian.cmd_orientation(home_pose.orientation):
+            rospy.logerr("ManipulationControl failed to orient right arm")
             return False
         if not self.right_cartesian.cmd_position(home_pose.position, True):
+            rospy.logerr("ManipulationControl failed to move right arm")
             return False
         return True
 
