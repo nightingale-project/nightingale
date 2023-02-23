@@ -15,14 +15,14 @@ class MoveArmTask(Task):
     def extend_restock(self):
         result = self.manipulation.extend_restock()
         assert type(result) is bool
-        return Task.SUCCESS if result else Task.ERROR
+        return TaskCodes.SUCCESS if result else TaskCodes.ERROR
 
     def retract_right_arm(self):
         result = self.manipulation.home()
         assert type(result) is bool
-        return Task.SUCCESS if result else Task.ERROR
+        return TaskCodes.SUCCESS if result else TaskCodes.ERROR
 
     def extend_handoff(self, point):
         result = self.manipulation.extend_handoff(point)
         assert type(result) is bool
-        return Task.SUCCESS if result else Task.ERROR
+        return TaskCodes.SUCCESS if result else TaskCodes.ERROR
