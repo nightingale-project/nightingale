@@ -106,7 +106,7 @@ class MissionPlanner:
 
         # arm extend stuff
         rospy.loginfo("Nightingale Mission Planner extending arm for stocking")
-        if self.move_arm_task.extend_restock() != Task.SUCCESS:
+        if self.move_arm_task.extend_restock() != TaskCodes.SUCCESS:
             rospy.logerr("Nightingale Mission Planner failed to extend arm for handoff")
             raise NotImplementedError()
         # get nurse input
@@ -116,7 +116,7 @@ class MissionPlanner:
 
         # arm retract stuff
         rospy.loginfo("Nightingale Mission Planner retracting arm after stocking")
-        if self.move_arm_task.retract_right_arm() != Task.SUCCESS:
+        if self.move_arm_task.retract_right_arm() != TaskCodes.SUCCESS:
             rospy.logerr("Nightingale Mission Planner failed to retract arm")
             raise NotImplementedError()
         rospy.loginfo("Nightingale Mission Planner retracted arm")
@@ -163,8 +163,8 @@ class MissionPlanner:
         # extend arm
         # TODO: uncomment once vision provides a point
         rospy.loginfo("Nightingale Mission Planner extending arm for handoff")
-        # if self.move_arm_task.extend_handoff(point) != Task.SUCCESS:
-        if self.move_arm_task.extend_restock() != Task.SUCCESS:
+        # if self.move_arm_task.extend_handoff(point) != TaskCodes.SUCCESS:
+        if self.move_arm_task.extend_restock() != TaskCodes.SUCCESS:
             rospy.logerr("Nightingale Mission Planner failed to extend arm for handoff")
             raise NotImplementedError()
         rospy.loginfo("Nightingale Mission Planner extended arm for handoff")
@@ -179,7 +179,7 @@ class MissionPlanner:
 
         # retract arm
         rospy.loginfo("Nightingale Mission Planner retracting arm after handoff")
-        if self.move_arm_task.retract_right_arm() != Task.SUCCESS:
+        if self.move_arm_task.retract_right_arm() != TaskCodes.SUCCESS:
             rospy.logerr("Nightingale Mission Planner failed to retract arm")
             raise NotImplementedError()
         rospy.loginfo("Nightingale Mission Planner retracted arm after handoff")
