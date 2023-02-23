@@ -111,7 +111,7 @@ class PoseEstimation:
         self.MM_TO_M = 1 / 1000
         self.SHOULDERS_REACH_RATIO = 1.7  # use convervative ratio to put bin closer. for men usually 1.72, women ratio usually around 1.78
         self.align_vertical = True
-        self.ee_bin_adjustment = 0.1  # meters
+        self.ee_bin_adjustment = 0.0  # meters
 
     def depth_image_cb(self, data):
         # store the latest depth image for processing

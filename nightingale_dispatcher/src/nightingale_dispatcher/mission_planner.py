@@ -153,8 +153,8 @@ class MissionPlanner:
         # Arrived at patient's bedside
 
         # pose estimation
-        status, bin_goal = self.estimate_pose_task.execute("body")
-        rospy.loginfo(f"node returns {bin_goal}")
+        #status, pose_result = self.estimate_pose_task.execute("body")
+        #rospy.loginfo(f"node returns {pose_result}")
 
         # show arm movement and get input to start
         task_response = self.send_interface_request_task.execute(
@@ -162,8 +162,12 @@ class MissionPlanner:
         )
 
         # extend arm
-        joint_values = self.cfg["right_arm_extended_handoff"]["joints"]
-        status = self.move_arm_task.execute(joint_values)
+        rospy.loginfo("Nightingale Mission Planner extending arm for handoff")
+        #if self.move_arm_task.extend_handoff(pose_result.bin_goal.point) != TaskCodes.SUCCESS:
+        if self.move_arm_task.extend_restock() != TaskCodes.SUCCESS:
+            rospy.logerr("Nightingale Mission Planner failed to extend arm for handoff")
+            raise NotImplementedError()
+        rospy.loginfo("Nightingale Mission Planner extended arm for handoff")
 
         # arm extended
         task_response = self.send_interface_request_task.execute(
@@ -171,7 +175,7 @@ class MissionPlanner:
         )
 
         # show arm movement and get input to start
-        # status = self.send_interface_request_task.execute(RobotStatus.RETRACTING_ARM)
+        status = self.send_interface_request_task.execute(RobotStatus.RETRACTING_ARM)
 
         # retract arm
         joint_values = self.cfg["right_arm_home"]["joints"]
