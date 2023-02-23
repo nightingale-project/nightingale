@@ -69,25 +69,70 @@ class RobotConfigurationService:
 
     def robot_configuration_lookup(self, req):
         ret = RobotConfigurationLookupResponse()
-        ret.jnt_state.header.stamp = rospy.Time.now()
-        body_part_string = {
-            req.LEFT_ARM: "left_arm",
-            req.RIGHT_ARM: "right_arm",
-            req.TORSO: "torso",
-            req.HEAD: "head",
-        }[req.body_part]
+        if req.lookup_cart == True:
+            ret.cart_state.header.stamp = rospy.Time.now()
+            body_part_string = {
+                req.LEFT_ARM: "left_arm",
+                req.RIGHT_ARM: "right_arm",
+                req.TORSO: "torso",
+                req.HEAD: "head",
+            }[req.body_part]
 
-        if req.configuration not in self.configurations.keys():
-            return None
-        configuration = self.configurations[req.configuration]
+            if req.configuration not in self.configurations.keys():
+                return None
+            configuration = self.configurations[req.configuration]
 
-        if body_part_string not in configuration.keys():
-            return None
+            if body_part_string not in configuration.keys():
+                return None
 
-        ret.jnt_state.name = configuration[body_part_string]["names"]
-        ret.jnt_state.position = configuration[body_part_string]["joints"]
-        ret.jnt_state.velocity = [0.0 for jnt in ret.jnt_state.name]
-        return ret
+            if req.joint_name not in configuration[body_part_string]["names"]:
+                return None
+
+            joint_idx = configuration[body_part_string]["names"].index(req.joint_name)
+
+            ret.cart_state.name = configuration[body_part_string]["names"]
+            ret.cart_state.position.point.x = configuration[body_part_string][
+                "cartesian"
+            ][joint_idx][0]
+            ret.cart_state.position.point.y = configuration[body_part_string][
+                "cartesian"
+            ][joint_idx][1]
+            ret.cart_state.position.point.z = configuration[body_part_string][
+                "cartesian"
+            ][joint_idx][2]
+
+            ret.cart_state.orientation = configuration[body_part_string]["cartesian"][
+                joint_idx
+            ][3]
+            ret.cart_state.orientation = configuration[body_part_string]["cartesian"][
+                joint_idx
+            ][4]
+            ret.cart_state.orientation = configuration[body_part_string]["cartesian"][
+                joint_idx
+            ][5]
+
+            return ret
+
+        else:
+            ret.jnt_state.header.stamp = rospy.Time.now()
+            body_part_string = {
+                req.LEFT_ARM: "left_arm",
+                req.RIGHT_ARM: "right_arm",
+                req.TORSO: "torso",
+                req.HEAD: "head",
+            }[req.body_part]
+
+            if req.configuration not in self.configurations.keys():
+                return None
+            configuration = self.configurations[req.configuration]
+
+            if body_part_string not in configuration.keys():
+                return None
+
+            ret.jnt_state.name = configuration[body_part_string]["names"]
+            ret.jnt_state.position = configuration[body_part_string]["joints"]
+            ret.jnt_state.velocity = [0.0 for jnt in ret.jnt_state.name]
+            return ret
 
 
 def main():

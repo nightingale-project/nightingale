@@ -5,5 +5,8 @@ int8 RIGHT_ARM=1
 int8 TORSO=2
 int8 HEAD=3
 int8 body_part
+bool lookup_cart
+string joint_name
 ---
 sensor_msgs/JointState jnt_state
+geometry_msgs/PoseStamped cart_state
