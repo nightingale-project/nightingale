@@ -91,28 +91,34 @@ class RobotConfigurationService:
             joint_idx = configuration[body_part_string]["names"].index(req.joint_name)
 
             ret.cart_state.name = configuration[body_part_string]["names"]
-            ret.cart_state.position.point.x = configuration[body_part_string][
+
+            # point
+            ret.cart_state.header.frame_id = "base_link"
+            ret.cart_state.pose.position.x = configuration[body_part_string][
                 "cartesian"
             ][joint_idx][0]
-            ret.cart_state.position.point.y = configuration[body_part_string][
+            ret.cart_state.pose.position.y = configuration[body_part_string][
                 "cartesian"
             ][joint_idx][1]
-            ret.cart_state.position.point.z = configuration[body_part_string][
+            ret.cart_state.pose.position.z = configuration[body_part_string][
                 "cartesian"
             ][joint_idx][2]
 
-            ret.cart_state.orientation = configuration[body_part_string]["cartesian"][
-                joint_idx
-            ][3]
-            ret.cart_state.orientation = configuration[body_part_string]["cartesian"][
-                joint_idx
-            ][4]
-            ret.cart_state.orientation = configuration[body_part_string]["cartesian"][
-                joint_idx
-            ][5]
+            # orientation
+            ret.cart_state.pose.orientation.x = configuration[body_part_string][
+                "cartesian"
+            ][joint_idx][3]
+            ret.cart_state.pose.orientation.y = configuration[body_part_string][
+                "cartesian"
+            ][joint_idx][4]
+            ret.cart_state.pose.orientation.z = configuration[body_part_string][
+                "cartesian"
+            ][joint_idx][5]
+            ret.cart_state.pose.orientation.w = configuration[body_part_string][
+                "cartesian"
+            ][joint_idx][6]
 
             return ret
-
         else:
             ret.jnt_state.header.stamp = rospy.Time.now()
             body_part_string = {
