@@ -21,7 +21,6 @@ class NavigateTask(Task):
             )
 
     def execute(self, room_number, sublocation):
-        return TaskCodes.SUCCESS
         goal = RoomRunnerGoal()
         goal.room_number = room_number
         goal.sublocation = sublocation
