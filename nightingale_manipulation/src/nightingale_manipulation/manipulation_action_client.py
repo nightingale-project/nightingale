@@ -33,6 +33,7 @@ from geometry_msgs.msg import Quaternion, Point
 from tf.transformations import euler_from_quaternion
 
 # TODO: replace with service call, requires refactoring of service to include gripper info
+CFG = rospy.get_param("/nightingale_utils/joint_configurations")
 
 
 # overriding the geometry msgs Pose class to add tolerance on equivalence check
@@ -228,6 +229,7 @@ class ManipulationJointControl:
         @return: result of verify_joint_target and action server state if blocking
         """
         if not self.update_joint_states():
+            rospy.logerr("update joint states failed")
             return False
         if not self.verify_joint_target(joint_target, self._right_joint_states):
             return True
@@ -250,6 +252,7 @@ class ManipulationJointControl:
         @return: boolean result of verify_joint_target and action server state if blocking
         """
         if not self.update_joint_states():
+            rospy.logerr("update joint states failed")
             return False
         if not self.verify_joint_target(joint_target, self._left_joint_states):
             return True
@@ -637,10 +640,14 @@ if __name__ == "__main__":
     manipulation = ManipulationControl()
 
     # close the gripper
+    rospy.loginfo("closing right gripper")
     manipulation.gpr_ctrl.close_right()
+    rospy.loginfo("closed right gripper")
     time.sleep(2)
     # Move left arm to home with joint ctrl
+    rospy.loginfo("homing left arm")
     manipulation.jnt_ctrl.cmd_left_arm(manipulation.jnt_ctrl.left_arm_home_joint_values)
+    rospy.loginfo("homed left arm")
 
     # Move right arm to home in cartesian
     home_pose = GeometryPose()
