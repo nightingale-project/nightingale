@@ -570,7 +570,7 @@ if __name__ == "__main__":
     rospy.init_node("manipulation_control")
     manipulation = ManipulationControl()
 
-    # close the gripper
+    '''# close the gripper
     rospy.loginfo("closing right gripper")
     manipulation.gpr_ctrl.close_right()
     rospy.loginfo("closed right gripper")
@@ -616,4 +616,10 @@ if __name__ == "__main__":
         manipulation.right_cartesian.cmd_position(handoff_pose.position, True)
         rospy.loginfo("Arrived at handoff pose")
 
-        time.sleep(2)
+        time.sleep(2)'''
+
+    for _ in range(3):
+        rospy.loginfo("going home")
+        assert manipulation.home()
+        rospy.loginfo("restocking")
+        assert manipulation.extend_restock()
