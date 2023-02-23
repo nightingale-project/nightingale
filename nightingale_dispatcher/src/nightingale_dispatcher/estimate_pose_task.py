@@ -27,10 +27,10 @@ class EstimatePoseTask(Task):
         goal.target = target
         self.action_client.send_goal(goal)
         self.action_client.wait_for_result()
-        bin_goal = self.action_client.get_result()
+        result = self.action_client.get_result()
         return (
             TaskCodes.SUCCESS
             if self.action_client.get_state() == GoalStatus.SUCCEEDED
             else TaskCodes.ERROR,
-            bin_goal,
+            result,
         )
