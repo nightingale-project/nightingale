@@ -1,2 +1,0 @@
-/move_base/local_costmap/inflation_layer/inflation_radius
-change the local costmap inflation radius from 0.45 to something smaller
