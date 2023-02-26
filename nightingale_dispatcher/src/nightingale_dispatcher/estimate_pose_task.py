@@ -25,12 +25,13 @@ class EstimatePoseTask(Task):
     def execute(self, target):
         goal = PoseEstimationGoal()
         goal.target = target
-        self.action_client.send_goal(goal)
-        self.action_client.wait_for_result()
-        result = self.action_client.get_result()
-        return (
-            TaskCodes.SUCCESS
-            if self.action_client.get_state() == GoalStatus.SUCCEEDED
-            else TaskCodes.ERROR,
-            result,
-        )
+        result = None
+        for _ in range(0, 3):
+            self.action_client.send_goal(goal)
+            self.action_client.wait_for_result()
+            result = self.action_client.get_result()
+            # allow retrial of the estimation in case cannot find pose
+            if self.action_client.get_state() == GoalStatus.SUCCEEDED:
+                return (TaskCodes.SUCCESS, result)
+
+        return (TaskCodes.ERROR, result)
