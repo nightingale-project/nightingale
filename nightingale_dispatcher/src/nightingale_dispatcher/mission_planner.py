@@ -1,4 +1,4 @@
-#/usr/bin/env python3
+# /usr/bin/env python3
 import queue
 from enum import Enum
 
@@ -164,16 +164,16 @@ class MissionPlanner:
         # Arrived at patient's bedside
 
         # pose estimation
-        #status, pose_result = self.estimate_pose_task.execute("body")
-        #bin_goal_pt = pose_result.bin_goal.point
-        #rospy.loginfo(f"node returns {pose_result}")
-        # if unable to find patient pose place bin at predetermined position 
-        # could also abort and go home instead but this decision complexity 
+        # status, pose_result = self.estimate_pose_task.execute("body")
+        # bin_goal_pt = pose_result.bin_goal.point
+        # rospy.loginfo(f"node returns {pose_result}")
+        # if unable to find patient pose place bin at predetermined position
+        # could also abort and go home instead but this decision complexity
         # is likely not within current scope
-        #if status == TaskCodes.ERROR:
+        # if status == TaskCodes.ERROR:
         #    rospy.logwarn("UNABLE TO FIND POSE. FALLING BACK TO SAFE HANDOFF POSITION")
         #    #TODO Find a safe bin goal we can fall back on. currently the restock position
-        #    bin_goal_pt = self.fallback_bin_goal 
+        #    bin_goal_pt = self.fallback_bin_goal
 
         # show arm movement and get input to start
         task_response = self.send_interface_request_task.execute(
@@ -183,8 +183,8 @@ class MissionPlanner:
         # extend arm
         rospy.loginfo("Nightingale Mission Planner extending arm for handoff")
 
-        #UNCOMMENT FOR POSE GOAL
-        #if self.move_arm_task.extend_handoff(bin_goal_pt) != TaskCodes.SUCCESS:
+        # UNCOMMENT FOR POSE GOAL
+        # if self.move_arm_task.extend_handoff(bin_goal_pt) != TaskCodes.SUCCESS:
 
         if self.move_arm_task.extend_restock() != TaskCodes.SUCCESS:
             rospy.logerr("Nightingale Mission Planner failed to extend arm for handoff")
