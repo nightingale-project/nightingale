@@ -6,6 +6,7 @@ import rospy
 import actionlib
 from actionlib_msgs.msg import GoalStatus
 from std_msgs.msg import String
+from geometry_msgs.msg import Point
 from nightingale_msgs.msg import MissionPlanAction
 from nightingale_dispatcher.navigate_task import NavigateTask
 from nightingale_dispatcher.move_arm_task import MoveArmTask
@@ -39,6 +40,11 @@ class MissionPlanner:
         self.server.start()
 
         self.phases = queue.Queue()
+
+        self.fallback_bin_goal = Point()
+        self.fallback_bin_goal.x = 0.807
+        self.fallback_bin_goal.y = 0.053
+        self.fallback_bin_goal.z = 0.978
 
     def go_to_patient_phase(self):
         rospy.loginfo("Nightingale Mission Planner going to patient")
@@ -159,7 +165,15 @@ class MissionPlanner:
 
         # pose estimation
         #status, pose_result = self.estimate_pose_task.execute("body")
+        #bin_goal_pt = pose_result.bin_goal.point
         #rospy.loginfo(f"node returns {pose_result}")
+        # if unable to find patient pose place bin at predetermined position 
+        # could also abort and go home instead but this decision complexity 
+        # is likely not within current scope
+        #if status == TaskCodes.ERROR:
+        #    rospy.logwarn("UNABLE TO FIND POSE. FALLING BACK TO SAFE HANDOFF POSITION")
+        #    #TODO Find a safe bin goal we can fall back on. currently the restock position
+        #    bin_goal_pt = self.fallback_bin_goal 
 
         # show arm movement and get input to start
         task_response = self.send_interface_request_task.execute(
@@ -168,7 +182,10 @@ class MissionPlanner:
 
         # extend arm
         rospy.loginfo("Nightingale Mission Planner extending arm for handoff")
-        #if self.move_arm_task.extend_handoff(pose_result.bin_goal.point) != TaskCodes.SUCCESS:
+
+        #UNCOMMENT FOR POSE GOAL
+        #if self.move_arm_task.extend_handoff(bin_goal_pt) != TaskCodes.SUCCESS:
+
         if self.move_arm_task.extend_restock() != TaskCodes.SUCCESS:
             rospy.logerr("Nightingale Mission Planner failed to extend arm for handoff")
             raise NotImplementedError()

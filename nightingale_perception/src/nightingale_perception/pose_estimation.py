@@ -158,24 +158,26 @@ class PoseEstimation:
             image = cv2.cvtColor(self.last_rgb_img, cv2.COLOR_BGR2RGB)
             results = pose.process(image)
             landmarks_list = results.pose_landmarks.landmark
-            # rospy.loginfo(f"{landmarks_list}")
 
             if goal.target == "body":
                 bin_goal = self.pose_estimate_body(landmarks_list)
                 # should not be entered as of yet
                 if bin_goal is None:
                     rospy.loginfo("Pose estimate failed")
-                    self.pose_estimation_server.set_aborted(None)
+                    self.result.pose_est_fail = 1
+                    self.pose_estimation_server.set_aborted(self.result)
                     return
                 self.result.bin_goal = bin_goal
                 self.pose_estimation_server.set_succeeded(self.result)
             elif goal.target == "head":
                 rospy.loginfo(f"Head not implemented")
-                self.pose_estimation_server.set_aborted(None)
-                pass
+                self.result.pose_est_fail = 2
+                self.pose_estimation_server.set_aborted(self.result)
+                return
             else:
                 rospy.loginfo(f"Need valid target")
-                self.pose_estimation_server.set_aborted(None)
+                self.result.pose_est_fail = 3
+                self.pose_estimation_server.set_aborted(self.result)
 
     def preempt_cb(self):
         pass
@@ -207,12 +209,18 @@ class PoseEstimation:
         return average_head_point
 
     def pose_estimate_body(self, landmarks_list):
+        bin_goal = None
         # dict {'landmark_id': {'mp_landmark': landmark, 'point': PointStamped}}
         landmarks = {}
         # get important landmarks
         for lm in self.lm_body:
             # add empty pose stamped since landmark position is not true
             landmark_data = landmarks_list[lm.value]
+
+            # if one of the points are not visible then fail
+            if landmark_data.visibility < self.landmark_vis_thresh:
+                return bin_goal
+
             lm_point = PointStamped()
             lm_point.header.frame_id = self.depth_optical_link_frame
             lm_point.point.x = landmark_data.x
@@ -222,29 +230,7 @@ class PoseEstimation:
                 "mp_landmark": landmark_data,
                 "point": lm_point,
             }
-        rospy.loginfo(f"{landmarks}")
-
-        # TODO check if landmarks are visible
-        # lm1_vis = True
-        # lm2_vis = True
-        # for lm1 in self.lm_set1:
-        #   if landmarks_list[lm].visibility < self.landmark_vis_thresh:
-        #       # unable to get 3 valid points to calculate pose
-        #       for lm2 in self.lm_set2:
-        #           if landmarks_list[lm2].visibility < self.landmark_vis_thresh:
-        #               rospy.loginfo("Unable to get landmarks 2")
-        #               break
-        #       break
-
-        # patient_lms = []
-        # if lm1_vis == True:
-        #    # store landmarks
-        #    patient_lms= landmarks_list[lm_set1[0], lm_set1[1], lm_set1[2]]
-        # elif lm2_vis == True:
-        #    patient_lms= landmarks_list[lm_set2[0], lm_set2[1], lm_set2[2]]
-        # else:
-        #    # wait for next iteration for valid landmarks
-        #    continue
+        # rospy.loginfo(f"{landmarks}")
 
         # get landmarks coords
         for lm in self.lm_body:
@@ -255,12 +241,11 @@ class PoseEstimation:
             # visualize points in Rviz
             self.point_viz_pub.publish(landmarks[lm.value]["point"])
 
-        rospy.loginfo(f"Transformed {landmarks}")
+        # rospy.loginfo(f"Transformed {landmarks}")
 
         # compute plane normal
         plane_unit_normal = self.compute_unit_normal(landmarks, self.align_vertical)
 
-        bin_goal = None
         # extrapolate. Returns coordinate of goal in 3D space in baselink
         bin_goal = self.extrapolate_goal(landmarks, plane_unit_normal)
         rospy.loginfo(f"bin goal {bin_goal}")
@@ -284,7 +269,7 @@ class PoseEstimation:
             ]
         )
 
-        rospy.loginfo(f"Align vertical {align_vertical}")
+        # rospy.loginfo(f"Align vertical {align_vertical}")
         vector_2 = None
         if align_vertical == True:
             # place point directly vertical in Z direction to constrain the plane
@@ -354,7 +339,7 @@ class PoseEstimation:
         # push goal upwards to account for bin lower than end effector
         bin_goal_ps.point.z = bin_goal[2] + self.ee_bin_adjustment
 
-        rospy.loginfo(f"bin goal {bin_goal_ps}")
+        # rospy.loginfo(f"bin goal {bin_goal_ps}")
         return bin_goal_ps
 
     def landmark_to_3d(self, point_stamped):
@@ -364,8 +349,7 @@ class PoseEstimation:
 
         depth = self.last_depth_img[y_pixel][x_pixel]
 
-        # librealsense 2 function
-        # see opencv_pointcloud_viewer.py
+        # librealsense 2 function see opencv_pointcloud_viewer.py
         point_vals = rs.rs2_deproject_pixel_to_point(
             self.camera_intrinsics, [x_pixel, y_pixel], depth
         )
@@ -382,12 +366,12 @@ class PoseEstimation:
     def transform_point_baselink(self, point_stamped):
         while not rospy.is_shutdown():
             try:
-                rospy.loginfo(f"point before {point_stamped}")
+                # rospy.loginfo(f"point before {point_stamped}")
                 transformed_point = self.tf_buffer.transform(
                     point_stamped,
                     self.base_link_topic,  # rospy.Time()
                 )
-                rospy.loginfo(f"point after {transformed_point}")
+                # rospy.loginfo(f"point after {transformed_point}")
                 return transformed_point
             except (
                 tf2_ros.LookupException,
