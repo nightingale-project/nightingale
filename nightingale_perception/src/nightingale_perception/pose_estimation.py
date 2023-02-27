@@ -350,6 +350,7 @@ class PoseEstimation:
         depth = self.last_depth_img[y_pixel][x_pixel]
 
         # librealsense 2 function see opencv_pointcloud_viewer.py
+        # inverse projection
         point_vals = rs.rs2_deproject_pixel_to_point(
             self.camera_intrinsics, [x_pixel, y_pixel], depth
         )
