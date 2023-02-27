@@ -45,6 +45,7 @@ class PayloadEstimator:
         self.translations = np.zeros((self.dof, 3))
 
         self.jacobian = np.zeros((6, self.dof))
+        self.base_link_rotation = np.zeros((3, 3))
         self.gravity_direction = np.zeros(3)
         self.gravity_forces = np.zeros(6)
 
@@ -70,7 +71,7 @@ class PayloadEstimator:
         )
 
         self.analysis_sub = rospy.Subscriber(
-            "analyze_arm_forces", Bool, self.analyze_arm_forces
+            "analyze_ee_forces", Bool, self.analyze_ee_forces
         )
         self.analysis_num = 1000
         self.analysis_dec = 5
@@ -90,18 +91,22 @@ class PayloadEstimator:
         # 8: right_wrist_spherical_1_joint
         # 9: right_wrist_spherical_2_joint
         # 10: right_wrist_3_joint
-        self.compute_arm_forces(msg.effort[4:11])
+        self.compute_ee_forces(msg.effort[4:11])
+
+        self.compare_torque(msg.effort[4:11])
+        # rospy.loginfo(f"pos: {np.round(msg.position[4:11], 2)}")
+        # rospy.loginfo(f"vel: {np.round(msg.velocity[4:11], 2)}")
 
         self.analysis_idx += 1
         if self.analysis_idx % self.analysis_dec == 0:
             self.analysis_forces[
                 :, (self.analysis_idx // self.analysis_dec) % self.analysis_num
-            ] = self.forces
+            ] = np.concatenate((self.forces, np.zeros((3, 1)))).flatten()
             if self.analysis_idx // self.analysis_dec == self.analysis_num:
                 rospy.loginfo("Ready to analyze")
                 self.analysis_idx = 0
 
-    def analyze_arm_forces(self, msg):
+    def analyze_ee_forces(self, msg):
         mean = np.mean(self.analysis_forces, axis=1)
         covariance = np.cov((self.analysis_forces.T - mean).T)
 
@@ -134,15 +139,15 @@ class PayloadEstimator:
                 rospy.Duration(20),
             )
 
-            rot_mat = tf_conversions.transformations.quaternion_matrix(
+            self.base_link_rotation = tf_conversions.transformations.quaternion_matrix(
                 [
                     base_link_transform.transform.rotation.x,
                     base_link_transform.transform.rotation.y,
                     base_link_transform.transform.rotation.z,
                     base_link_transform.transform.rotation.w,
                 ]
-            )
-            self.gravity_direction = rot_mat[:3, 2]
+            )[:3, :3]
+            self.gravity_direction = -self.base_link_rotation[:, 2]
         except (
             tf2_ros.LookupException,
             tf2_ros.ConnectivityException,
@@ -219,18 +224,35 @@ class PayloadEstimator:
 
         self.gravity_forces = gravity_forces
 
-    def compute_arm_forces(self, torques):
-        forces = np.linalg.pinv(self.jacobian.T) @ torques - self.gravity_forces
+    def compare_torque(self, torques):
+        computed_torque = self.jacobian[:3, :].T @ self.gravity_forces[:3]
+        error = computed_torque - np.array(torques)
+        error_norm = np.sqrt(np.sum(np.square(error)))
 
-        self.forces = self.last_forces + self.filter_coeff * (forces - self.last_forces)
-        self.last_forces = forces
+        rospy.loginfo(
+            f"{np.round(torques, 2)} {np.round(computed_torque)} {error_norm}"
+        )
+        # rospy.loginfo(f"{np.round(error, 4)} {error_norm}")
+
+    def compute_ee_forces(self, torques):
+        forces = (
+            np.linalg.inv(self.jacobian @ self.jacobian.T) @ self.jacobian @ torques
+        )  # - self.gravity_forces
+        forces_base_link = self.base_link_rotation.T @ np.reshape(forces[:3], (3, 1))
+
+        self.forces = self.last_forces + self.filter_coeff * (
+            forces_base_link - self.last_forces
+        )
+        self.last_forces = forces_base_link
 
         payload_mass = (
-            np.dot(self.forces[:3], -self.gravity_direction)
+            np.dot(self.forces[:3].flatten(), self.gravity_direction)
             / self.GRAVITATIONAL_ACCELERATION
         )
 
-        rospy.loginfo(f"{np.sqrt(np.sum(np.square(self.forces[:3])))} {payload_mass}")
+        # rospy.loginfo(
+        #     f"{np.round(forces_base_link, 3).flatten()} {np.sqrt(np.sum(np.square(forces_base_link)))} {payload_mass}"
+        # )
 
         payload = Payload()
         payload.mass = payload_mass
