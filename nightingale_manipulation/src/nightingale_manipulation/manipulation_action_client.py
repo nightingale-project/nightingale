@@ -135,9 +135,25 @@ class ManipulationJointControl:
         self.left_arm_home_joint_values = CFG["left_arm_home"]["joints"]
         self.right_arm_home_joint_values = CFG["right_arm_home"]["joints"]
 
+        self.torso_joint_names = CFG["joint_configurations"]["home"]["torso"]["names"]
+        self.pan_tilt_joint_names = CFG["joint_configurations"]["home"]["head"]["names"]
+        self.torso_home_joint_values = CFG["joint_configurations"]["home"]["torso"][
+            "joints"
+        ]
+        self.pan_tilt_home_joint_values = CFG["joint_configurations"]["home"]["head"][
+            "joints"
+        ]
+
         self._right_joint_states = [0, 0, 0, 0, 0, 0, 0]
         self._left_joint_states = [0, 0, 0, 0, 0, 0, 0]
+        self._torso_joint_states = [0]
+        self._pan_tilt_joint_states = [0, 0]
         self._joint_tolerance = joint_tolerance
+
+        self._left_joint_target = None
+        self._right_joint_target = None
+        self._pan_tilt_joint_target = None
+        self._torso_joint_target = None
 
     def update_joint_states(self):
         """
@@ -163,6 +179,8 @@ class ManipulationJointControl:
 
         self._right_joint_states = []
         self._left_joint_states = []
+        self._torso_joint_states = []
+        self._pan_tilt_joint_states = []
 
         # probably a redundant check but making sure the joint names exist from the /joint_states data
         if not (
@@ -179,6 +197,11 @@ class ManipulationJointControl:
                 names_pos_dict[self.right_arm_joint_names[i]]
             )
             self._left_joint_states.append(names_pos_dict[self.left_arm_joint_names[i]])
+
+        self._pan_tilt_joint_states.append(names_pos_dict[self.pan_tilt_joint_names[0]])
+        self._pan_tilt_joint_states.append(names_pos_dict[self.pan_tilt_joint_names[1]])
+
+        self._torso_joint_states.append(names_pos_dict[self.torso_joint_names[0]])
 
         return True
 
@@ -211,7 +234,53 @@ class ManipulationJointControl:
                 error_count -= 1
         return error_count > 0
 
-    def cmd_right_arm(self, joint_target: list) -> bool:
+    def cmd_torso(self, joint_target: list, execute=True) -> bool:
+        """
+        Commands the movement of the torso through the joint_space action server
+        @param joint_target: list of target joint values
+        @param execute: if True, arm will move without waiting, else self.execute() must be called after
+        @return: status
+        """
+        if not self.update_joint_states():
+            return False
+
+        try:
+            if not len(joint_target) == 1:
+                return False
+        except TypeError:
+            return False
+
+        self._torso_joint_target = joint_target.copy()
+
+        if not execute:
+            return True
+
+        return self.execute()
+
+    def cmd_pan_tilt(self, joint_target: list, execute=True) -> bool:
+        """
+        Commands the movement of the pan tilt through the joint_space action server
+        @param joint_target: list of target joint values
+        @param execute: if True, arm will move without waiting, else self.execute() must be called after
+        @return: status
+        """
+        if not self.update_joint_states():
+            return False
+
+        try:
+            if not len(joint_target) == 2:
+                return False
+        except TypeError:
+            return False
+
+        self._pan_tilt_joint_target = joint_target.copy()
+
+        if not execute:
+            return True
+
+        return self.execute()
+
+    def cmd_right_arm(self, joint_target: list, execute=True) -> bool:
         """
         Commands movement of the right arm through the right_arm action server
         @param joint_target: list of target joint values
@@ -223,17 +292,14 @@ class ManipulationJointControl:
         if not self.verify_joint_target(joint_target, self._right_joint_states):
             return True
 
-        goal = joint_goal(joint_target, self.right_arm_joint_names)
-        self.right_arm.send_goal(goal)
+        self._right_joint_target = joint_target.copy()
 
-        self.right_arm.wait_for_result()
-        status = self.right_arm.get_result().status
-        if status == "Success":
+        if not execute:
             return True
-        rospy.logwarn("cmd_right_arm failed with status: " + str(status))
-        return False
 
-    def cmd_left_arm(self, joint_target):
+        return self.execute()
+
+    def cmd_left_arm(self, joint_target: list, execute=True) -> bool:
         """
         Commands the movement of the left arm through the left_arm action server
         @param joint_target: list of target joint values
@@ -245,20 +311,53 @@ class ManipulationJointControl:
         if not self.verify_joint_target(joint_target, self._left_joint_states):
             return True
 
-        goal = joint_goal(joint_target, self.left_arm_joint_names)
-        self.left_arm.send_goal(goal)
+        self._left_joint_target = joint_target.copy()
 
-        self.left_arm.wait_for_result()
-        status = self.left_arm.get_result().status
+        if not execute:
+            return True
+
+        return self.execute()
+
+    def execute(self, velocity=0.5):
+        goal_names = []
+        goal_values = []
+
+        if self._left_joint_target is not None:
+            goal_names += self.left_arm_joint_names
+            goal_values += self._left_joint_target.copy()
+            self._left_joint_target = None
+
+        if self._right_joint_target is not None:
+            goal_names += self.right_arm_joint_names
+            goal_values += self._right_joint_target.copy()
+            self._right_joint_target = None
+
+        if self._pan_tilt_joint_target is not None:
+            goal_names += self.pan_tilt_joint_names
+            goal_values += self._pan_tilt_joint_target.copy()
+            self._pan_tilt_joint_target = None
+
+        if self._torso_joint_target is not None:
+            goal_names += self.torso_joint_names
+            goal_values += self._torso_joint_target.copy()
+            self._torso_joint_target = None
+
+        goal = joint_goal(goal_values, goal_names, eev=velocity)
+        self.client.send_goal(goal)
+        self.client.wait_for_result()
+        status = self.client.get_result().status
+
         if status == "Success":
             return True
-        rospy.logwarn("cmd_left_arm failed with status: " + str(status))
+        rospy.logwarn("joint control execute failed with status: " + str(status))
         return False
 
     def home(self):
-        left_status = self.cmd_left_arm(self.left_arm_home_joint_values)
-        right_status = self.cmd_right_arm(self.right_arm_home_joint_values)
-        return left_status and right_status
+        self.cmd_left_arm(self.left_arm_home_joint_values, execute=False)
+        self.cmd_right_arm(self.right_arm_home_joint_values, execute=False)
+        self.cmd_pan_tilt(self.pan_tilt_home_joint_values, execute=False)
+        self.cmd_torso(self.torso_home_joint_values, execute=False)
+        return self.execute(velocity=1)
 
 
 class ManipulationGripperControl:
@@ -563,6 +662,9 @@ class ManipulationControl:
 if __name__ == "__main__":
     rospy.init_node("manipulation_control")
     manipulation = ManipulationControl()
+    manipulation.gpr_ctrl.open_right()
+
+    manipulation.jnt_ctrl.cmd_torso(manipulation.jnt_ctrl.torso_home_joint_values)
 
     # close the gripper
     manipulation.gpr_ctrl.close_right()
@@ -600,10 +702,6 @@ if __name__ == "__main__":
         manipulation.right_cartesian.cmd_position(home_pose.position, True)
         rospy.loginfo("Arrived at home pose")
 
-        time.sleep(2)
-
         rospy.loginfo("Going to handoff pose")
         manipulation.right_cartesian.cmd_position(handoff_pose.position, True)
         rospy.loginfo("Arrived at handoff pose")
-
-        time.sleep(2)

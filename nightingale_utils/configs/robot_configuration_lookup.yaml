@@ -2,7 +2,7 @@ joint_configurations: {
     home: {
         head: {
             names: ["pan_joint", "tilt_joint"],
-            joints: [0.0,0.0],
+            joints: [0.0, 0.0],
         },
         torso: {
             names: ["linear_joint"],
