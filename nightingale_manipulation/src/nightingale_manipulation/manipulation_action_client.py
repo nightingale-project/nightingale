@@ -129,11 +129,11 @@ class ManipulationJointControl:
         )
         self.right_arm.wait_for_server()
 
-        self.pan_tilt = actionlib.simple_action_client.SimpleActionClient(
+        self.head = actionlib.simple_action_client.SimpleActionClient(
             "/moveit_action_handlers/head/joint_ctrl", MoveToJointsMoveItAction
         )
         rospy.loginfo("Waiting for pan tilt joint moveit action server")
-        self.pan_tilt.wait_for_server()
+        self.head.wait_for_server()
 
         self.torso = actionlib.simple_action_client.SimpleActionClient(
             "/moveit_action_handlers/torso/joint_ctrl", MoveToJointsMoveItAction
@@ -148,19 +148,19 @@ class ManipulationJointControl:
         self.right_arm_home_joint_values = CFG["right_arm_home"]["joints"]
 
         self.torso_joint_names = CFG["home"]["torso"]["names"]
-        self.pan_tilt_joint_names = CFG["home"]["head"]["names"]
+        self.head_joint_names = CFG["home"]["head"]["names"]
         self.torso_home_joint_values = CFG["home"]["torso"]["joints"]
-        self.pan_tilt_home_joint_values = CFG["home"]["head"]["joints"]
+        self.head_home_joint_values = CFG["home"]["head"]["joints"]
 
         self._right_joint_states = [0, 0, 0, 0, 0, 0, 0]
         self._left_joint_states = [0, 0, 0, 0, 0, 0, 0]
         self._torso_joint_states = [0]
-        self._pan_tilt_joint_states = [0, 0]
+        self._head_joint_states = [0, 0]
         self._joint_tolerance = joint_tolerance
 
         self._left_joint_target = None
         self._right_joint_target = None
-        self._pan_tilt_joint_target = None
+        self._head_joint_target = None
         self._torso_joint_target = None
 
     def update_joint_states(self):
@@ -188,7 +188,7 @@ class ManipulationJointControl:
         self._right_joint_states = []
         self._left_joint_states = []
         self._torso_joint_states = []
-        self._pan_tilt_joint_states = []
+        self._head_joint_states = []
 
         # probably a redundant check but making sure the joint names exist from the /joint_states data
         if not (
@@ -206,8 +206,8 @@ class ManipulationJointControl:
             )
             self._left_joint_states.append(names_pos_dict[self.left_arm_joint_names[i]])
 
-        self._pan_tilt_joint_states.append(names_pos_dict[self.pan_tilt_joint_names[0]])
-        self._pan_tilt_joint_states.append(names_pos_dict[self.pan_tilt_joint_names[1]])
+        self._head_joint_states.append(names_pos_dict[self.head_joint_names[0]])
+        self._head_joint_states.append(names_pos_dict[self.head_joint_names[1]])
 
         self._torso_joint_states.append(names_pos_dict[self.torso_joint_names[0]])
 
@@ -262,7 +262,7 @@ class ManipulationJointControl:
         self.torso.send_goal(goal)
         return self.torso.wait_for_result()
 
-    def cmd_pan_tilt(self, joint_target: list) -> bool:
+    def cmd_head(self, joint_target: list) -> bool:
         """
         Commands the movement of the pan tilt through the joint_space action server
         @param joint_target: list of target joint values
@@ -278,9 +278,9 @@ class ManipulationJointControl:
         except TypeError:
             return False
 
-        goal = joint_goal(joint_target, self.pan_tilt_joint_names)
-        self.pan_tilt.send_goal(goal)
-        return self.pan_tilt.wait_for_result()
+        goal = joint_goal(joint_target, self.head_joint_names)
+        self.head.send_goal(goal)
+        return self.head.wait_for_result()
 
     def cmd_right_arm(self, joint_target: list) -> bool:
         """
@@ -318,7 +318,7 @@ class ManipulationJointControl:
         status = self.cmd_left_arm(self.left_arm_home_joint_values)
         status &= self.cmd_right_arm(self.right_arm_home_joint_values)
 
-        status &= self.cmd_pan_tilt(self.pan_tilt_home_joint_values)
+        status &= self.cmd_head(self.head_home_joint_values)
         status &= self.cmd_torso(self.torso_home_joint_values)
 
         return status
