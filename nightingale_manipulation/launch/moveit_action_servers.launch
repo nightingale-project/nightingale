@@ -40,4 +40,16 @@
         <param name="ee_link_name" value="left_ee_link"/>
     </node>
 
+    <!-- MoveIt Joint Space Action Server, Pan Tilt -->
+    <node pkg="moveit_action_handlers" type="move_joints_action_server_node" name="pan_tilt_move_joints_action_server_node" output="screen">
+        <param name="move_group" value="pan_tilt"/>
+        <param name="action_server_name" value="moveit_action_handlers/torso/joint_ctrl"/>
+    </node>
+
+    <!-- MoveIt Joint Space Action Server, Torso -->
+    <node pkg="moveit_action_handlers" type="move_joints_action_server_node" name="torso_move_joints_action_server_node" output="screen">
+        <param name="move_group" value="torso"/>
+        <param name="action_server_name" value="moveit_action_handlers/pan_tilt/joint_ctrl"/>
+    </node>
+
 </launch>
