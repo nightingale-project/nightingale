@@ -130,7 +130,7 @@ class ManipulationJointControl:
         self.right_arm.wait_for_server()
 
         self.pan_tilt = actionlib.simple_action_client.SimpleActionClient(
-            "/moveit_action_handlers/pan_tilt/joint_ctrl", MoveToJointsMoveItAction
+            "/moveit_action_handlers/head/joint_ctrl", MoveToJointsMoveItAction
         )
         rospy.loginfo("Waiting for pan tilt joint moveit action server")
         self.pan_tilt.wait_for_server()
