@@ -23,7 +23,7 @@ class FaceScreen:
                     "center_x": cfg.SCREEN_X_CENTER,
                     "center_y": cfg.SCREEN_Y_CENTER,
                 },
-                size_hint=(0.7, 1),
+                size_hint=(1, 1.2),
                 on_release=self.to_homescreen,
             )
         )
