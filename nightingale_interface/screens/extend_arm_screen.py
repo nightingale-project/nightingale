@@ -85,7 +85,7 @@ class ExtendArmScreen:
         # Video player of robot moving
         screen.add_widget(
             Video(
-                source="videos/clock.mp4",
+                source="videos/arm_extend.mp4",
                 state="play",
                 options={"eos": "loop"},
                 size_hint_x=cfg.VIDEO_PLAYER_WIDTH,
