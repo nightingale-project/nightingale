@@ -19,7 +19,7 @@ from moveit_action_handlers.msg import PoseStamped
 from sensor_msgs.msg import JointState
 import tf_conversions, tf2_ros
 from geometry_msgs.msg import Pose as GeometryPose
-from geometry_msgs.msg import Quaternion, Point
+from geometry_msgs.msg import Quaternion, Point, Vector3
 from tf.transformations import euler_from_quaternion
 
 # TODO: replace with service call, requires refactoring of service to include gripper info
@@ -479,15 +479,22 @@ class ManipulationCartesianControl:
 
         # free end effector control mode
         else:
-            quaternion_list = [
-                pose.orientation.x,
-                pose.orientation.y,
-                pose.orientation.z,
-                pose.orientation.w,
-            ]
-            (roll, pitch, yaw) = euler_from_quaternion(quaternion_list)
+            (roll, pitch, yaw) = euler_from_quaternion(
+                [
+                    pose.orientation.x,
+                    pose.orientation.y,
+                    pose.orientation.z,
+                    pose.orientation.w,
+                ]
+            )
             euler_orientation = Orientation(roll=roll, pitch=pitch, yaw=yaw)
             goal = cartesian_goal(pose.position, ref_link, euler_orientation)
+
+            goal.constraint_mode = 2
+            goal.orientation_constraint = pose.orientation
+            goal.orientation_constraint_axis_tolerance = Vector3(
+                x=0.2, y=0.2, z=2 * math.pi
+            )
 
         rospy.loginfo("goal: ")
         rospy.loginfo(goal)
@@ -629,12 +636,16 @@ if __name__ == "__main__":
     manipulation.gpr_ctrl.open_right()
 
     manipulation.jnt_ctrl.cmd_torso(manipulation.jnt_ctrl.torso_home_joint_values)
+    manipulation.jnt_ctrl.cmd_head(manipulation.jnt_ctrl.head_home_joint_values)
 
     # close the gripper
     manipulation.gpr_ctrl.close_right()
-    time.sleep(2)
+
     # Move left arm to home with joint ctrl
     manipulation.jnt_ctrl.cmd_left_arm(manipulation.jnt_ctrl.left_arm_home_joint_values)
+
+    manipulation.jnt_ctrl.cmd_torso([0.3])
+    manipulation.jnt_ctrl.cmd_head([0.1, 0.1])
 
     # Move right arm to home in cartesian
     home_pose = GeometryPose()
