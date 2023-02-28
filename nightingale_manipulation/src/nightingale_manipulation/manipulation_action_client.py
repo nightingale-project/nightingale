@@ -629,12 +629,16 @@ if __name__ == "__main__":
     manipulation.gpr_ctrl.open_right()
 
     manipulation.jnt_ctrl.cmd_torso(manipulation.jnt_ctrl.torso_home_joint_values)
+    manipulation.jnt_ctrl.cmd_head(manipulation.jnt_ctrl.head_home_joint_values)
 
     # close the gripper
     manipulation.gpr_ctrl.close_right()
     time.sleep(2)
     # Move left arm to home with joint ctrl
     manipulation.jnt_ctrl.cmd_left_arm(manipulation.jnt_ctrl.left_arm_home_joint_values)
+
+    manipulation.jnt_ctrl.cmd_torso([0.3])
+    manipulation.jnt_ctrl.cmd_head([0.5, 0.5])
 
     # Move right arm to home in cartesian
     home_pose = GeometryPose()
