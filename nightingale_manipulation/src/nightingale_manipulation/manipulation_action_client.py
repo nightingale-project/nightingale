@@ -490,12 +490,6 @@ class ManipulationCartesianControl:
             euler_orientation = Orientation(roll=roll, pitch=pitch, yaw=yaw)
             goal = cartesian_goal(pose.position, ref_link, euler_orientation)
 
-            goal.constraint_mode = 2
-            goal.orientation_constraint = pose.orientation
-            goal.orientation_constraint_axis_tolerance = Vector3(
-                x=0.2, y=0.2, z=2 * math.pi
-            )
-
         rospy.loginfo("goal: ")
         rospy.loginfo(goal)
 
@@ -653,20 +647,20 @@ if __name__ == "__main__":
     home_pose.position.y = 0.003
     home_pose.position.z = 0.637
 
-    home_pose.orientation.x = -0.456
-    home_pose.orientation.y = -0.583
-    home_pose.orientation.z = 0.430
-    home_pose.orientation.w = 0.517
+    home_pose.orientation.x = -0.5
+    home_pose.orientation.y = -0.5
+    home_pose.orientation.z = 0.5
+    home_pose.orientation.w = 0.5
 
     handoff_pose = GeometryPose()
     handoff_pose.position.x = 0.807
     handoff_pose.position.y = 0.053
     handoff_pose.position.z = 0.978
 
-    handoff_pose.orientation.x = -0.69435
-    handoff_pose.orientation.y = -0.05705
-    handoff_pose.orientation.z = -0.054539
-    handoff_pose.orientation.w = 0.7153
+    handoff_pose.orientation.x = -0.70710678
+    handoff_pose.orientation.y = 0
+    handoff_pose.orientation.z = 0
+    handoff_pose.orientation.w = 0.70710678
 
     rospy.loginfo("Going to home orientation")
     manipulation.right_cartesian.cmd_orientation(home_pose.orientation)
