@@ -129,20 +129,28 @@ class ManipulationJointControl:
         )
         self.right_arm.wait_for_server()
 
+        self.pan_tilt = actionlib.simple_action_client.SimpleActionClient(
+            "/moveit_action_handlers/pan_tilt/joint_ctrl", MoveToJointsMoveItAction
+        )
+        rospy.loginfo("Waiting for pan tilt joint moveit action server")
+        self.pan_tilt.wait_for_server()
+
+        self.torso = actionlib.simple_action_client.SimpleActionClient(
+            "/moveit_action_handlers/torso/joint_ctrl", MoveToJointsMoveItAction
+        )
+        rospy.loginfo("Waiting for torso joint moveit action server")
+        self.torso.wait_for_server()
+
         # TODO: replace with service call
         self.left_arm_joint_names = CFG["left_arm_home"]["names"]
         self.right_arm_joint_names = CFG["right_arm_home"]["names"]
         self.left_arm_home_joint_values = CFG["left_arm_home"]["joints"]
         self.right_arm_home_joint_values = CFG["right_arm_home"]["joints"]
 
-        self.torso_joint_names = CFG["joint_configurations"]["home"]["torso"]["names"]
-        self.pan_tilt_joint_names = CFG["joint_configurations"]["home"]["head"]["names"]
-        self.torso_home_joint_values = CFG["joint_configurations"]["home"]["torso"][
-            "joints"
-        ]
-        self.pan_tilt_home_joint_values = CFG["joint_configurations"]["home"]["head"][
-            "joints"
-        ]
+        self.torso_joint_names = CFG["home"]["torso"]["names"]
+        self.pan_tilt_joint_names = CFG["home"]["head"]["names"]
+        self.torso_home_joint_values = CFG["home"]["torso"]["joints"]
+        self.pan_tilt_home_joint_values = CFG["home"]["head"]["joints"]
 
         self._right_joint_states = [0, 0, 0, 0, 0, 0, 0]
         self._left_joint_states = [0, 0, 0, 0, 0, 0, 0]
@@ -251,6 +259,16 @@ class ManipulationJointControl:
             return False
 
         self._torso_joint_target = joint_target.copy()
+
+        goal = joint_goal(self._torso_joint_target, self._)
+        self.torso.send_goal(goal)
+        self.torso.wait_for_result()
+        status = self.torso.get_result().status
+
+        if status == "Success":
+            return True
+        rospy.logwarn("joint control execute failed with status: " + str(status))
+        return False
 
         if not execute:
             return True
