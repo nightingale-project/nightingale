@@ -645,7 +645,7 @@ if __name__ == "__main__":
     manipulation.jnt_ctrl.cmd_left_arm(manipulation.jnt_ctrl.left_arm_home_joint_values)
 
     manipulation.jnt_ctrl.cmd_torso([0.3])
-    manipulation.jnt_ctrl.cmd_head([0.1, 0.1])
+    manipulation.jnt_ctrl.cmd_head([0.5, 0.5])
 
     # Move right arm to home in cartesian
     home_pose = GeometryPose()
