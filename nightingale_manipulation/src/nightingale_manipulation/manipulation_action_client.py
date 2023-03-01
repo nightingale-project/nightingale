@@ -4,24 +4,22 @@ import actionlib
 import rospy
 
 # joint
-from moveit_action_handlers.msg import PropertyValuePair
-from moveit_action_handlers.msg import MoveToJointsMoveItAction
-from moveit_action_handlers.msg import MoveToJointsMoveItGoal
-
+from moveit_action_handlers.msg import (
+    PropertyValuePair,
+    MoveToJointsMoveItAction,
+    MoveToJointsMoveItGoal,
+)
 from sensor_msgs.msg import JointState
 
 # cartesian
-from moveit_action_handlers.msg import MoveToPoseMoveItAction
-from moveit_action_handlers.msg import MoveToPoseMoveItGoal
-from moveit_action_handlers.msg import PoseStamped
+from moveit_action_handlers.msg import (
+    MoveToPoseMoveItAction,
+    MoveToPoseMoveItGoal,
+    PoseStamped,
+)
 from geometry_msgs.msg import Pose
 
-# forward kinematics
-# from urdf_parser_py.urdf import URDF
-# from pykdl_utils.kdl_kinematics import KDLKinematics
-
-
-# TODO: replace with service call, requires refactoring of service to include gripper info
+from nightingale_msgs.srv import RobotConfigurationLookup
 
 
 def joint_goal(joint_values, joint_names, eev=0.5, eea=0.5, timeout=10):
@@ -69,32 +67,17 @@ class ManipulationJointControl:
         )
         self.right_arm.wait_for_server()
 
-        # TODO: replace with service call
-        self.left_arm_joint_names = CFG["left_arm_home"]["names"]
-        self.right_arm_joint_names = CFG["right_arm_home"]["names"]
-        self.left_arm_home_joint_values = CFG["left_arm_home"]["joints"]
-        self.right_arm_home_joint_values = CFG["right_arm_home"]["joints"]
-
-    def cmd_right_arm(self, joint_values, blocking=True):
-        goal = joint_goal(joint_values, self.right_arm_joint_names)
-        self.right_arm.send_goal(goal)
-        if blocking:
-            return self.right_arm.wait_for_result()  # TODO: action_server.get_result()
-        return True
-
-    def cmd_left_arm(self, joint_values, blocking=True):
-        goal = joint_goal(joint_values, self.left_arm_joint_names)
+    def cmd_left_arm(self, goal, blocking=True):
         self.left_arm.send_goal(goal)
         if blocking:
             return self.left_arm.wait_for_result()  # TODO: action_server.get_result()
         return True
 
-    def home(self):
-        self.cmd_left_arm(self.left_arm_home_joint_values, blocking=False)
-        self.left_arm.wait_for_result()
-        self.cmd_right_arm(self.right_arm_home_joint_values, blocking=False)
-        self.right_arm.wait_for_result()
-        return True  # TODO: action_server.get_result()
+    def cmd_right_arm(self, goal, blocking=True):
+        self.right_arm.send_goal(goal)
+        if blocking:
+            return self.right_arm.wait_for_result()  # TODO: action_server.get_result()
+        return True
 
 
 class ManipulationGripperControl:
@@ -109,54 +92,37 @@ class ManipulationGripperControl:
         )
         self.right_gripper.wait_for_server()
 
-        # TODO: replace with service call
-        opened = CFG["open_gripper"]
-        closed = CFG["closed_gripper"]
-        self.right_open_goal = joint_goal(
-            [opened, opened, opened], CFG["right_gripper"]["joints"]
-        )
-        self.right_closed_goal = joint_goal(
-            [closed, closed, closed], CFG["right_gripper"]["joints"]
-        )
-
-        self.left_open_goal = joint_goal(
-            [opened, opened, opened], CFG["left_gripper"]["joints"]
-        )
-        self.left_closed_goal = joint_goal(
-            [closed, closed, closed], CFG["left_gripper"]["joints"]
-        )
-
         self.gripper_lock = {"left": True, "right": True}
         self.unlock_left_gripper()
         self.unlock_right_gripper()
 
-    def cmd_right_gripper(self, goal, blocking=True):
-        if self.gripper_lock["right"]:
-            self.right_gripper.send_goal(goal)
-            if blocking:
-                return self.right_gripper.wait_for_result()
-            return True  # TODO: action_server.get_result()
-        return False
-
     def cmd_left_gripper(self, goal, blocking=True):
-        if self.gripper_lock["left"]:
+        if not self.gripper_lock["left"]:
             self.left_gripper.send_goal(goal)
             if blocking:
                 return self.left_gripper.wait_for_result()
             return True  # TODO: action_server.get_result()
         return False
 
-    def lock_right_gripper(self):
-        self.gripper_lock["right"] = True
-
-    def unlock_right_gripper(self):
-        self.gripper_lock["right"] = False
+    def cmd_right_gripper(self, goal, blocking=True):
+        if not self.gripper_lock["right"]:
+            self.right_gripper.send_goal(goal)
+            if blocking:
+                return self.right_gripper.wait_for_result()
+            return True  # TODO: action_server.get_result()
+        return False
 
     def lock_left_gripper(self):
         self.gripper_lock["left"] = True
 
     def unlock_left_gripper(self):
         self.gripper_lock["left"] = False
+
+    def lock_right_gripper(self):
+        self.gripper_lock["right"] = True
+
+    def unlock_right_gripper(self):
+        self.gripper_lock["right"] = False
 
 
 class ManipulationCartesianControl:
@@ -172,10 +138,10 @@ class ManipulationCartesianControl:
         self.left_arm.wait_for_server()
         self.ee_ctrl_mode = 0
 
-    def cmd_right_arm(self, pose: Pose, blocking=True):
+    def cmd_right_arm(self, goal, blocking=True):
         raise NotImplementedError()
 
-    def cmd_left_arm(self, pose: Pose, blocking=True):
+    def cmd_left_arm(self, goal, blocking=True):
         raise NotImplementedError()
 
     def set_ee_ctrl_mode(self, mode):
@@ -184,56 +150,120 @@ class ManipulationCartesianControl:
 
 class ManipulationControl:
     def __init__(self):
-        rospy.loginfo("starting manipulation initialization, waiting for servers...")
+        rospy.loginfo("Starting manipulation initialization, waiting for servers...")
         self.jnt_ctrl = ManipulationJointControl()
-        rospy.loginfo("initialized joint ctrl")
+        rospy.loginfo("Initialized joint ctrl")
         self.gpr_ctrl = ManipulationGripperControl()
-        rospy.loginfo("initialized gripper ctrl")
+        rospy.loginfo("Initialized gripper ctrl")
         self.crt_ctrl = ManipulationCartesianControl()
-        rospy.loginfo("initialized cartesian ctrl")
+        rospy.loginfo("Initialized cartesian ctrl")
 
-        self.right_joint_states = [0, 0, 0, 0, 0, 0, 0]
-        self.left_joint_states = [0, 0, 0, 0, 0, 0, 0]
-        self.linear_joint_state = [0]
-        self.right_ee_pose = None
-        self.left_ee_pose = None
-        self.update_joint_states()
-        rospy.loginfo("joint states received, initialization successful")
+        robot_config_service = "/nightingale/robot_configuration_lookup"
+        rospy.loginfo(f"Manipulation Control: waiting for robot configuration service")
+        rospy.wait_for_service(robot_config_service)
+        rospy.loginfo(f"Manipulation Control: found robot configuration service")
+        lookup_client = rospy.ServiceProxy(
+            robot_config_service, RobotConfigurationLookup
+        )
+        rospy.loginfo(
+            "Nightingale Manipulation Control found robot configuration lookup service server",
+            logger_name=self.logger_name,
+        )
+        try:
+            response = lookup_client(RobotConfigurationLookup.LEFT_ARM, "home")
+            self.left_arm_joint_names = response.jnt_states.names
+            self.left_arm_home_joint_values = response.jnt_states.position
+
+            response = lookup_client(RobotConfigurationLookup.RIGHT_ARM, "home")
+            self.right_arm_joint_names = response.jnt_states.names
+            self.right_arm_home_joint_values = response.jnt_states.position
+
+            response = lookup_client(RobotConfigurationLookup.RIGHT_ARM, "handoff")
+            self.right_arm_handoff_joint_values = response.jnt_states.position
+
+            response = lookup_client(
+                RobotConfigurationLookup.LEFT_GRIPPER, "open_gripper"
+            )
+            self.left_gripper_joint_names = response.jnt_states.names
+            self.left_gripper_open_joint_values = response.jnt_states.position
+
+            response = lookup_client(
+                RobotConfigurationLookup.LEFT_GRIPPER, "closed_gripper"
+            )
+            self.left_gripper_closed_joint_values = response.jnt_states.position
+
+            response = lookup_client(
+                RobotConfigurationLookup.RIGHT_GRIPPER, "open_gripper"
+            )
+            self.right_gripper_joint_names = response.jnt_states.names
+            self.right_gripper_open_joint_values = response.jnt_states.position
+
+            response = lookup_client(
+                RobotConfigurationLookup.RIGHT_GRIPPER, "closed_gripper"
+            )
+            self.right_gripper_closed_joint_values = response.jnt_states.position
+
+        except rospy.ServiceException as exc:
+            rospy.logerr(
+                "Nightingale Manipulation Control failed to call robot configuration lookup service",
+                logger_name=self.logger_name,
+            )
+
+        self.joint_states_sub = rospy.Subscriber(
+            "/joint_states", JointState, self.update_joint_states
+        )
 
     def update_joint_states(self):
-        joint_states = rospy.client.wait_for_message("/joint_states", JointState)
-        p = joint_states.position
-        self.right_joint_states = [p[14], p[13], p[10], p[11], p[15], p[16], p[17]]
-        self.left_joint_states = [p[4], p[3], p[0], p[1], p[5], p[6], p[7]]
-        self.linear_joint_state = [p[8]]
-
-    def update_ee_pose(self):
-        """
-        robot_urdf = URDF.from_xml_string("urdf_str")
-        self.update_joint_states()
-        # base -> right ee
-        kdl_kin = KDLKinematics(robot_urdf, "base_link", "right_ee_link")
-        self.right_ee_pose = kdl_kin.forward(self.linear_joint_state + self.right_joint_states)
-
-        # base -> left ee
-        kdl_kin = KDLKinematics(robot_urdf, "base_link", "left_ee_link")
-        self.left_ee_pose = kdl_kin.forward(self.linear_joint_state + self.left_joint_states)
-        """
         raise NotImplementedError()
 
     def home(self):
         # home left arm in joint space and home right arm in cart or joint space
-        # use self.jnt_ctrl.home() for now
-        raise NotImplementedError()
+        self.jnt_ctrl.cmd_left_arm(
+            joint_goal(self.left_arm_home_joint_values, self.left_arm_joint_names)
+        )
+        self.jnt_ctrl.cmd_right_arm(
+            joint_goal(self.right_arm_home_joint_values, self.right_arm_joint_names)
+        )
 
     def extend_handoff(self):
         # extend right arm in cartesian space
-        # TODO: replace with service call
-        self.jnt_ctrl.cmd_right_arm(CFG["right_arm_extended_handoff"]["joints"])
+        self.jnt_ctrl.cmd_right_arm(
+            joint_goal(self.right_arm_handoff_joint_values, self.left_arm_joint_names)
+        )
+
+    def open_left_gripper(self):
+        self.gpr_ctrl.cmd_left_gripper(
+            joint_goal(
+                self.left_gripper_open_joint_values, self.left_gripper_joint_names
+            )
+        )
+
+    def open_right_gripper(self):
+        self.gpr_ctrl.cmd_right_gripper(
+            joint_goal(
+                self.right_gripper_open_joint_values, self.right_gripper_joint_names
+            )
+        )
+
+    def close_left_gripper(self):
+        self.gpr_ctrl.cmd_left_gripper(
+            joint_goal(
+                self.left_gripper_closed_joint_values, self.left_gripper_joint_names
+            )
+        )
+
+    def close_right_gripper(self):
+        self.gpr_ctrl.cmd_right_gripper(
+            joint_goal(
+                self.right_gripper_closed_joint_values, self.right_gripper_joint_names
+            )
+        )
 
 
 # test code
 if __name__ == "__main__":
     rospy.init_node("manipulation_control")
     manipulation = ManipulationControl()
-    manipulation.jnt_ctrl.home()
+    manipulation.open_right_gripper()
+    manipulation.home()
+    manipulation.close_right_gripper()
