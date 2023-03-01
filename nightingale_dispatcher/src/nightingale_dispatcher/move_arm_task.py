@@ -18,7 +18,7 @@ class MoveArmTask(Task):
         return TaskCodes.SUCCESS if result else TaskCodes.ERROR
 
     def retract_right_arm(self):
-        result = self.manipulation.home_right()
+        result = self.manipulation.retract_right()
         assert type(result) is bool
         return TaskCodes.SUCCESS if result else TaskCodes.ERROR
 
