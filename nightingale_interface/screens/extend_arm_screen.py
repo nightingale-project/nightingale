@@ -65,15 +65,15 @@ class ExtendArmScreen:
         )
 
         # retract arm
-        screen.add_widget(
-            MDRectangleFlatButton(
-                text="Cancel",
-                font_style="H4",
-                pos_hint={"center_x": 0.85, "center_y": 0.35},
-                size_hint=(cfg.SHORT_RECT_WIDTH, cfg.SHORT_RECT_HEIGHT),
-                on_release=self.cancel_extend_arm,
-            )
-        )
+        # screen.add_widget(
+        #    MDRectangleFlatButton(
+        #        text="Cancel",
+        #        font_style="H4",
+        #        pos_hint={"center_x": 0.85, "center_y": 0.35},
+        #        size_hint=(cfg.SHORT_RECT_WIDTH, cfg.SHORT_RECT_HEIGHT),
+        #        on_release=self.cancel_extend_arm,
+        #    )
+        # )
 
         # start extend arm
         screen.add_widget(
