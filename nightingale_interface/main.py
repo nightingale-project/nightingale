@@ -1,3 +1,9 @@
+# follow environment variable is needed to be set so Kivy doesn't take
+# over the commmand line for reading arguments
+import os
+
+os.environ["KIVY_NO_ARGS"] = "1"
+
 import MovoConfig
 from screen_wrapper import ScreenWrapper
 from screens.screen_config import ScreenConfig
@@ -10,9 +16,11 @@ from nightingale_ros_bridge.src.nightingale_ros_bridge.bridge_interface_config i
 import json
 import asyncio
 import roslibpy
-
+from functools import partial
+import argparse
 import kivy
 from kivy.config import Config
+from kivy.clock import Clock
 
 Config.set("graphics", "width", "1280")
 Config.set("graphics", "height", "800")
@@ -25,7 +33,6 @@ from kivy.properties import NumericProperty, StringProperty
 class MainApp(MDApp, ScreenWrapper):
     _other_task = None
     _wd_task = None
-    coms_enabled = True
 
     # ros things
     client = None
@@ -148,18 +155,18 @@ class MainApp(MDApp, ScreenWrapper):
         self.theme_cls.theme_style = "Dark"
         return self.build_wrapper()
 
-    def init_ros(self):
+    def init_ros(self, on_movo=False):
         # initialize the ros bridge client
 
-        # self.client = roslibpy.Ros(
-        #    MovoConfig.Config["Movo2"]["IP"], MovoConfig.Config["RosBridgePort"]
-        # )
-
-        # temporary offline computer testing
-        self.client = roslibpy.Ros(
-            host="localhost", port=MovoConfig.Config["RosBridgePort"]
-        )
-        # temporary offline computer testing
+        self.client = None
+        if on_movo == True:
+            self.client = roslibpy.Ros(
+                MovoConfig.Config["Movo2"]["IP"], MovoConfig.Config["RosBridgePort"]
+            )
+        else:
+            self.client = roslibpy.Ros(
+                host="localhost", port=MovoConfig.Config["RosBridgePort"]
+            )
 
         self.client.run()
         asyncio.sleep(0.5)
@@ -196,6 +203,10 @@ class MainApp(MDApp, ScreenWrapper):
             if action == UserInputs.ESTOP:
                 self.estop_action_topic.publish(msg)
             else:
+                if action == UserInputs.WD_TIMEOUT or action == UserInputs.RETURN_HOME:
+                    # clear screen history for next patient/task loop
+                    self.screen_stack.clear()
+
                 self.ros_action_topic.publish(msg)
             return True
         except:
@@ -211,10 +222,19 @@ class MainApp(MDApp, ScreenWrapper):
         status = int(msg["data"])  # enum
 
         next_screen = ScreenConfig.HUB_SCREEN_NAME
-        if status == RobotStatus.IDLE_HOME or status == RobotStatus.DRIVING:
+        if status == RobotStatus.IDLE_HOME:
             # instantly return since no user input expected
             self.call_ros_action(UserInputs.NO_ROS_ACTION)
             next_screen = ScreenConfig.FACE_SCREEN_NAME
+
+        elif status == RobotStatus.DRIVING:
+            # instantly return since no user input expected
+            # switch to start driving screen for 5 secs and then switch to face screen
+            self.call_ros_action(UserInputs.NO_ROS_ACTION)
+            next_screen = ScreenConfig.START_DRIVE_SCREEN_NAME
+            Clock.schedule_once(
+                partial(self.set_screen_delayed, ScreenConfig.FACE_SCREEN_NAME), 5
+            )
 
         elif status == RobotStatus.BEDSIDE_IDLE:
             next_screen = ScreenConfig.HUB_SCREEN_NAME
@@ -249,10 +269,16 @@ class MainApp(MDApp, ScreenWrapper):
         self.queue(self.robot_state_screen_change_task, 0, next_screen)
         return True
 
+    def set_screen_delayed(self, screen_name, dt):
+        # able to set any screen name after a delay.
+        # meant to be used with Kivy.Clock scheduling calls
+        self.root.current = screen_name
+
     def robot_state_screen_change_task(self, next_screen):
         # update screen upon new state
         if next_screen is not None and self.get_screen(next_screen):
             self.root.current = next_screen
+            self.screen_stack.append(self.root.current)
 
     def reset_wd(self):
         # reset watchdog to max time
@@ -260,13 +286,26 @@ class MainApp(MDApp, ScreenWrapper):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--ros_comms",
+        action="store_true",
+        help="If set then True to use ROS bridge, False otherwise",
+    )
+    parser.add_argument(
+        "--on_movo",
+        action="store_true",
+        help="If set then True to run on movo, False if on own computer",
+    )
+
+    args = parser.parse_args()
     # initialize the app and event loop
     loop = asyncio.get_event_loop()
     app = MainApp()
 
     # initializes everything related to ros bridge
-    if app.coms_enabled:
-        app.init_ros()
+    if args.ros_comms == True:
+        app.init_ros(args.on_movo)
 
     # start the app event loop
     loop.run_until_complete(app.main())
