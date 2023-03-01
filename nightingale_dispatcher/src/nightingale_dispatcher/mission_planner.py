@@ -41,11 +41,6 @@ class MissionPlanner:
 
         self.phases = queue.Queue()
 
-        self.fallback_bin_goal = Point()
-        self.fallback_bin_goal.x = 0.807
-        self.fallback_bin_goal.y = 0.053
-        self.fallback_bin_goal.z = 0.978
-
     def go_to_patient_phase(self):
         rospy.loginfo("Nightingale Mission Planner going to patient")
         # Assume door is open
@@ -165,11 +160,6 @@ class MissionPlanner:
         # if unable to find patient pose place bin at predetermined position
         # could also abort and go home instead but this decision complexity
         # is likely not within current scope
-        # if status == TaskCodes.ERROR:
-        #    rospy.logwarn("UNABLE TO FIND POSE. FALLING BACK TO SAFE HANDOFF POSITION")
-        #    #TODO Find a safe bin goal we can fall back on. currently the restock position
-        #    bin_goal_pt = self.fallback_bin_goal
-
         # show arm movement and get input to start
         task_response = self.send_interface_request_task.execute(
             RobotStatus.BEDSIDE_DELIVER
@@ -179,8 +169,12 @@ class MissionPlanner:
         rospy.loginfo("Nightingale Mission Planner extending arm for handoff")
 
         # UNCOMMENT FOR POSE GOAL
-        # if self.move_arm_task.extend_handoff(bin_goal_pt) != TaskCodes.SUCCESS:
-
+        # if status != TaskCodes.SUCCESS:
+        #    rospy.logwarn("UNABLE TO FIND POSE. FALLING BACK TO SAFE HANDOFF POSITION")
+        #    status = self.move_arm_task.extend_restock()
+        # else:
+        #     status = self.move_arm_task.extend_handoff(bin_goal_pt)
+        # if status != TaskCodes.SUCCESS:
         if self.move_arm_task.extend_restock() != TaskCodes.SUCCESS:
             rospy.logerr("Nightingale Mission Planner failed to extend arm for handoff")
             raise NotImplementedError()

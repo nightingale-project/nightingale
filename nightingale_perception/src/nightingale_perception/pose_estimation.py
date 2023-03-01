@@ -380,6 +380,7 @@ class PoseEstimation:
                 tf2_ros.ExtrapolationException,
             ):
                 continue
+            rospy.sleep(0.2)
 
 
 def main():
