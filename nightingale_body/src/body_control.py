@@ -9,7 +9,10 @@ from moveit_action_handlers.msg import (
     PropertyValuePair,
 )
 
-from nightingale_msgs.srv import RobotConfigurationLookup
+from nightingale_msgs.srv import (
+    RobotConfigurationLookup,
+    RobotConfigurationLookupRequest,
+)
 
 
 class BodyJointControl:
@@ -19,12 +22,14 @@ class BodyJointControl:
         )
         rospy.loginfo("Waiting for head joint moveit action server")
         self.head_ac.wait_for_server()
+        rospy.loginfo("Found head joint moveit action server")
 
         self.torso_ac = actionlib.simple_action_client.SimpleActionClient(
             "/moveit_action_handlers/torso/joint_ctrl", MoveToJointsMoveItAction
         )
         rospy.loginfo("Waiting for torso joint moveit action server")
         self.torso_ac.wait_for_server()
+        rospy.loginfo("Found torso joint moveit action server")
 
     def _make_goal(self, jnt_name, jnt_pos, ee_vel=0.5, ee_accel=0.5, timeout=5):
         goal = MoveToJointsMoveItGoal()
@@ -62,27 +67,34 @@ class BodyControl:
             robot_config_service, RobotConfigurationLookup
         )
         rospy.loginfo(
-            "Nightingale Manipulation Control found robot configuration lookup service server",
-            logger_name=self.logger_name,
+            "Nightingale Manipulation Control found robot configuration lookup service server"
         )
-        try:
-            response = lookup_client(RobotConfigurationLookup.HEAD, "home")
-            self.head_joint_names = response.jnt_states.names
-            self.head_home_joint_values = response.jnt_states.position
+        # try:
+        #     response = lookup_client(RobotConfigurationLookupRequest.HEAD, "home")
+        #     self.head_joint_names = response.jnt_states.names
+        #     self.head_home_joint_values = response.jnt_states.position
 
-            response = lookup_client(RobotConfigurationLookup.TORSO, "home")
-            self.torso_joint_names = response.jnt_states.names
-            self.torso_home_joint_values = response.jnt_states.position
+        #     response = lookup_client(RobotConfigurationLookupRequest.TORSO, "home")
+        #     self.torso_joint_names = response.jnt_states.names
+        #     self.torso_home_joint_values = response.jnt_states.position
 
-            response = lookup_client(RobotConfigurationLookup.TORSO, "handoff")
-            self.torso_joint_names = response.jnt_states.names
-            self.torso_handoff_joint_values = response.jnt_states.position
+        #     response = lookup_client(RobotConfigurationLookupRequest.TORSO, "handoff")
+        #     self.torso_joint_names = response.jnt_states.names
+        #     self.torso_handoff_joint_values = response.jnt_states.position
 
-        except rospy.ServiceException as e:
-            rospy.logerr(
-                "Nightingale Manipulation Control failed to call robot configuration lookup service",
-                logger_name=self.logger_name,
-            )
+        # except rospy.ServiceException as e:
+        #     rospy.logerr(
+        #         f"Nightingale Manipulation Control failed to call robot configuration lookup service {e}"
+        #     )
+
+        self.head_joint_names = ["pan_joint", "tilt_joint"]
+        self.head_home_joint_values = [0, 0]
+
+        self.torso_joint_names = ["linear_joint"]
+        self.torso_home_joint_values = [0.1]
+
+        self.torso_joint_names = ["linear_joint"]
+        self.torso_handoff_joint_values = [0.4]
 
         self.body_jnt_ctrl = BodyJointControl()
 
