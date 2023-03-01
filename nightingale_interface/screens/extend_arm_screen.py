@@ -2,6 +2,10 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.video import Video
 from kivy.uix.button import Button
 from kivy.uix.screenmanager import SlideTransition, NoTransition
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+from kivy.uix.gridlayout import GridLayout
+from kivy.clock import Clock
 
 from kivymd.uix.button import MDRectangleFlatButton
 
@@ -85,7 +89,7 @@ class ExtendArmScreen:
         # Video player of robot moving
         screen.add_widget(
             Video(
-                source="videos/arm_extend.mp4",
+                source="videos/arm_extendx3.mp4",
                 state="play",
                 options={"eos": "loop"},
                 size_hint_x=cfg.VIDEO_PLAYER_WIDTH,
