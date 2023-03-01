@@ -4,7 +4,6 @@
     <!-- This file launches all launch files performing core nightingale functions -->
     <include file="$(find nightingale_utils)/launch/utils.launch"/>
     <include file="$(find nightingale_perception)/launch/pt_cloud_process.launch"/>
-    <include file="$(find nightingale_perception)/launch/pose_estimation.launch"/>
     <include file="$(find nightingale_navigation)/launch/navigation.launch"/>
     <include file="$(find nightingale_ros_bridge)/launch/interface.launch"/>
     <include file="$(find nightingale_dispatcher)/launch/dispatcher.launch"/>

@@ -71,7 +71,6 @@ add_action_files(
   FILES
   RoomRunner.action
   MissionPlan.action
-  PoseEstimation.action
 )
 
 ## Generate added messages and services with any dependencies listed here

@@ -12,7 +12,6 @@ from nightingale_dispatcher.move_arm_task import MoveArmTask
 from nightingale_dispatcher.send_interface_request_task import SendInterfaceRequestTask
 from nightingale_dispatcher.task import Task, TaskCodes
 from nightingale_ros_bridge.bridge_interface_config import BridgeConfig, RobotStatus
-from nightingale_dispatcher.estimate_pose_task import EstimatePoseTask
 
 
 # enum for phase status
@@ -30,7 +29,6 @@ class MissionPlanner:
         )
         self.navigate_task = NavigateTask()
         self.move_arm_task = MoveArmTask()
-        self.estimate_pose_task = EstimatePoseTask()
         self.send_interface_request_task = SendInterfaceRequestTask()
 
         self.server = actionlib.SimpleActionServer(
@@ -157,10 +155,6 @@ class MissionPlanner:
         rospy.loginfo("Nightingale Mission Planner starting to hand items")
         # Arrived at patient's bedside
 
-        # pose estimation
-        #status, pose_result = self.estimate_pose_task.execute("body")
-        #rospy.loginfo(f"node returns {pose_result}")
-
         # show arm movement and get input to start
         task_response = self.send_interface_request_task.execute(
             RobotStatus.BEDSIDE_DELIVER
@@ -168,7 +162,6 @@ class MissionPlanner:
 
         # extend arm
         rospy.loginfo("Nightingale Mission Planner extending arm for handoff")
-        #if self.move_arm_task.extend_handoff(pose_result.bin_goal.point) != TaskCodes.SUCCESS:
         if self.move_arm_task.extend_restock() != TaskCodes.SUCCESS:
             rospy.logerr("Nightingale Mission Planner failed to extend arm for handoff")
             raise NotImplementedError()
