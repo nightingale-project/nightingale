@@ -37,7 +37,7 @@ joint_configurations: {
             joints: [0.23, 0.23, 0.23],
         },
         right_gripper: {
-            names: ["right_gripper_finger1_joint", "right_gripper_finger2_joint", "right_gripper_finger3_joint" ]
+            names: ["right_gripper_finger1_joint", "right_gripper_finger2_joint", "right_gripper_finger3_joint" ],
             joints: [0.23, 0.23, 0.23],
         }
     },
@@ -47,7 +47,7 @@ joint_configurations: {
             joints: [0, 0, 0],
         },
         right_gripper: {
-            names: ["right_gripper_finger1_joint", "right_gripper_finger2_joint", "right_gripper_finger3_joint" ]
+            names: ["right_gripper_finger1_joint", "right_gripper_finger2_joint", "right_gripper_finger3_joint" ],
             joints: [0, 0, 0],
         }
     },
