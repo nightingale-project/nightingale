@@ -35,6 +35,7 @@ from tf.transformations import euler_from_quaternion
 # TODO: replace with service call, requires refactoring of service to include gripper info
 CFG = rospy.get_param("/nightingale_utils/joint_configurations")
 
+MoveItActionHandlerSuccess = "Success"
 
 # overriding the geometry msgs Pose class to add tolerance on equivalence check
 class Pose(GeometryPose):
@@ -239,7 +240,7 @@ class ManipulationJointControl:
 
         self.right_arm.wait_for_result()
         status = self.right_arm.get_result().status
-        if status == "Success":
+        if status == MoveItActionHandlerSuccess:
             return True
         rospy.logwarn("cmd_right_arm failed with status: " + str(status))
         return False
@@ -262,7 +263,7 @@ class ManipulationJointControl:
 
         self.left_arm.wait_for_result()
         status = self.left_arm.get_result().status
-        if status == "Success":
+        if status == MoveItActionHandlerSuccess:
             return True
         rospy.logwarn("cmd_left_arm failed with status: " + str(status))
         return False
@@ -312,7 +313,7 @@ class ManipulationGripperControl:
 
         self.right_gripper.send_goal(goal)
         self.right_gripper.wait_for_result()
-        return self.right_gripper.get_result().status == "Success"
+        return self.right_gripper.get_result().status == MoveItActionHandlerSuccess
 
     def cmd_left_gripper(self, goal):
         if not self.gripper_lock["left"]:
@@ -320,7 +321,7 @@ class ManipulationGripperControl:
 
         self.left_gripper.send_goal(goal)
         self.left_gripper.wait_for_result()
-        return self.left_gripper.get_result().status == "Success"
+        return self.left_gripper.get_result().status == MoveItActionHandlerSuccess
 
     def lock_right_gripper(self):
         self.gripper_lock["right"] = False
@@ -444,7 +445,7 @@ class ManipulationCartesianControl:
         self.arm.send_goal(goal)
         if blocking:
             self.arm.wait_for_result()
-            return self.arm.get_result().status == "Success"
+            return self.arm.get_result().status == MoveItActionHandlerSuccess
         return True
 
     def cmd_position(self, point: Point, ee_fixed=True):
@@ -590,7 +591,7 @@ class ManipulationControl:
     def update_joint_states(self):
         raise NotImplementedError()
 
-    def home_right(self):
+    def home_right(self, tries=3):
         # CAUTION: This function should only ever home the arms. Don't add homing of other things here
         # right gripper is openend on bootup by kinova. not sure where, but not in init
         def home_right_internal():
@@ -614,34 +615,60 @@ class ManipulationControl:
                 return False
             return True
 
-        for _ in range(self.tries):
+        for _ in range(tries):
             if home_right_internal():
                 return True
         return False
 
+    def retract_right(self, tries=3):
+        def home_right_internal():
+            home_pose = GeometryPose()
+            # TODO get this from the service
+            home_pose.position.x = 0.581
+            home_pose.position.y = 0.003
+            home_pose.position.z = 0.637
+            home_pose.orientation.x = -0.456
+            home_pose.orientation.y = -0.583
+            home_pose.orientation.z = 0.430
+            home_pose.orientation.w = 0.517
+            if not self.right_cartesian.cmd_orientation(home_pose.orientation):
+                rospy.logerr("ManipulationControl failed to orient right arm")
+                return False
+            if not self.right_cartesian.cmd_position(home_pose.position, True):
+                rospy.logerr("ManipulationControl failed to move right arm")
+                return False
+            return True
 
-    def home_left(self):
+        for _ in range(tries):
+            if home_right_internal():
+                return True
+        return False
+
+    def home_left(self, tries=3):
         def home_left_internal():
+            if not self.gpr_ctrl.close_left():
+                rospy.logerr("ManipulationControl failed to close left gripper")
+                return False
             if not self.jnt_ctrl.cmd_left_arm(self.jnt_ctrl.left_arm_home_joint_values):
                 rospy.logerr("ManipulationControl failed to home left arm")
                 return False
             return True
 
-        for _ in range(self.tries):
+        for _ in range(tries):
             if home_left_internal():
                 return True
         return False
 
-    def extend_handoff(self, goal_point: Point):
+    def extend_handoff(self, goal_point: Point, tries=3):
         def extend_handoff_internal():
             return self.right_cartesian.cmd_position(goal_point, True)
 
-        for _ in range(self.tries):
+        for _ in range(tries):
             if extend_handoff_internal():
                 return True
         return False
 
-    def extend_restock(self):
+    def extend_restock(self, tries=3):
         # TODO: these should come from some param server
         def extend_restock_internal():
             restock_pose = GeometryPose()
@@ -650,7 +677,7 @@ class ManipulationControl:
             restock_pose.position.z = 0.978
             return self.right_cartesian.cmd_position(restock_pose.position, True)
 
-        for _ in range(self.tries):
+        for _ in range(tries):
             if extend_restock_internal():
                 return True
         return False
@@ -689,53 +716,11 @@ if __name__ == "__main__":
     rospy.init_node("manipulation_control")
     manipulation = ManipulationControl()
 
-    # close the gripper
-    rospy.loginfo("closing right gripper")
-    manipulation.gpr_ctrl.close_right()
-    rospy.loginfo("closed right gripper")
-    time.sleep(2)
-    # Move left arm to home with joint ctrl
-    rospy.loginfo("homing left arm")
-    manipulation.jnt_ctrl.cmd_left_arm(manipulation.jnt_ctrl.left_arm_home_joint_values)
-    rospy.loginfo("homed left arm")
-
-    # Move right arm to home in cartesian
-    home_pose = GeometryPose()
-    home_pose.position.x = 0.581
-    home_pose.position.y = 0.003
-    home_pose.position.z = 0.637
-
-    home_pose.orientation.x = -0.456
-    home_pose.orientation.y = -0.583
-    home_pose.orientation.z = 0.430
-    home_pose.orientation.w = 0.517
-
-    handoff_pose = GeometryPose()
-    handoff_pose.position.x = 0.807
-    handoff_pose.position.y = 0.053
-    handoff_pose.position.z = 0.978
-
-    handoff_pose.orientation.x = -0.69435
-    handoff_pose.orientation.y = -0.05705
-    handoff_pose.orientation.z = -0.054539
-    handoff_pose.orientation.w = 0.7153
-
-    rospy.loginfo("Going to home orientation")
-    manipulation.right_cartesian.cmd_orientation(home_pose.orientation)
-    rospy.loginfo("Arrived at home orientation")
-
-    for iter in range(3):
-        rospy.loginfo("Going to home pose")
-        manipulation.right_cartesian.cmd_position(home_pose.position, True)
-        rospy.loginfo("Arrived at home pose")
-
-        time.sleep(2)
-
-        rospy.loginfo("Going to handoff pose")
-        manipulation.right_cartesian.cmd_position(handoff_pose.position, True)
-        rospy.loginfo("Arrived at handoff pose")
-
-        time.sleep(2)
-    manipulation.open_right_gripper()
-    manipulation.home()
-    manipulation.close_right_gripper()
+    rospy.loginfo(manipulation.jnt_ctrl.left_arm_home_joint_values)
+    for _ in range(3):
+        rospy.loginfo("going home")
+        assert manipulation.home_left() and manipulation.home_right()
+        rospy.loginfo("restocking")
+        assert manipulation.extend_restock()
+    rospy.loginfo("going home")
+    assert manipulation.home_left() and manipulation.home_right()
