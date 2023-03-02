@@ -19,7 +19,10 @@ from moveit_action_handlers.msg import (
 )
 from geometry_msgs.msg import Pose
 
-from nightingale_msgs.srv import RobotConfigurationLookup
+from nightingale_msgs.srv import (
+    RobotConfigurationLookup,
+    RobotConfigurationLookupRequest,
+)
 
 
 def joint_goal(joint_values, joint_names, eev=0.5, eea=0.5, timeout=10):
@@ -170,42 +173,44 @@ class ManipulationControl:
             logger_name=self.logger_name,
         )
         try:
-            response = lookup_client(RobotConfigurationLookup.LEFT_ARM, "home")
+            response = lookup_client("home", RobotConfigurationLookupRequest.LEFT_ARM)
             self.left_arm_joint_names = response.jnt_states.names
             self.left_arm_home_joint_values = response.jnt_states.position
 
-            response = lookup_client(RobotConfigurationLookup.RIGHT_ARM, "home")
+            response = lookup_client("home", RobotConfigurationLookupRequest.RIGHT_ARM)
             self.right_arm_joint_names = response.jnt_states.names
             self.right_arm_home_joint_values = response.jnt_states.position
 
-            response = lookup_client(RobotConfigurationLookup.RIGHT_ARM, "handoff")
+            response = lookup_client(
+                "handoff", RobotConfigurationLookupRequest.RIGHT_ARM
+            )
             self.right_arm_handoff_joint_values = response.jnt_states.position
 
             response = lookup_client(
-                RobotConfigurationLookup.LEFT_GRIPPER, "open_gripper"
+                "open_gripper", RobotConfigurationLookupRequest.LEFT_GRIPPER
             )
             self.left_gripper_joint_names = response.jnt_states.names
             self.left_gripper_open_joint_values = response.jnt_states.position
 
             response = lookup_client(
-                RobotConfigurationLookup.LEFT_GRIPPER, "closed_gripper"
+                "closed_gripper", RobotConfigurationLookupRequest.LEFT_GRIPPER
             )
             self.left_gripper_closed_joint_values = response.jnt_states.position
 
             response = lookup_client(
-                RobotConfigurationLookup.RIGHT_GRIPPER, "open_gripper"
+                "open_gripper", RobotConfigurationLookupRequest.RIGHT_GRIPPER
             )
             self.right_gripper_joint_names = response.jnt_states.names
             self.right_gripper_open_joint_values = response.jnt_states.position
 
             response = lookup_client(
-                RobotConfigurationLookup.RIGHT_GRIPPER, "closed_gripper"
+                "closed_gripper", RobotConfigurationLookupRequest.RIGHT_GRIPPER
             )
             self.right_gripper_closed_joint_values = response.jnt_states.position
 
-        except rospy.ServiceException as exc:
+        except rospy.ServiceException as e:
             rospy.logerr(
-                "Nightingale Manipulation Control failed to call robot configuration lookup service",
+                f"Nightingale Manipulation Control failed to call robot configuration lookup service {e}",
                 logger_name=self.logger_name,
             )
 
