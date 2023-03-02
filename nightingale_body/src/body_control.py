@@ -69,32 +69,23 @@ class BodyControl:
         rospy.loginfo(
             "Nightingale Manipulation Control found robot configuration lookup service server"
         )
-        # try:
-        #     response = lookup_client(RobotConfigurationLookupRequest.HEAD, "home")
-        #     self.head_joint_names = response.jnt_states.names
-        #     self.head_home_joint_values = response.jnt_states.position
+        try:
+            response = lookup_client("home", RobotConfigurationLookupRequest.HEAD)
+            self.head_joint_names = response.jnt_states.names
+            self.head_home_joint_values = response.jnt_states.position
 
-        #     response = lookup_client(RobotConfigurationLookupRequest.TORSO, "home")
-        #     self.torso_joint_names = response.jnt_states.names
-        #     self.torso_home_joint_values = response.jnt_states.position
+            response = lookup_client("home", RobotConfigurationLookupRequest.TORSO)
+            self.torso_joint_names = response.jnt_states.names
+            self.torso_home_joint_values = response.jnt_states.position
 
-        #     response = lookup_client(RobotConfigurationLookupRequest.TORSO, "handoff")
-        #     self.torso_joint_names = response.jnt_states.names
-        #     self.torso_handoff_joint_values = response.jnt_states.position
+            response = lookup_client("handoff", RobotConfigurationLookupRequest.TORSO)
+            self.torso_joint_names = response.jnt_states.names
+            self.torso_handoff_joint_values = response.jnt_states.position
 
-        # except rospy.ServiceException as e:
-        #     rospy.logerr(
-        #         f"Nightingale Manipulation Control failed to call robot configuration lookup service {e}"
-        #     )
-
-        self.head_joint_names = ["pan_joint", "tilt_joint"]
-        self.head_home_joint_values = [0, 0]
-
-        self.torso_joint_names = ["linear_joint"]
-        self.torso_home_joint_values = [0.1]
-
-        self.torso_joint_names = ["linear_joint"]
-        self.torso_handoff_joint_values = [0.4]
+        except rospy.ServiceException as e:
+            rospy.logerr(
+                f"Nightingale Manipulation Control failed to call robot configuration lookup service {e}"
+            )
 
         self.body_jnt_ctrl = BodyJointControl()
 
