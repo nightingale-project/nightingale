@@ -9,6 +9,7 @@ project(nightingale_body)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   actionlib
+  moveit_action_handlers
   rospy
   std_msgs
 )
