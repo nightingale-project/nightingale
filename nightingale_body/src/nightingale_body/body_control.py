@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import actionlib
+import numpy as np
 import rospy
 
 from moveit_action_handlers.msg import (
@@ -8,14 +9,17 @@ from moveit_action_handlers.msg import (
     MoveToJointsMoveItGoal,
     PropertyValuePair,
 )
-
 from nightingale_msgs.srv import (
     RobotConfigurationLookup,
     RobotConfigurationLookupRequest,
 )
+from sensor_msgs.msg import JointState
 
 
 class BodyJointControl:
+    CLOSE_DIST_TOL = 1e-2  # m
+    CLOSE_ANGLE_TOL = 0.087  # rad = 5 deg
+
     def __init__(self):
         self.head_ac = actionlib.simple_action_client.SimpleActionClient(
             "/moveit_action_handlers/head/joint_ctrl", MoveToJointsMoveItAction
@@ -46,16 +50,54 @@ class BodyJointControl:
         return goal
 
     def cmd_head(self, target_jnt_name, target_jnt_pos):
+        if self.head_is_close(target_jnt_name, target_jnt_pos):
+            return True
+
         goal = self._make_goal(target_jnt_name, target_jnt_pos)
 
         self.head_ac.send_goal(goal)
         return self.head_ac.wait_for_result()
 
     def cmd_torso(self, target_jnt_name, target_jnt_pos):
+        if self.torso_is_close(target_jnt_name, target_jnt_pos):
+            return True
+
         goal = self._make_goal(target_jnt_name, target_jnt_pos)
 
         self.torso_ac.send_goal(goal)
         return self.torso_ac.wait_for_result()
+
+    def head_is_close(self, target_jnt_name, target_jnt_pos):
+        curr_jnt_state = rospy.wait_for_message("/movo/head/joint_states", JointState)
+        curr_jnt_pos = {
+            name: pos for name, pos in zip(curr_jnt_state.name, curr_jnt_state.pos)
+        }
+
+        diff = np.zeros(len(target_jnt_name))
+        for idx, (tgt_name, tgt_pos) in enumerate(zip(target_jnt_name, target_jnt_pos)):
+            try:
+                diff[idx] = np.abs(curr_jnt_pos[tgt_name] - tgt_pos)
+            except KeyError:
+                continue
+
+        return np.sum(diff) < self.CLOSE_ANGLE_TOL
+
+    def torso_is_close(self, target_jnt_name, target_jnt_pos):
+        curr_jnt_state = rospy.wait_for_message(
+            "/movo/linear_actuator/joint_states", JointState
+        )
+        curr_jnt_pos = {
+            name: pos for name, pos in zip(curr_jnt_state.name, curr_jnt_state.pos)
+        }
+
+        diff = np.zeros(len(target_jnt_name))
+        for idx, (tgt_name, tgt_pos) in enumerate(zip(target_jnt_name, target_jnt_pos)):
+            try:
+                diff[idx] = np.abs(curr_jnt_pos[tgt_name] - tgt_pos)
+            except KeyError:
+                continue
+
+        return np.sum(diff) < self.CLOSE_DIST_TOL
 
 
 class BodyControl:

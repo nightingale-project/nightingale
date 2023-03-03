@@ -12,8 +12,13 @@ class MoveBodyTask(Task):
 
     def home(self):
         self.body_ctrl.home()
-        return TaskCodes.SUCCESS
+        if self.body_ctrl.home():
+            return TaskCodes.SUCCESS
+        else:
+            return TaskCodes.ERROR
 
     def handoff(self):
-        self.body_ctrl.handoff()
-        return TaskCodes.SUCCESS
+        if self.body_ctrl.handoff():
+            return TaskCodes.SUCCESS
+        else:
+            return TaskCodes.ERROR
