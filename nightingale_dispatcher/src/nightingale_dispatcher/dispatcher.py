@@ -28,7 +28,7 @@ class DispatcherNode:
     def handle_add_mission(self, req):
         goal = MissionPlanGoal()
         goal.name = req.name
-        # goal.priority = 0 # TODO determine rule to set int priority of patient
+        goal.phase = req.phase
 
         self.missions.put(goal)
         if self.mission_planner_client.simple_state == SimpleGoalState.DONE:

@@ -6,7 +6,7 @@ import rospy
 import actionlib
 from actionlib_msgs.msg import GoalStatus
 from std_msgs.msg import String
-from nightingale_msgs.msg import MissionPlanAction
+from nightingale_msgs.msg import MissionPlanAction, MissionPlanGoal
 from nightingale_dispatcher.navigate_task import NavigateTask
 from nightingale_dispatcher.move_arm_task import MoveArmTask
 from nightingale_dispatcher.send_interface_request_task import SendInterfaceRequestTask
@@ -31,12 +31,22 @@ class MissionPlanner:
         self.move_arm_task = MoveArmTask()
         self.send_interface_request_task = SendInterfaceRequestTask()
 
+        self.phases = queue.Queue()
+        self.phase_map = {
+            MissionPlanGoal.GO_TO_PATIENT_PHASE: self.go_to_patient_phase,
+            MissionPlanGoal.GO_HOME_BASE_PHASE: self.go_home_base_phase,
+            MissionPlanGoal.TRIAGE_PATIENT_PHASE: self.triage_patient_phase,
+            MissionPlanGoal.GO_TO_STOCK_PHASE: self.go_to_stock_phase,
+            MissionPlanGoal.GET_ITEMS_PHASE: self.get_items_phase,
+            MissionPlanGoal.RETURN_TO_PATIENT_PHASE: self.return_to_patient_phase,
+            MissionPlanGoal.HANDOFF_ITEMS_PHASE: self.handoff_items_phase,
+            MissionPlanGoal.GO_IDLE_PHASE: self.go_idle_phase,
+        }
+
         self.server = actionlib.SimpleActionServer(
             "mission_planner", MissionPlanAction, self.goal_cb, False
         )
         self.server.start()
-
-        self.phases = queue.Queue()
 
     def go_to_patient_phase(self):
         rospy.loginfo("Nightingale Mission Planner going to patient")
@@ -84,7 +94,7 @@ class MissionPlanner:
             self.phases.put(self.go_to_stock_phase)
         else:
             # should never reach here
-            rospy.loginfo(f"Unknown input {task_reponse}")
+            rospy.loginfo(f"Unknown input {task_response}")
             raise NotImplementedError()
         return PhaseStatus.PHASE_COMPLETE
 
@@ -202,7 +212,7 @@ class MissionPlanner:
         #   Handoff -> Home -> Idle
 
         self.room = goal.name
-        self.phases.put(self.go_to_patient_phase)
+        self.phases.put(self.phase_map[goal.phase])
 
         while not self.phases.empty():
             phase = self.phases.get()
