@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 <launch>
-    <node pkg="nightingale_dispatcher" type="dispatcher.py" name="dispatcher" output="screen"></node>
-    <node pkg="nightingale_dispatcher" type="mission_planner.py" name="mission_planner" output="screen"></node>
+    <node pkg="nightingale_dispatcher" type="dispatcher.py" name="dispatcher" output="screen"/>
+    <node pkg="nightingale_dispatcher" type="mission_planner.py" name="mission_planner" output="screen"/>
 </launch>
