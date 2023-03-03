@@ -35,7 +35,7 @@ class WatchdogScreen:
                 text="Yes",
                 font_style="H4",
                 pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.2},
-                size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
+                size_hint=(cfg.LONG_RECT_WIDTH_CONFIRM, cfg.LONG_RECT_HEIGHT_CONFIRM),
                 on_release=self.exit_wd,
             )
         )

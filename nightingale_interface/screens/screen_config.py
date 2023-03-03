@@ -15,8 +15,11 @@ class ScreenConfig:
     SCREEN_X_CENTER = 0.5
     SCREEN_Y_CENTER = 0.5
 
-    LONG_RECT_WIDTH = 0.4
-    LONG_RECT_HEIGHT = 0.12
+    LONG_RECT_WIDTH = 0.5
+    LONG_RECT_HEIGHT = 0.2
+
+    LONG_RECT_WIDTH_CONFIRM = 0.4
+    LONG_RECT_HEIGHT_CONFIRM = 0.12
 
     SHORT_RECT_WIDTH = 0.2
     SHORT_RECT_HEIGHT = 0.1
@@ -40,6 +43,7 @@ class ScreenConfig:
     NURSE_ALERT_SCREEN_NAME = "nursealertscreen"
     VIDEO_CALL_SCREEN_NAME = "videocallscreen"
     WATCHDOG_TIMEOUT_SCREEN_NAME = "watchdogscreen"
+    START_DRIVE_SCREEN_NAME = "startdrivescreen"
 
     # screen id nums
     ITEM_SELECT_SCREEN_ID = 9
