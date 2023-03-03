@@ -32,6 +32,8 @@ from geometry_msgs.msg import Pose as GeometryPose
 from geometry_msgs.msg import Quaternion, Point
 from tf.transformations import euler_from_quaternion
 
+from nightingale_manipulation.planning_scene_interface import PlanningSceneInterface
+
 MoveItActionHandlerSuccess = "Success"
 
 
@@ -558,11 +560,13 @@ class ManipulationControl:
         )
         self.right_cartesian = ManipulationCartesianControl("right")
         self.left_cartesian = ManipulationCartesianControl("left")
+        self.planning_scene = PlanningSceneInterface()
 
     def home_right(self, tries=3):
         # CAUTION: This function should only ever home the arms. Don't add homing of other things here
         # right gripper is openend on bootup by kinova. not sure where, but not in init
         def home_right_internal():
+            self.planning_scene.add_box()
             # if not self.gpr_ctrl.close_right():
             #    rospy.logerr("ManipulationControl failed to close right gripper")
             #    return False
@@ -578,19 +582,24 @@ class ManipulationControl:
             home_pose.orientation.w = 0.517
             if not self.right_cartesian.cmd_orientation(home_pose.orientation):
                 rospy.logerr("ManipulationControl failed to orient right arm")
+                self.planning_scene.remove_box()
                 return False
             if not self.right_cartesian.cmd_position(home_pose.position, True):
                 rospy.logerr("ManipulationControl failed to move right arm")
+                self.planning_scene.remove_box()
                 return False
+            self.planning_scene.remove_box()
             return True
 
         for _ in range(tries):
             if home_right_internal():
+                self.planning_scene.remove_box()
                 return True
         return False
 
     def retract_right(self, tries=3):
         def home_right_internal():
+            self.planning_scene.add_box()
             home_pose = GeometryPose()
             # TODO get this from the service
             home_pose.position.x = 0.581
@@ -602,10 +611,13 @@ class ManipulationControl:
             home_pose.orientation.w = 0.517
             if not self.right_cartesian.cmd_orientation(home_pose.orientation):
                 rospy.logerr("ManipulationControl failed to orient right arm")
+                self.planning_scene.remove_box()
                 return False
             if not self.right_cartesian.cmd_position(home_pose.position, True):
                 rospy.logerr("ManipulationControl failed to move right arm")
+                self.planning_scene.remove_box()
                 return False
+            self.planning_scene.remove_box()
             return True
 
         for _ in range(tries):
