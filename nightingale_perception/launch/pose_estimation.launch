@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- launch the pose stimation node -->
+  <node name="pose_estimation" pkg="nightingale_perception" type="pose_estimation.py" output="screen"/>
+</launch>
+

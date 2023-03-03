@@ -6,12 +6,14 @@ import rospy
 import actionlib
 from actionlib_msgs.msg import GoalStatus
 from std_msgs.msg import String
+from geometry_msgs.msg import Point
 from nightingale_msgs.msg import MissionPlanAction
 from nightingale_dispatcher.navigate_task import NavigateTask
 from nightingale_dispatcher.move_arm_task import MoveArmTask
 from nightingale_dispatcher.send_interface_request_task import SendInterfaceRequestTask
 from nightingale_dispatcher.task import Task, TaskCodes
 from nightingale_ros_bridge.bridge_interface_config import BridgeConfig, RobotStatus
+from nightingale_dispatcher.estimate_pose_task import EstimatePoseTask
 
 
 # enum for phase status
@@ -29,6 +31,7 @@ class MissionPlanner:
         )
         self.navigate_task = NavigateTask()
         self.move_arm_task = MoveArmTask()
+        self.estimate_pose_task = EstimatePoseTask()
         self.send_interface_request_task = SendInterfaceRequestTask()
 
         self.server = actionlib.SimpleActionServer(
@@ -155,6 +158,13 @@ class MissionPlanner:
         rospy.loginfo("Nightingale Mission Planner starting to hand items")
         # Arrived at patient's bedside
 
+        # pose estimation
+        # status, pose_result = self.estimate_pose_task.execute("body")
+        # bin_goal_pt = pose_result.bin_goal.point
+        # rospy.loginfo(f"node returns {pose_result}")
+        # if unable to find patient pose place bin at predetermined position
+        # could also abort and go home instead but this decision complexity
+        # is likely not within current scope
         # show arm movement and get input to start
         task_response = self.send_interface_request_task.execute(
             RobotStatus.BEDSIDE_DELIVER
@@ -162,6 +172,14 @@ class MissionPlanner:
 
         # extend arm
         rospy.loginfo("Nightingale Mission Planner extending arm for handoff")
+
+        # UNCOMMENT FOR POSE GOAL
+        # if status != TaskCodes.SUCCESS:
+        #    rospy.logwarn("UNABLE TO FIND POSE. FALLING BACK TO SAFE HANDOFF POSITION")
+        #    status = self.move_arm_task.extend_restock()
+        # else:
+        #     status = self.move_arm_task.extend_handoff(bin_goal_pt)
+        # if status != TaskCodes.SUCCESS:
         if self.move_arm_task.extend_restock() != TaskCodes.SUCCESS:
             rospy.logerr("Nightingale Mission Planner failed to extend arm for handoff")
             raise NotImplementedError()
