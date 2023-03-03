@@ -80,7 +80,7 @@ class BodyJointControl:
             except KeyError:
                 continue
 
-        return np.sum(diff) < self.CLOSE_ANGLE_TOL
+        return np.all(diff < self.CLOSE_ANGLE_TOL)
 
     def torso_is_close(self, target_jnt_name, target_jnt_pos):
         curr_jnt_state = rospy.wait_for_message(
@@ -97,7 +97,7 @@ class BodyJointControl:
             except KeyError:
                 continue
 
-        return np.sum(diff) < self.CLOSE_DIST_TOL
+        return np.all(diff < self.CLOSE_DIST_TOL)
 
 
 class BodyControl:
