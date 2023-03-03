@@ -1,0 +1,9 @@
+# input is the body part as a string
+# {"body", "head"}
+string target
+---
+# returns a 3D coordinate PointStamped
+# of the bin goal in base link frame
+geometry_msgs/PointStamped bin_goal
+int8 pose_est_fail
+---
