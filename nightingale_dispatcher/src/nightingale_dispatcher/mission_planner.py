@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# /usr/bin/env python3
 import queue
 from enum import Enum
 
@@ -105,16 +105,21 @@ class MissionPlanner:
         # Arrived at stock area
 
         # arm extend stuff
-        joint_values = self.cfg["right_arm_extended_handoff"]["joints"]
-        status = self.move_arm_task.execute(joint_values)
+        rospy.loginfo("Nightingale Mission Planner extending arm for stocking")
+        if self.move_arm_task.extend_restock() != TaskCodes.SUCCESS:
+            rospy.logerr("Nightingale Mission Planner failed to extend arm for handoff")
+            raise NotImplementedError()
         # get nurse input
         task_reponse = self.send_interface_request_task.execute(
             RobotStatus.ITEM_STOCK_REACHED
         )
 
         # arm retract stuff
-        joint_values = self.cfg["right_arm_home"]["joints"]
-        status = self.move_arm_task.execute(joint_values)
+        rospy.loginfo("Nightingale Mission Planner retracting arm after stocking")
+        if self.move_arm_task.retract_right_arm() != TaskCodes.SUCCESS:
+            rospy.logerr("Nightingale Mission Planner failed to retract arm")
+            raise NotImplementedError()
+        rospy.loginfo("Nightingale Mission Planner retracted arm")
 
         # add a block to check arm status first before interpreting input
 
@@ -156,8 +161,11 @@ class MissionPlanner:
         )
 
         # extend arm
-        joint_values = self.cfg["right_arm_extended_handoff"]["joints"]
-        status = self.move_arm_task.execute(joint_values)
+        rospy.loginfo("Nightingale Mission Planner extending arm for handoff")
+        if self.move_arm_task.extend_restock() != TaskCodes.SUCCESS:
+            rospy.logerr("Nightingale Mission Planner failed to extend arm for handoff")
+            raise NotImplementedError()
+        rospy.loginfo("Nightingale Mission Planner extended arm for handoff")
 
         # arm extended
         task_response = self.send_interface_request_task.execute(
@@ -165,21 +173,15 @@ class MissionPlanner:
         )
 
         # show arm movement and get input to start
-        # status = self.send_interface_request_task.execute(RobotStatus.RETRACTING_ARM)
+        status = self.send_interface_request_task.execute(RobotStatus.RETRACTING_ARM)
 
         # retract arm
-        joint_values = self.cfg["right_arm_home"]["joints"]
-        status = self.move_arm_task.execute(joint_values)
-
-        # send to screen arm retracted
-        task_response = self.send_interface_request_task.execute(
-            RobotStatus.ARM_RETRACTED
-        )
-
-        # add a block to check arm status first before interpreting input
-
-        if status == TaskCodes.ERROR:
+        rospy.loginfo("Nightingale Mission Planner retracting arm after handoff")
+        if self.move_arm_task.retract_right_arm() != TaskCodes.SUCCESS:
+            rospy.logerr("Nightingale Mission Planner failed to retract arm")
             raise NotImplementedError()
+        rospy.loginfo("Nightingale Mission Planner retracted arm after handoff")
+
         # when done automatically goes back to triage patient
         self.phases.put(self.triage_patient_phase)
         return PhaseStatus.PHASE_COMPLETE
