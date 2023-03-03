@@ -54,7 +54,7 @@ class MissionPlanner:
         # TODO: first go to doorside then bedside when door opening added
 
         # update to driving screen
-        task_reponse = self.send_interface_request_task.execute(RobotStatus.DRIVING)
+        task_response = self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
         status = self.navigate_task.execute(self.room, "bedside")
         if status == TaskCodes.ERROR:
@@ -68,7 +68,7 @@ class MissionPlanner:
         # TODO: first go to doorside then bedside when door opening added
 
         # update to driving screen
-        task_reponse = self.send_interface_request_task.execute(RobotStatus.DRIVING)
+        task_response = self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
         status = self.navigate_task.execute("home", "default")
         if status == TaskCodes.ERROR:
@@ -102,7 +102,7 @@ class MissionPlanner:
         rospy.loginfo("Nightingale Mission Planner going to stock")
 
         # update to driving screen
-        task_reponse = self.send_interface_request_task.execute(RobotStatus.DRIVING)
+        task_response = self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
         status = self.navigate_task.execute("stock", "default")
         if status == TaskCodes.ERROR:
@@ -118,7 +118,7 @@ class MissionPlanner:
         joint_values = self.cfg["right_arm_extended_handoff"]["joints"]
         status = self.move_arm_task.execute(joint_values)
         # get nurse input
-        task_reponse = self.send_interface_request_task.execute(
+        task_response = self.send_interface_request_task.execute(
             RobotStatus.ITEM_STOCK_REACHED
         )
 
@@ -128,16 +128,16 @@ class MissionPlanner:
 
         # add a block to check arm status first before interpreting input
 
-        if task_reponse == TaskCodes.ERROR:
+        if task_response == TaskCodes.ERROR:
             raise NotImplementedError()
-        elif task_reponse == TaskCodes.DELIVER_ITEMS:
+        elif task_response == TaskCodes.DELIVER_ITEMS:
             self.phases.put(self.return_to_patient_phase)
-        elif task_reponse == TaskCodes.DISMISS:
+        elif task_response == TaskCodes.DISMISS:
             # nurse cancelled
             self.phases.put(self.go_home_base_phase)
         else:
             # should not get here but add so something happens
-            rospy.loginfo(f"Unknown input by nurse {task_reponse}")
+            rospy.loginfo(f"Unknown input by nurse {task_response}")
             self.phases.put(self.go_home_base_phase)
         return PhaseStatus.PHASE_COMPLETE
 
@@ -196,6 +196,8 @@ class MissionPlanner:
 
     def go_idle_phase(self):
         # cleanup and exit
+        rospy.loginfo("Nightingale Mission Planner idling")
+
         # Update idle screen
         task_response = self.send_interface_request_task.execute(RobotStatus.IDLE_HOME)
 
@@ -212,7 +214,14 @@ class MissionPlanner:
         #   Handoff -> Home -> Idle
 
         self.room = goal.name
-        self.phases.put(self.phase_map[goal.phase])
+        try:
+            self.phases.put(self.phase_map[goal.phase])
+        except KeyError:
+            rospy.logerr(
+                f"Nightingale Mission Planner: Invalid phase {goal.phase} received"
+            )
+            self.server.set_aborted()
+            return
 
         while not self.phases.empty():
             phase = self.phases.get()
