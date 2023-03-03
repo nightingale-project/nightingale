@@ -33,7 +33,7 @@ class MoveArmTask(Task):
         result = self.manipulation.extend_handoff(point)
         assert type(result) is bool
         return TaskCodes.SUCCESS if result else TaskCodes.ERROR
-        
+
     # this function returns true if a given point is within the right arm's workspace
     def witihin_workspace(self, point):
         assert type(point) is Point
