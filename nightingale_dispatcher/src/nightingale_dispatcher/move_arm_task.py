@@ -16,12 +16,24 @@ class MoveArmTask(Task):
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
         self.right_arm_length = 0.7  # this is conservative
+        if not self.manipulation.home_left() or not self.manipulation.home_right():
+            rospy.logfatal("MoveArmTask: Failed to home arms. This is unrecoverable")
 
-    def execute(self, end_pose):
-        assert len(end_pose) is 7
-        self.manipulation.jnt_ctrl.cmd_right_arm(end_pose)
-        return TaskCodes.SUCCESS
+    def extend_restock(self):
+        result = self.manipulation.extend_restock()
+        assert type(result) is bool
+        return TaskCodes.SUCCESS if result else TaskCodes.ERROR
 
+    def retract_right_arm(self):
+        result = self.manipulation.retract_right()
+        assert type(result) is bool
+        return TaskCodes.SUCCESS if result else TaskCodes.ERROR
+
+    def extend_handoff(self, point):
+        result = self.manipulation.extend_handoff(point)
+        assert type(result) is bool
+        return TaskCodes.SUCCESS if result else TaskCodes.ERROR
+        
     # this function returns true if a given point is within the right arm's workspace
     def witihin_workspace(self, point):
         assert type(point) is Point

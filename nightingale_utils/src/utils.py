@@ -73,6 +73,8 @@ class RobotConfigurationService:
         body_part_string = {
             req.LEFT_ARM: "left_arm",
             req.RIGHT_ARM: "right_arm",
+            req.LEFT_GRIPPER: "left_gripper",
+            req.RIGHT_GRIPPER: "right_gripper",
             req.TORSO: "torso",
             req.HEAD: "head",
         }[req.body_part]
