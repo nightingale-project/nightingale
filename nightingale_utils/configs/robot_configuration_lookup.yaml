@@ -2,7 +2,7 @@ joint_configurations: {
     home: {
         head: {
             names: ["pan_joint", "tilt_joint"],
-            joints: [0.0,0.0],
+            joints: [0.0, 0.0],
         },
         torso: {
             names: ["linear_joint"],
@@ -18,6 +18,14 @@ joint_configurations: {
         }
     },
     handoff: {
+        head: {
+            names: ["pan_joint", "tilt_joint"],
+            joints: [0.0, 0.0],
+        },
+        torso: {
+            names: ["linear_joint"],
+            joints: [0.4],
+        },
         right_arm: {
             names: ["right_shoulder_pan_joint", "right_shoulder_lift_joint", "right_arm_half_joint", "right_elbow_joint", "right_wrist_spherical_1_joint", "right_wrist_spherical_2_joint", "right_wrist_3_joint"],
             joints: [-1.497173771091874, -0.05384432355144005, -0.0472769683033043, -1.4575817535881566, 3.1601009435928535, 1.2459021253979168, 1.515535734175753],
@@ -29,7 +37,7 @@ joint_configurations: {
             joints: [0.23, 0.23, 0.23],
         },
         right_gripper: {
-            names: ["right_gripper_finger1_joint", "right_gripper_finger2_joint", "right_gripper_finger3_joint" ]
+            names: ["right_gripper_finger1_joint", "right_gripper_finger2_joint", "right_gripper_finger3_joint" ],
             joints: [0.23, 0.23, 0.23],
         }
     },
@@ -39,7 +47,7 @@ joint_configurations: {
             joints: [0, 0, 0],
         },
         right_gripper: {
-            names: ["right_gripper_finger1_joint", "right_gripper_finger2_joint", "right_gripper_finger3_joint" ]
+            names: ["right_gripper_finger1_joint", "right_gripper_finger2_joint", "right_gripper_finger3_joint" ],
             joints: [0, 0, 0],
         }
     },
