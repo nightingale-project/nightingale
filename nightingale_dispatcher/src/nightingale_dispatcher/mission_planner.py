@@ -48,7 +48,6 @@ class MissionPlanner:
         # update to driving screen
         task_reponse = self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
-        status = self.move_body_task.home()
         status = self.navigate_task.execute(self.room, "bedside")
         if status == TaskCodes.ERROR:
             raise NotImplementedError()
@@ -63,7 +62,6 @@ class MissionPlanner:
         # update to driving screen
         task_reponse = self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
-        status = self.move_body_task.home()
         status = self.navigate_task.execute("home", "default")
         if status == TaskCodes.ERROR:
             raise NotImplementedError()
@@ -98,7 +96,6 @@ class MissionPlanner:
         # update to driving screen
         task_reponse = self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
-        status = self.move_body_task.home()
         status = self.navigate_task.execute("stock", "default")
         if status == TaskCodes.ERROR:
             raise NotImplementedError()
@@ -150,7 +147,6 @@ class MissionPlanner:
         # update to driving screen
         task_reponse = self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
-        status = self.move_body_task.home()
         status = self.navigate_task.execute(self.room, "bedside")
         if status == TaskCodes.ERROR:
             raise NotImplementedError()
@@ -166,6 +162,7 @@ class MissionPlanner:
             RobotStatus.BEDSIDE_DELIVER
         )
 
+        rospy.loginfo("Raising body to handoff")
         status = self.move_body_task.handoff()
 
         # extend arm
@@ -190,6 +187,7 @@ class MissionPlanner:
             raise NotImplementedError()
         rospy.loginfo("Nightingale Mission Planner retracted arm after handoff")
 
+        rospy.loginfo("Lowering body to home")
         status = self.move_body_task.home()
 
         # when done automatically goes back to triage patient

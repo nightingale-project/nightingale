@@ -11,7 +11,6 @@ class MoveBodyTask(Task):
         self.body_ctrl = BodyControl()
 
     def home(self):
-        self.body_ctrl.home()
         if self.body_ctrl.home():
             return TaskCodes.SUCCESS
         else:
