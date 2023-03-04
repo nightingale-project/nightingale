@@ -6,13 +6,15 @@ import rospy
 import actionlib
 from actionlib_msgs.msg import GoalStatus
 from std_msgs.msg import String
-from nightingale_msgs.msg import MissionPlanAction
+from nightingale_msgs.msg import MissionPlanAction, MissionPlanGoal
+from geometry_msgs.msg import Point
 from nightingale_dispatcher.navigate_task import NavigateTask
 from nightingale_dispatcher.move_arm_task import MoveArmTask
 from nightingale_dispatcher.move_body_task import MoveBodyTask
 from nightingale_dispatcher.send_interface_request_task import SendInterfaceRequestTask
 from nightingale_dispatcher.task import Task, TaskCodes
 from nightingale_ros_bridge.bridge_interface_config import BridgeConfig, RobotStatus
+from nightingale_dispatcher.estimate_pose_task import EstimatePoseTask
 
 
 # enum for phase status
@@ -31,14 +33,25 @@ class MissionPlanner:
         self.navigate_task = NavigateTask()
         self.move_arm_task = MoveArmTask()
         self.move_body_task = MoveBodyTask()
+        self.estimate_pose_task = EstimatePoseTask()
         self.send_interface_request_task = SendInterfaceRequestTask()
+
+        self.phases = queue.Queue()
+        self.phase_map = {
+            MissionPlanGoal.GO_TO_PATIENT_PHASE: self.go_to_patient_phase,
+            MissionPlanGoal.GO_HOME_BASE_PHASE: self.go_home_base_phase,
+            MissionPlanGoal.TRIAGE_PATIENT_PHASE: self.triage_patient_phase,
+            MissionPlanGoal.GO_TO_STOCK_PHASE: self.go_to_stock_phase,
+            MissionPlanGoal.GET_ITEMS_PHASE: self.get_items_phase,
+            MissionPlanGoal.RETURN_TO_PATIENT_PHASE: self.return_to_patient_phase,
+            MissionPlanGoal.HANDOFF_ITEMS_PHASE: self.handoff_items_phase,
+            MissionPlanGoal.GO_IDLE_PHASE: self.go_idle_phase,
+        }
 
         self.server = actionlib.SimpleActionServer(
             "mission_planner", MissionPlanAction, self.goal_cb, False
         )
         self.server.start()
-
-        self.phases = queue.Queue()
 
     def go_to_patient_phase(self):
         rospy.loginfo("Nightingale Mission Planner going to patient")
@@ -46,7 +59,7 @@ class MissionPlanner:
         # TODO: first go to doorside then bedside when door opening added
 
         # update to driving screen
-        task_reponse = self.send_interface_request_task.execute(RobotStatus.DRIVING)
+        task_response = self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
         rospy.loginfo("Lowering body to home")
         status = self.move_body_task.home()
@@ -63,7 +76,7 @@ class MissionPlanner:
         # TODO: first go to doorside then bedside when door opening added
 
         # update to driving screen
-        task_reponse = self.send_interface_request_task.execute(RobotStatus.DRIVING)
+        task_response = self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
         rospy.loginfo("Lowering body to home")
         status = self.move_body_task.home()
@@ -92,7 +105,7 @@ class MissionPlanner:
             self.phases.put(self.go_to_stock_phase)
         else:
             # should never reach here
-            rospy.loginfo(f"Unknown input {task_reponse}")
+            rospy.loginfo(f"Unknown input {task_response}")
             raise NotImplementedError()
         return PhaseStatus.PHASE_COMPLETE
 
@@ -100,7 +113,7 @@ class MissionPlanner:
         rospy.loginfo("Nightingale Mission Planner going to stock")
 
         # update to driving screen
-        task_reponse = self.send_interface_request_task.execute(RobotStatus.DRIVING)
+        task_response = self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
         rospy.loginfo("Lowering body to home")
         status = self.move_body_task.home()
@@ -121,7 +134,7 @@ class MissionPlanner:
             rospy.logerr("Nightingale Mission Planner failed to extend arm for handoff")
             raise NotImplementedError()
         # get nurse input
-        task_reponse = self.send_interface_request_task.execute(
+        task_response = self.send_interface_request_task.execute(
             RobotStatus.ITEM_STOCK_REACHED
         )
 
@@ -134,16 +147,16 @@ class MissionPlanner:
 
         # add a block to check arm status first before interpreting input
 
-        if task_reponse == TaskCodes.ERROR:
+        if task_response == TaskCodes.ERROR:
             raise NotImplementedError()
-        elif task_reponse == TaskCodes.DELIVER_ITEMS:
+        elif task_response == TaskCodes.DELIVER_ITEMS:
             self.phases.put(self.return_to_patient_phase)
-        elif task_reponse == TaskCodes.DISMISS:
+        elif task_response == TaskCodes.DISMISS:
             # nurse cancelled
             self.phases.put(self.go_home_base_phase)
         else:
             # should not get here but add so something happens
-            rospy.loginfo(f"Unknown input by nurse {task_reponse}")
+            rospy.loginfo(f"Unknown input by nurse {task_response}")
             self.phases.put(self.go_home_base_phase)
         return PhaseStatus.PHASE_COMPLETE
 
@@ -169,6 +182,13 @@ class MissionPlanner:
         rospy.loginfo("Nightingale Mission Planner starting to hand items")
         # Arrived at patient's bedside
 
+        # pose estimation
+        # status, pose_result = self.estimate_pose_task.execute("body")
+        # bin_goal_pt = pose_result.bin_goal.point
+        # rospy.loginfo(f"node returns {pose_result}")
+        # if unable to find patient pose place bin at predetermined position
+        # could also abort and go home instead but this decision complexity
+        # is likely not within current scope
         # show arm movement and get input to start
         task_response = self.send_interface_request_task.execute(
             RobotStatus.BEDSIDE_DELIVER
@@ -179,6 +199,14 @@ class MissionPlanner:
 
         # extend arm
         rospy.loginfo("Nightingale Mission Planner extending arm for handoff")
+
+        # UNCOMMENT FOR POSE GOAL
+        # if status != TaskCodes.SUCCESS:
+        #    rospy.logwarn("UNABLE TO FIND POSE. FALLING BACK TO SAFE HANDOFF POSITION")
+        #    status = self.move_arm_task.extend_restock()
+        # else:
+        #     status = self.move_arm_task.extend_handoff(bin_goal_pt)
+        # if status != TaskCodes.SUCCESS:
         if self.move_arm_task.extend_restock() != TaskCodes.SUCCESS:
             rospy.logerr("Nightingale Mission Planner failed to extend arm for handoff")
             raise NotImplementedError()
@@ -208,6 +236,8 @@ class MissionPlanner:
 
     def go_idle_phase(self):
         # cleanup and exit
+        rospy.loginfo("Nightingale Mission Planner idling")
+
         # Update idle screen
         task_response = self.send_interface_request_task.execute(RobotStatus.IDLE_HOME)
 
@@ -224,7 +254,14 @@ class MissionPlanner:
         #   Handoff -> Home -> Idle
 
         self.room = goal.name
-        self.phases.put(self.go_to_patient_phase)
+        try:
+            self.phases.put(self.phase_map[goal.phase])
+        except KeyError:
+            rospy.logerr(
+                f"Nightingale Mission Planner: Invalid phase {goal.phase} received"
+            )
+            self.server.set_aborted()
+            return
 
         while not self.phases.empty():
             phase = self.phases.get()
