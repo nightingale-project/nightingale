@@ -56,28 +56,28 @@ class PlanningSceneInterface(object):
         box_pose = geometry_msgs.msg.PoseStamped()
         box_pose.header.frame_id = "upper_body_link"
         box_pose.pose.orientation.w = 1.0
-        box_pose.pose.position.x = 0.25
+        box_pose.pose.position.x = 0.15
         box_pose.pose.position.y = -0.43
-        box_pose.pose.position.z = -0.15
+        box_pose.pose.position.z = -0.11
 
         upper_box = geometry_msgs.msg.PoseStamped()
         upper_box.header.frame_id = "upper_body_link"
         upper_box.pose.orientation.w = 0.924
         upper_box.pose.orientation.x = -0.383
-        upper_box.pose.position.x = 0.25
+        upper_box.pose.position.x = 0.15
         upper_box.pose.position.y = -0.33
-        upper_box.pose.position.z = 0.25
+        upper_box.pose.position.z = 0.29
 
         top_box = geometry_msgs.msg.PoseStamped()
         top_box.header.frame_id = "upper_body_link"
         top_box.pose.orientation.w = 1.0
-        top_box.pose.position.x = 0.32
+        top_box.pose.position.x = 0.27
         top_box.pose.position.y = -0.15
-        top_box.pose.position.z = 0.36
+        top_box.pose.position.z = 0.4
 
         self.scene.add_box("right_lower_wall", box_pose, size=(0.5, 0.05, 0.6))
         self.scene.add_box("right_upper_wall", upper_box, size=(0.5, 0.05, 0.32))
-        self.scene.add_box("right_top_wall", top_box, size=(0.35, 0.15, 0.03))
+        self.scene.add_box("right_top_wall", top_box, size=(0.25, 0.15, 0.03))
 
         start = rospy.get_time()
         seconds = rospy.get_time()

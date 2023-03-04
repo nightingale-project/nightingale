@@ -188,8 +188,12 @@ class MissionPlanner:
 
         rospy.loginfo("Raising body to handoff")
         status = self.move_body_task.handoff()
-
-        # TODO FELIX INTEGRATE THIS EVENTUALLY 
+        if status != TaskCodes.SUCCESS:
+            rospy.logerr("UNABLE TO RAISE TORSO")
+            raise NotImplementedError()
+           
+        rospy.sleep(2.5)
+        # pose estimation
         # status, pose_result = self.estimate_pose_task.execute("body")
         # bin_goal_pt = pose_result.bin_goal.point
         # if not self.move_arm_task.witihin_workspace(bin_goal_pt):
@@ -240,11 +244,18 @@ class MissionPlanner:
             raise NotImplementedError()
         rospy.loginfo("Nightingale Mission Planner retracted arm after handoff")
 
-        rospy.loginfo("Lowering body to home")
-        status = self.move_body_task.home()
-
+        #rospy.loginfo("Lowering body to home")
+        #status = self.move_body_task.home()
+        #if status != TaskCodes.SUCCESS:
+        #    rospy.logerr("UNABLE TO LOWER TORSO")
+        #    raise NotImplementedError()
+ 
         # when done automatically goes back to triage patient
         self.phases.put(self.triage_patient_phase)
+<<<<<<< HEAD
+=======
+        #self.phases.put(self.handoff_items_phase)
+>>>>>>> Improve handoff sequence
 
         return PhaseStatus.PHASE_COMPLETE
 

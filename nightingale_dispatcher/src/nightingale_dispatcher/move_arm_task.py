@@ -24,7 +24,8 @@ class MoveArmTask(Task):
 
         if not self.manipulation.home_left() or not self.manipulation.home_right():
             rospy.logfatal("MoveArmTask: Failed to home arms. This is unrecoverable")
-
+        self.manipulation.right_cartesian.set_ref_link("base_link")
+ 
     def extend_restock(self):
         result = self.manipulation.extend_restock()
         assert type(result) is bool

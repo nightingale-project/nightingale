@@ -307,20 +307,15 @@ class ManipulationGripperControl:
         rospy.loginfo("Manipulation Control: Initialized gripper ctrl")
 
     def cmd_right_gripper(self, joint_target):
-        if not self.gripper_lock["right"]:
-            return False
         goal = joint_goal(joint_target, self.right_gripper_joint_names)
         self.right_gripper.send_goal(goal)
-        self.right_gripper.wait_for_result()
-        return self.right_gripper.get_result().status == MoveItActionHandlerSuccess
+        rospy.loginfo(f"{goal}")
+        return self.right_gripper.wait_for_result()
 
     def cmd_left_gripper(self, joint_target):
-        if not self.gripper_lock["left"]:
-            return False
         goal = joint_goal(joint_target, self.left_gripper_joint_names)
         self.left_gripper.send_goal(goal)
-        self.left_gripper.wait_for_result()
-        return self.left_gripper.get_result().status == MoveItActionHandlerSuccess
+        return self.left_gripper.wait_for_result()
 
     def lock_right_gripper(self):
         self.gripper_lock["right"] = False
@@ -552,7 +547,7 @@ class ManipulationControl:
             self.left_gripper_joint_names,
             self.right_gripper_joint_names,
             self.left_gripper_open_joint_values,
-            self.left_gripper_open_joint_values,
+            self.left_gripper_closed_joint_values,
         )
         self.right_cartesian = ManipulationCartesianControl("right")
         self.left_cartesian = ManipulationCartesianControl("left")
@@ -562,34 +557,11 @@ class ManipulationControl:
         # CAUTION: This function should only ever home the arms. Don't add homing of other things here
         # right gripper is openend on bootup by kinova. not sure where, but not in init
         def home_right_internal():
-            self.planning_scene.add_box()
-            # if not self.gpr_ctrl.close_right():
-            #    rospy.logerr("ManipulationControl failed to close right gripper")
-            #    return False
-            home_pose = GeometryPose()
-            # need to add cartesian to lookup service
-            # TODO get this from the service
-            home_pose.position.x = 0.581
-            home_pose.position.y = 0.003
-            home_pose.position.z = 0.12
-            home_pose.orientation.x = -0.456
-            home_pose.orientation.y = -0.583
-            home_pose.orientation.z = 0.430
-            home_pose.orientation.w = 0.517
-            self.right_cartesian.set_ref_link("upper_body_link")
-            if not self.right_cartesian.cmd_orientation(home_pose.orientation):
-                rospy.logerr("ManipulationControl failed to orient right arm")
-                self.planning_scene.remove_box()
-                self.right_cartesian.set_ref_link("base_link")
-                return False
-            if not self.right_cartesian.cmd_position(home_pose.position, True):
-                rospy.logerr("ManipulationControl failed to move right arm")
-                self.planning_scene.remove_box()
-                self.right_cartesian.set_ref_link("base_link")
-                return False
-            self.planning_scene.remove_box()
-            self.right_cartesian.set_ref_link("base_link")
-            return True
+            if not self.gpr_ctrl.close_right():
+               rospy.logerr("ManipulationControl failed to close right gripper")
+               return False
+
+            return self.jnt_ctrl.cmd_right_arm(self.jnt_ctrl.right_arm_home_joint_values)
 
         for _ in range(tries):
             if home_right_internal():
@@ -672,22 +644,27 @@ class ManipulationControl:
         return False
 
     def open_left_gripper(self):
-        self.gpr_ctrl.open_left()
+        return self.gpr_ctrl.open_left()
 
     def open_right_gripper(self):
-        self.gpr_ctrl.open_right()
+        return self.gpr_ctrl.open_right()
 
     def close_left_gripper(self):
-        self.gpr_ctrl.close_left()
+        return self.gpr_ctrl.close_left()
 
     def close_right_gripper(self):
-        self.gpr_ctrl.close_right()
+        return self.gpr_ctrl.close_right()
 
 
 # test code
 if __name__ == "__main__":
     rospy.init_node("manipulation_control")
     manipulation = ManipulationControl()
+
+    rospy.loginfo("Testing gripper")
+    assert manipulation.open_right_gripper()
+    assert manipulation.close_right_gripper()
+    rospy.loginfo("Done testing gripper")
 
     rospy.loginfo("going home")
     assert manipulation.home_left()
