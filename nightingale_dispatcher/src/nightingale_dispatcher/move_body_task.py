@@ -9,6 +9,7 @@ from nightingale_body.body_control import BodyControl
 class MoveBodyTask(Task):
     def __init__(self):
         self.body_ctrl = BodyControl()
+        self.body_ctrl.home()
 
     def home(self):
         if self.body_ctrl.home():
