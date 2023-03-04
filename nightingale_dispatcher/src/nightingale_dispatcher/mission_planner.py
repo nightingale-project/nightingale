@@ -10,6 +10,7 @@ from nightingale_msgs.msg import MissionPlanAction, MissionPlanGoal
 from geometry_msgs.msg import Point
 from nightingale_dispatcher.navigate_task import NavigateTask
 from nightingale_dispatcher.move_arm_task import MoveArmTask
+from nightingale_dispatcher.move_body_task import MoveBodyTask
 from nightingale_dispatcher.send_interface_request_task import SendInterfaceRequestTask
 from nightingale_dispatcher.task import Task, TaskCodes
 from nightingale_ros_bridge.bridge_interface_config import BridgeConfig, RobotStatus
@@ -31,6 +32,7 @@ class MissionPlanner:
         )
         self.navigate_task = NavigateTask()
         self.move_arm_task = MoveArmTask()
+        self.move_body_task = MoveBodyTask()
         self.estimate_pose_task = EstimatePoseTask()
         self.send_interface_request_task = SendInterfaceRequestTask()
 
@@ -59,6 +61,9 @@ class MissionPlanner:
         # update to driving screen
         task_response = self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
+        rospy.loginfo("Lowering body to home")
+        status = self.move_body_task.home()
+
         status = self.navigate_task.execute(self.room, "bedside")
         if status == TaskCodes.ERROR:
             raise NotImplementedError()
@@ -72,6 +77,9 @@ class MissionPlanner:
 
         # update to driving screen
         task_response = self.send_interface_request_task.execute(RobotStatus.DRIVING)
+
+        rospy.loginfo("Lowering body to home")
+        status = self.move_body_task.home()
 
         status = self.navigate_task.execute("home", "default")
         if status == TaskCodes.ERROR:
@@ -106,6 +114,9 @@ class MissionPlanner:
 
         # update to driving screen
         task_response = self.send_interface_request_task.execute(RobotStatus.DRIVING)
+
+        rospy.loginfo("Lowering body to home")
+        status = self.move_body_task.home()
 
         status = self.navigate_task.execute("stock", "default")
         if status == TaskCodes.ERROR:
@@ -158,6 +169,9 @@ class MissionPlanner:
         # update to driving screen
         task_reponse = self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
+        rospy.loginfo("Lowering body to home")
+        status = self.move_body_task.home()
+
         status = self.navigate_task.execute(self.room, "bedside")
         if status == TaskCodes.ERROR:
             raise NotImplementedError()
@@ -179,6 +193,9 @@ class MissionPlanner:
         task_response = self.send_interface_request_task.execute(
             RobotStatus.BEDSIDE_DELIVER
         )
+
+        rospy.loginfo("Raising body to handoff")
+        status = self.move_body_task.handoff()
 
         # extend arm
         rospy.loginfo("Nightingale Mission Planner extending arm for handoff")
@@ -209,6 +226,9 @@ class MissionPlanner:
             rospy.logerr("Nightingale Mission Planner failed to retract arm")
             raise NotImplementedError()
         rospy.loginfo("Nightingale Mission Planner retracted arm after handoff")
+
+        rospy.loginfo("Lowering body to home")
+        status = self.move_body_task.home()
 
         # when done automatically goes back to triage patient
         self.phases.put(self.triage_patient_phase)
