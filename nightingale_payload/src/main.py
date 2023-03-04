@@ -12,7 +12,7 @@ from urdf_parser_py.urdf import Robot
 
 
 class PayloadEstimator:
-    GRAVITATIONAL_ACCELERATION = -9.8  # [m/sec^2]
+    GRAVITATIONAL_ACCELERATION = 9.8  # [m/sec^2]
     PAYLOAD_DETECTION_THRESHOLD = 1  # [kg]
 
     def __init__(self, arm_side):
@@ -70,13 +70,14 @@ class PayloadEstimator:
             "/joint_states", JointState, self.joint_state_cb
         )
 
-        self.analysis_sub = rospy.Subscriber(
-            "analyze_ee_forces", Bool, self.analyze_ee_forces
-        )
         self.analysis_num = 1000
         self.analysis_dec = 5
         self.analysis_idx = 0
         self.analysis_forces = np.zeros((6, self.analysis_num))
+
+        self.analysis_sub = rospy.Subscriber(
+            "analyze_ee_forces", Bool, self.analyze_ee_forces
+        )
 
     def joint_state_cb(self, msg):
         self.lookup_tf()
@@ -147,7 +148,7 @@ class PayloadEstimator:
                     base_link_transform.transform.rotation.w,
                 ]
             )[:3, :3]
-            self.gravity_direction = -self.base_link_rotation[:, 2]
+            self.gravity_direction = -(self.base_link_rotation.T)[:, 2]
         except (
             tf2_ros.LookupException,
             tf2_ros.ConnectivityException,
@@ -177,6 +178,8 @@ class PayloadEstimator:
                         link_transform.transform.rotation.w,
                     ]
                 )
+                if idx == 1:
+                    rospy.loginfo(f"{from_link}->{to_link}:\n{np.round(rot_mat, 2)}")
                 rotation_axes[idx, :] = rot_mat[:3, 2]
 
                 translations[idx, :] = [
@@ -225,13 +228,15 @@ class PayloadEstimator:
         self.gravity_forces = gravity_forces
 
     def compare_torque(self, torques):
-        computed_torque = self.jacobian[:3, :].T @ self.gravity_forces[:3]
-        error = computed_torque - np.array(torques)
-        error_norm = np.sqrt(np.sum(np.square(error)))
+        rospy.loginfo(f"\n{np.round((self.jacobian[:3, :]).T, 2)}")
 
-        rospy.loginfo(
-            f"{np.round(torques, 2)} {np.round(computed_torque)} {error_norm}"
-        )
+        computed_torque = self.jacobian.T @ self.gravity_forces
+        error = np.array(torques) - computed_torque
+        error_norm = np.sum(np.abs(error))
+
+        # rospy.loginfo(
+        #     f"{np.round(torques, 2)} {np.round(computed_torque)} {error_norm}"
+        # )
         # rospy.loginfo(f"{np.round(error, 4)} {error_norm}")
 
     def compute_ee_forces(self, torques):
