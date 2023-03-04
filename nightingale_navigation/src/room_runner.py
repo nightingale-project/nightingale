@@ -14,6 +14,8 @@ import tf2_ros
 import tf_conversions
 from actionlib_msgs.msg import GoalStatus
 from geometry_msgs.msg import PoseWithCovarianceStamped
+from dynamic_reconfigure.client import Client as DynamicReconfigureClient
+from std_srvs.srv import Empty
 import numpy as np
 
 
@@ -83,6 +85,29 @@ class RoomRunnerNode(object):
                 logger_name=self.logger_name,
             )
 
+        # Localcostmap inflation is dynamically configured when close to goal
+        # This allows robot to drive right up to the bed
+        rospy.loginfo(
+            f"Waiting for dynamic reconfigure client for local costmap",
+            logger_name=self.logger_name,
+        )
+        self.dynamic_reconfigure_client = DynamicReconfigureClient(
+            "/move_base/local_costmap/inflation_layer"
+        )
+        rospy.loginfo(
+            f"Got the dynamic reconfigure client for local costmap",
+            logger_name=self.logger_name,
+        )
+        self.local_inflation = self.dynamic_reconfigure_client.get_configuration()[
+            "inflation_radius"
+        ]
+        self.deflation_hysteresis_low = rospy.get_param(
+            "/room_runner/deflation_hysteresis_low", 2.5
+        )
+        self.deflation_hysteresis_high = rospy.get_param(
+            "/room_runner/deflation_hysteresis_high", 7.0
+        )
+
         self.timer = (
             rospy.Timer(rospy.Duration(self.pose_write_period), self.write_pose)
             if self.save_pose
@@ -107,6 +132,25 @@ class RoomRunnerNode(object):
 
         msg, fb_cb, a_cb = self.generate_goal_info(goal_pose)
 
+        clear_costmaps_service_name = "/move_base/clear_costmaps"
+        rospy.loginfo(
+            f"RoomRunner clearing costmaps. Waiting for {clear_costmaps_service_name} service.",
+            logger_name=self.logger_name,
+        )
+        rospy.wait_for_service(clear_costmaps_service_name)
+        try:
+            caller = rospy.ServiceProxy(clear_costmaps_service_name, Empty)
+            caller()
+            rospy.loginfo(
+                f"RoomRunner cleared costmaps successfully.",
+                logger_name=self.logger_name,
+            )
+        except rospy.ServiceException as e:
+            rospy.logerr(
+                f"Failed to clear the costmap. Exception: {e}",
+                logger_name=self.logger_name,
+            )
+
         self.client.send_goal(msg, feedback_cb=fb_cb, active_cb=a_cb)
         self.client.wait_for_result()
 
@@ -123,7 +167,7 @@ class RoomRunnerNode(object):
             )
         else:
             rospy.logerr(
-                f"RoomRunner Failed. State is {self.client.get_state()}",
+                f"RoomRunner Failed. State is {self.client.get_state().get_text()}",
                 logger_name=self.logger_name,
             )
             # the action call succeeded but the actual action performance failed
@@ -147,6 +191,14 @@ class RoomRunnerNode(object):
                 [fb.base_position.pose.position.x, fb.base_position.pose.position.y]
             )
             euclidean_distance = np.linalg.norm(target - cur)
+            if euclidean_distance < self.deflation_hysteresis_low:
+                self.dynamic_reconfigure_client.update_configuration(
+                    {"inflation_radius": self.local_inflation / 3}
+                )
+            elif euclidean_distance > self.deflation_hysteresis_high:
+                self.dynamic_reconfigure_client.update_configuration(
+                    {"inflation_radius": self.local_inflation}
+                )
             ret = RoomRunnerFeedback()
             ret.euclidean_distance_to_goal = euclidean_distance
             self.server.publish_feedback(ret)

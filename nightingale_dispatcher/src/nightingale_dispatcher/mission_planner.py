@@ -89,6 +89,10 @@ class MissionPlanner:
 
     def triage_patient_phase(self):
         # Arrived at patient's bedside
+
+        rospy.loginfo("Raising body to handoff")
+        status = self.move_body_task.handoff()
+
         # get patient input
         rospy.loginfo("Nightingale Mission Planner waiting on user input")
         task_response = self.send_interface_request_task.execute(
