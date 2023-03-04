@@ -48,6 +48,9 @@ class MissionPlanner:
         # update to driving screen
         task_reponse = self.send_interface_request_task.execute(RobotStatus.DRIVING)
 
+        rospy.loginfo("Lowering body to home")
+        status = self.move_body_task.home()
+
         status = self.navigate_task.execute(self.room, "bedside")
         if status == TaskCodes.ERROR:
             raise NotImplementedError()
@@ -61,6 +64,9 @@ class MissionPlanner:
 
         # update to driving screen
         task_reponse = self.send_interface_request_task.execute(RobotStatus.DRIVING)
+
+        rospy.loginfo("Lowering body to home")
+        status = self.move_body_task.home()
 
         status = self.navigate_task.execute("home", "default")
         if status == TaskCodes.ERROR:
@@ -95,6 +101,9 @@ class MissionPlanner:
 
         # update to driving screen
         task_reponse = self.send_interface_request_task.execute(RobotStatus.DRIVING)
+
+        rospy.loginfo("Lowering body to home")
+        status = self.move_body_task.home()
 
         status = self.navigate_task.execute("stock", "default")
         if status == TaskCodes.ERROR:
@@ -146,6 +155,9 @@ class MissionPlanner:
 
         # update to driving screen
         task_reponse = self.send_interface_request_task.execute(RobotStatus.DRIVING)
+
+        rospy.loginfo("Lowering body to home")
+        status = self.move_body_task.home()
 
         status = self.navigate_task.execute(self.room, "bedside")
         if status == TaskCodes.ERROR:
