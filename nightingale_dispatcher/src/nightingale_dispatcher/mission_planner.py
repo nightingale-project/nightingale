@@ -189,7 +189,7 @@ class MissionPlanner:
         rospy.loginfo("Raising body to handoff")
         status = self.move_body_task.handoff()
 
-        # pose estimation
+        # TODO FELIX INTEGRATE THIS EVENTUALLY 
         # status, pose_result = self.estimate_pose_task.execute("body")
         # bin_goal_pt = pose_result.bin_goal.point
         # if not self.move_arm_task.witihin_workspace(bin_goal_pt):
@@ -205,18 +205,15 @@ class MissionPlanner:
         status, pose_result = self.estimate_pose_task.execute("body")
         bin_goal_pt = pose_result.bin_goal.point
         rospy.loginfo(f"node returns {pose_result}")
-        # if unable to find patient pose place bin at predetermined position
-        # could also abort and go home instead but this decision complexity
-        # is likely not within current scope
+
         # show arm movement and get input to start
-        #task_response = self.send_interface_request_task.execute(
-        #    RobotStatus.BEDSIDE_DELIVER
-        #)
+        task_response = self.send_interface_request_task.execute(
+            RobotStatus.BEDSIDE_DELIVER
+        )
 
         # extend arm
         rospy.loginfo("Nightingale Mission Planner extending arm for handoff")
 
-        # UNCOMMENT FOR POSE GOAL
         if status != TaskCodes.SUCCESS or not self.move_arm_task.within_workspace(bin_goal_pt):
            rospy.logwarn("UNABLE TO FIND POSE. FALLING BACK TO SAFE HANDOFF POSITION")
            status = self.move_arm_task.extend_restock()
@@ -229,12 +226,12 @@ class MissionPlanner:
         rospy.loginfo("Nightingale Mission Planner extended arm for handoff")
 
         # arm extended
-        #task_response = self.send_interface_request_task.execute(
-        #    RobotStatus.ARM_EXTENDED
-        #)
+        task_response = self.send_interface_request_task.execute(
+            RobotStatus.ARM_EXTENDED
+        )
 
         # show arm movement and get input to start
-        #status = self.send_interface_request_task.execute(RobotStatus.RETRACTING_ARM)
+        status = self.send_interface_request_task.execute(RobotStatus.RETRACTING_ARM)
 
         # retract arm
         rospy.loginfo("Nightingale Mission Planner retracting arm after handoff")
@@ -247,8 +244,7 @@ class MissionPlanner:
         status = self.move_body_task.home()
 
         # when done automatically goes back to triage patient
-        #self.phases.put(self.triage_patient_phase)
-        self.phases.put(self.handoff_items_phase)
+        self.phases.put(self.triage_patient_phase)
 
         return PhaseStatus.PHASE_COMPLETE
 
