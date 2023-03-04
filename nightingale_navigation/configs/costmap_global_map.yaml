@@ -3,4 +3,5 @@ global_costmap:
    robot_base_frame: base_link
    static_map: true
    footprint_padding: 0.05
+   inflation_radius: 0.55
    map_topic: /map

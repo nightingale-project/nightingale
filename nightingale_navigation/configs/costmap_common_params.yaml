@@ -12,7 +12,6 @@ footprint: [[0.87,0.52],[0.87,-0.4],[-0.56,-0.4],[-0.56,0.52]]
 ### Costmap definitions ###
 update_frequency: 8.0 # laserscans are 15 Hz. Be conservative
 publish_frequency: 5.0 # publish freq is usually < update_freq
-inflation_radius: 0.45
 obstacle_layer/footprint_clearing_enabled: true
 
 #raytrace_range must be less than max range of sensor.
