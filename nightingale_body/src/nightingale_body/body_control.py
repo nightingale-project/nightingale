@@ -70,7 +70,7 @@ class BodyJointControl:
     def head_is_close(self, target_jnt_name, target_jnt_pos):
         curr_jnt_state = rospy.wait_for_message("/movo/head/joint_states", JointState)
         curr_jnt_pos = {
-            name: pos for name, pos in zip(curr_jnt_state.name, curr_jnt_state.pos)
+            name: pos for name, pos in zip(curr_jnt_state.name, curr_jnt_state.position)
         }
 
         diff = np.zeros(len(target_jnt_name))
@@ -87,7 +87,7 @@ class BodyJointControl:
             "/movo/linear_actuator/joint_states", JointState
         )
         curr_jnt_pos = {
-            name: pos for name, pos in zip(curr_jnt_state.name, curr_jnt_state.pos)
+            name: pos for name, pos in zip(curr_jnt_state.name, curr_jnt_state.position)
         }
 
         diff = np.zeros(len(target_jnt_name))
@@ -113,16 +113,16 @@ class BodyControl:
         )
         try:
             response = lookup_client("home", RobotConfigurationLookupRequest.HEAD)
-            self.head_joint_names = response.jnt_states.names
-            self.head_home_joint_values = response.jnt_states.position
+            self.head_joint_names = response.jnt_state.name
+            self.head_home_joint_values = response.jnt_state.position
 
             response = lookup_client("home", RobotConfigurationLookupRequest.TORSO)
-            self.torso_joint_names = response.jnt_states.names
-            self.torso_home_joint_values = response.jnt_states.position
+            self.torso_joint_names = response.jnt_state.name
+            self.torso_home_joint_values = response.jnt_state.position
 
             response = lookup_client("handoff", RobotConfigurationLookupRequest.TORSO)
-            self.torso_joint_names = response.jnt_states.names
-            self.torso_handoff_joint_values = response.jnt_states.position
+            self.torso_joint_names = response.jnt_state.name
+            self.torso_handoff_joint_values = response.jnt_state.position
 
         except rospy.ServiceException as e:
             rospy.logerr(
