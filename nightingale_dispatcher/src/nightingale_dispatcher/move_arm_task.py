@@ -15,7 +15,7 @@ class MoveArmTask(Task):
         self.manipulation = ManipulationControl()
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
-        self.right_arm_length = 0.7  # this is conservative
+        self.right_arm_length = 0.8  # this is conservative
         if not self.manipulation.home_left() or not self.manipulation.home_right():
             rospy.logfatal("MoveArmTask: Failed to home arms. This is unrecoverable")
 
@@ -35,7 +35,7 @@ class MoveArmTask(Task):
         return TaskCodes.SUCCESS if result else TaskCodes.ERROR
 
     # this function returns true if a given point is within the right arm's workspace
-    def witihin_workspace(self, point):
+    def within_workspace(self, point):
         assert type(point) is Point
         # assume the point is in the base_link frame
         stamped_point = PointStamped()
