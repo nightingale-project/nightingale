@@ -9,4 +9,5 @@
     <include file="$(find nightingale_ros_bridge)/launch/interface.launch"/>
     <include file="$(find nightingale_dispatcher)/launch/dispatcher.launch"/>
     <include file="$(find nightingale_manipulation)/launch/moveit_action_servers.launch"/>
+    <include file="$(find nightingale_body)/launch/moveit_action_servers.launch"/>
 </launch>
