@@ -171,6 +171,15 @@ class MissionPlanner:
         # pose estimation
         # status, pose_result = self.estimate_pose_task.execute("body")
         # bin_goal_pt = pose_result.bin_goal.point
+        # if not self.move_arm_task.witihin_workspace(bin_goal_pt):
+        #    rospy.logerr(f"Nightingale Perception returned a point not within the workspace: {bin_goal_pt}. Trying closer point")
+        #    alpha = 0.9
+        #    for _ in range(3):
+        #        bin_goal_pt.x = bin_goal_pt.x * alpha
+        #        bin_goal_pt.y = bin_goal_pt.y * alpha
+        #        bin_goal_pt.z = bin_goal_pt.z * alpha
+        #        if self.move_arm_task.witihin_workspace(bin_goal_pt): break
+        #        rospy.logerr(f"Closer point still outside of workspace, trying even closer point {bin_goal_pt}")
         # rospy.loginfo(f"node returns {pose_result}")
         # if unable to find patient pose place bin at predetermined position
         # could also abort and go home instead but this decision complexity
