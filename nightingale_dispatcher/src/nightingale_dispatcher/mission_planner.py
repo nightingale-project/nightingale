@@ -182,6 +182,9 @@ class MissionPlanner:
         rospy.loginfo("Nightingale Mission Planner starting to hand items")
         # Arrived at patient's bedside
 
+        rospy.loginfo("Raising body to handoff")
+        status = self.move_body_task.handoff()
+
         # pose estimation
         # status, pose_result = self.estimate_pose_task.execute("body")
         # bin_goal_pt = pose_result.bin_goal.point
@@ -202,9 +205,6 @@ class MissionPlanner:
         task_response = self.send_interface_request_task.execute(
             RobotStatus.BEDSIDE_DELIVER
         )
-
-        rospy.loginfo("Raising body to handoff")
-        status = self.move_body_task.handoff()
 
         # extend arm
         rospy.loginfo("Nightingale Mission Planner extending arm for handoff")
