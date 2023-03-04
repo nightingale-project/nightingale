@@ -113,6 +113,7 @@ include_directories(
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
   src/nightingale_manipulation/manipulation_action_client.py
+  src/nightingale_manipulation/planning_scene_interface.py
   src/manipulation_control_test.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
