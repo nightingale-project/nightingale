@@ -575,8 +575,10 @@ class ManipulationControl:
         def move_left():
             cur_pose = self.right_cartesian.get_pose()
             cur_pose.position.y += 0.2
-            if not self.right_cartesian.cmd_position(cur_pose):
+            if not self.right_cartesian.cmd_position(cur_pose.position):
+                rospy.logerr("ManipulationControl failed to move right arm left")
                 return False
+            return True
 
         def home_right_internal():
             home_pose = GeometryPose()
