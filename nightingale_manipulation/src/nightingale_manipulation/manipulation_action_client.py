@@ -354,7 +354,7 @@ class ManipulationCartesianControl:
         self.ee_ctrl_mode = 0
         self.orientation = Orientation()
         self.pose = Pose()
-        self.ref_link = "base_link"
+        self.ref_link = "upper_body_link"
         self.ee_link = f"{prefix}_ee_link"
 
         self.tf_buffer = tf2_ros.Buffer()
@@ -571,8 +571,14 @@ class ManipulationControl:
         return False
 
     def retract_right(self, tries=3):
+
+        def move_left():
+            cur_pose = self.right_cartesian.get_pose()
+            cur_pose.position.y += 0.2
+            if not self.right_cartesian.cmd_position(cur_pose):
+                return False
+
         def home_right_internal():
-            self.planning_scene.add_box()
             home_pose = GeometryPose()
             # TODO get this from the service
             home_pose.position.x = 0.356
@@ -584,14 +590,19 @@ class ManipulationControl:
             home_pose.orientation.w = 0.530
             if not self.right_cartesian.cmd_position(home_pose.position):
                 rospy.logerr("ManipulationControl failed to move right arm")
-                self.planning_scene.remove_box()
                 return False
-            self.planning_scene.remove_box()
             return True
 
         for _ in range(tries):
+            if move_left():
+                break
+
+        self.planning_scene.add_box()
+        for _ in range(tries):
             if home_right_internal():
+                self.planning_scene.remove_box()
                 return True
+        self.planning_scene.remove_box()
         return False
 
     def home_left(self, tries=3):
