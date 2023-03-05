@@ -33,6 +33,7 @@ from geometry_msgs.msg import Quaternion, Point
 from tf.transformations import euler_from_quaternion
 
 from nightingale_manipulation.planning_scene_interface import PlanningSceneInterface
+from nightingale_manipulation.trajectory_intercept_server import TrajectoryInterceptServer
 
 MoveItActionHandlerSuccess = "Success"
 
@@ -552,6 +553,9 @@ class ManipulationControl:
         self.right_cartesian = ManipulationCartesianControl("right")
         self.left_cartesian = ManipulationCartesianControl("left")
         self.planning_scene = PlanningSceneInterface()
+        self.trajectory_inversion_server = TrajectoryInterceptServer(
+            "/movo/right_arm_controller/follow_joint_trajectory"
+        )
 
     def home_right(self, tries=3):
         # CAUTION: This function should only ever home the arms. Don't add homing of other things here
@@ -571,8 +575,11 @@ class ManipulationControl:
         return False
 
     def retract_right(self, tries=3):
+        def reverse_previous_path():
+            return self.trajectory_inversion_server.send_reverse_trajectory()
+
         def home_right_internal():
-            self.planning_scene.add_box()
+            # self.planning_scene.add_box()
             home_pose = GeometryPose()
             # TODO get this from the service
             home_pose.position.x = 0.356
@@ -584,13 +591,13 @@ class ManipulationControl:
             home_pose.orientation.w = 0.530
             if not self.right_cartesian.cmd_position(home_pose.position):
                 rospy.logerr("ManipulationControl failed to move right arm")
-                self.planning_scene.remove_box()
+                # self.planning_scene.remove_box()
                 return False
-            self.planning_scene.remove_box()
+            # self.planning_scene.remove_box()
             return True
 
         for _ in range(tries):
-            if home_right_internal():
+            if reverse_previous_path():
                 return True
         return False
 
@@ -658,6 +665,10 @@ if __name__ == "__main__":
     for _ in range(20):
         rospy.loginfo("restocking")
         assert manipulation.extend_restock()
+        rospy.loginfo("retracting")
+        assert manipulation.retract_right()
+        rospy.loginfo("extending handoff")
+        assert manipulation.extend_handoff(Point(0.86, -0.13, 0.9))
         rospy.loginfo("retracting")
         assert manipulation.retract_right()
 
