@@ -132,7 +132,9 @@ class BodyControl:
         self.body_jnt_ctrl = BodyJointControl()
 
     def home(self):
-        status = self.body_jnt_ctrl.cmd_head(self.head_joint_names, self.head_home_joint_values)
+        status = self.body_jnt_ctrl.cmd_head(
+            self.head_joint_names, self.head_home_joint_values
+        )
         status &= self.body_jnt_ctrl.cmd_torso(
             self.torso_joint_names, self.torso_home_joint_values
         )
