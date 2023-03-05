@@ -32,7 +32,6 @@ from geometry_msgs.msg import Pose as GeometryPose
 from geometry_msgs.msg import Quaternion, Point
 from tf.transformations import euler_from_quaternion
 
-from nightingale_manipulation.planning_scene_interface import PlanningSceneInterface
 from nightingale_manipulation.trajectory_intercept_server import TrajectoryInterceptServer
 
 MoveItActionHandlerSuccess = "Success"
@@ -552,7 +551,6 @@ class ManipulationControl:
         )
         self.right_cartesian = ManipulationCartesianControl("right")
         self.left_cartesian = ManipulationCartesianControl("left")
-        self.planning_scene = PlanningSceneInterface()
         self.trajectory_inversion_server = TrajectoryInterceptServer(
             "/movo/right_arm_controller/follow_joint_trajectory"
         )
@@ -587,7 +585,6 @@ class ManipulationControl:
             return True
 
         def home_right_internal():
-            # self.planning_scene.add_box()
             home_pose = GeometryPose()
             # TODO get this from the service
             home_pose.position.x = 0.356
@@ -599,9 +596,7 @@ class ManipulationControl:
             home_pose.orientation.w = 0.530
             if not self.right_cartesian.cmd_position(home_pose.position):
                 rospy.logerr("ManipulationControl failed to move right arm")
-                # self.planning_scene.remove_box()
                 return False
-            # self.planning_scene.remove_box()
             return True
 
         for _ in range(tries):
