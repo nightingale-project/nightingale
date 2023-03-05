@@ -409,8 +409,6 @@ class ManipulationCartesianControl:
 
         if ee_relative:
             ref_link = self.ee_link
-        else:
-            ref_link = self.ref_link
         # locked end effector control mode
         if self.ee_ctrl_mode:
             goal = cartesian_goal(
@@ -578,12 +576,12 @@ class ManipulationControl:
             home_pose = GeometryPose()
             # TODO get this from the service
             home_pose.position.x = 0.356
-            home_pose.position.y = -0.122
+            home_pose.position.y = 0.003
             home_pose.position.z = 0.051
-            home_pose.orientation.x = -0.456
-            home_pose.orientation.y = -0.583
-            home_pose.orientation.z = 0.430
-            home_pose.orientation.w = 0.517
+            home_pose.orientation.x = -0.510
+            home_pose.orientation.y = -0.493
+            home_pose.orientation.z = 0.464
+            home_pose.orientation.w = 0.530
             if not self.right_cartesian.cmd_position(home_pose.position):
                 rospy.logerr("ManipulationControl failed to move right arm")
                 self.planning_scene.remove_box()
