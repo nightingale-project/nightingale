@@ -398,10 +398,11 @@ class ManipulationCartesianControl:
         self.pose.orientation = q
         return True
 
-    def cmd_arm(self, pose: GeometryPose, ee_relative=False):
+    def cmd_arm(self, pose: GeometryPose, ref_link="upper_body_link", ee_relative=False):
         """
         Commands the arm to move to a target Pose in the cartesian space
         @param pose: type geometry_msgs.msg Pose, also accepts manipulation_action_client.Pose type
+        @param ref_link: the link to move with respect to
         @param ee_relative: if true, use ee_link instead of base_link for reference link
         @return: Result of action
         """
@@ -412,8 +413,6 @@ class ManipulationCartesianControl:
 
         if ee_relative:
             ref_link = self.ee_link
-        else:
-            ref_link = self.ref_link
         # locked end effector control mode
         if self.ee_ctrl_mode:
             goal = cartesian_goal(
@@ -439,7 +438,7 @@ class ManipulationCartesianControl:
         self.arm.wait_for_result()
         return self.arm.get_result().status == MoveItActionHandlerSuccess
 
-    def cmd_position(self, point: Point, ee_fixed=True):
+    def cmd_position(self, point: Point, ref_link="upper_body_link", ee_fixed=True):
         if type(point) is not Point:
             return False
         ee_prev = self.ee_ctrl_mode
@@ -452,7 +451,7 @@ class ManipulationCartesianControl:
         goal = GeometryPose()
         goal.position = point
         goal.orientation = pose.orientation
-        status = self.cmd_arm(goal)
+        status = self.cmd_arm(goal, ref_link=ref_link)
 
         self.ee_ctrl_mode = ee_prev
         return status
@@ -464,7 +463,7 @@ class ManipulationCartesianControl:
         goal = GeometryPose()
         goal.orientation = q
         goal.position = pose.position
-        return self.cmd_arm(goal)
+        return self.cmd_arm(goal, ref_link="base_link")
 
     def set_fixed_ee_ctrl_mode(self):
         self.ee_ctrl_mode = 1
@@ -566,30 +565,7 @@ class ManipulationControl:
             # if not self.gpr_ctrl.close_right():
             #    rospy.logerr("ManipulationControl failed to close right gripper")
             #    return False
-            home_pose = GeometryPose()
-            # need to add cartesian to lookup service
-            # TODO get this from the service
-            home_pose.position.x = 0.581
-            home_pose.position.y = 0.003
-            home_pose.position.z = 0.12
-            home_pose.orientation.x = -0.456
-            home_pose.orientation.y = -0.583
-            home_pose.orientation.z = 0.430
-            home_pose.orientation.w = 0.517
-            self.right_cartesian.set_ref_link("upper_body_link")
-            if not self.right_cartesian.cmd_orientation(home_pose.orientation):
-                rospy.logerr("ManipulationControl failed to orient right arm")
-                self.planning_scene.remove_box()
-                self.right_cartesian.set_ref_link("base_link")
-                return False
-            if not self.right_cartesian.cmd_position(home_pose.position, True):
-                rospy.logerr("ManipulationControl failed to move right arm")
-                self.planning_scene.remove_box()
-                self.right_cartesian.set_ref_link("base_link")
-                return False
-            self.planning_scene.remove_box()
-            self.right_cartesian.set_ref_link("base_link")
-            return True
+            return self.jnt_ctrl.cmd_right_arm(self.jnt_ctrl.right_arm_home_joint_values)
 
         for _ in range(tries):
             if home_right_internal():
@@ -609,20 +585,11 @@ class ManipulationControl:
             home_pose.orientation.y = -0.583
             home_pose.orientation.z = 0.430
             home_pose.orientation.w = 0.517
-            self.right_cartesian.set_ref_link("upper_body_link")
-            if not self.right_cartesian.cmd_orientation(home_pose.orientation):
-                rospy.logerr("ManipulationControl failed to orient right arm")
-                self.right_cartesian.set_ref_link("base_link")
-                self.planning_scene.remove_box()
-                return False
-            self.right_cartesian.set_ref_link("upper_body_link")
-            if not self.right_cartesian.cmd_position(home_pose.position, True):
+            if not self.right_cartesian.cmd_position(home_pose.position):
                 rospy.logerr("ManipulationControl failed to move right arm")
-                self.right_cartesian.set_ref_link("base_link")
                 self.planning_scene.remove_box()
                 return False
             self.planning_scene.remove_box()
-            self.right_cartesian.set_ref_link("base_link")
             return True
 
         for _ in range(tries):
@@ -647,7 +614,7 @@ class ManipulationControl:
 
     def extend_handoff(self, goal_point: Point, tries=3):
         def extend_handoff_internal():
-            return self.right_cartesian.cmd_position(goal_point, True)
+            return self.right_cartesian.cmd_position(goal_point, ref_link="base_link")
 
         for _ in range(tries):
             if extend_handoff_internal():
@@ -661,9 +628,7 @@ class ManipulationControl:
             restock_pose.position.x = 0.807
             restock_pose.position.y = 0.053
             restock_pose.position.z = 0.278
-            self.right_cartesian.set_ref_link("upper_body_link")
-            status = self.right_cartesian.cmd_position(restock_pose.position, True)
-            self.right_cartesian.set_ref_link("base_link")
+            status = self.right_cartesian.cmd_position(restock_pose.position)
             return status
 
         for _ in range(tries):
