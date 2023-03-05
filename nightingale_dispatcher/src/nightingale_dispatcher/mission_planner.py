@@ -185,6 +185,8 @@ class MissionPlanner:
         rospy.loginfo("Raising body to handoff")
         status = self.move_body_task.handoff()
 
+        rospy.sleep(2.5)
+
         # pose estimation
         # status, pose_result = self.estimate_pose_task.execute("body")
         # bin_goal_pt = pose_result.bin_goal.point

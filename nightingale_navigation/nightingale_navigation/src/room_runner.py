@@ -167,7 +167,7 @@ class RoomRunnerNode(object):
             )
         else:
             rospy.logerr(
-                f"RoomRunner Failed. State is {self.client.get_state().get_text()}",
+                f"RoomRunner Failed. State is {self.client.get_state()}",
                 logger_name=self.logger_name,
             )
             # the action call succeeded but the actual action performance failed
