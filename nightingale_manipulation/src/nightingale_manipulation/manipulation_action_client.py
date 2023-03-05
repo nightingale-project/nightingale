@@ -32,6 +32,8 @@ from geometry_msgs.msg import Pose as GeometryPose
 from geometry_msgs.msg import Quaternion, Point
 from tf.transformations import euler_from_quaternion
 
+from nightingale_manipulation.planning_scene_interface import PlanningSceneInterface
+
 MoveItActionHandlerSuccess = "Success"
 
 
@@ -109,7 +111,7 @@ def cartesian_goal(
     eev=0.5,
     eea=0.5,
     mode=0,
-    timeout=60,
+    timeout=20,
 ) -> MoveToPoseMoveItGoal:
     goal = MoveToPoseMoveItGoal()
     goal.constraint_mode = mode
@@ -305,20 +307,14 @@ class ManipulationGripperControl:
         rospy.loginfo("Manipulation Control: Initialized gripper ctrl")
 
     def cmd_right_gripper(self, joint_target):
-        if not self.gripper_lock["right"]:
-            return False
         goal = joint_goal(joint_target, self.right_gripper_joint_names)
         self.right_gripper.send_goal(goal)
-        self.right_gripper.wait_for_result()
-        return self.right_gripper.get_result().status == MoveItActionHandlerSuccess
+        return self.right_gripper.wait_for_result()
 
     def cmd_left_gripper(self, joint_target):
-        if not self.gripper_lock["left"]:
-            return False
         goal = joint_goal(joint_target, self.left_gripper_joint_names)
         self.left_gripper.send_goal(goal)
-        self.left_gripper.wait_for_result()
-        return self.left_gripper.get_result().status == MoveItActionHandlerSuccess
+        return self.left_gripper.wait_for_result()
 
     def lock_right_gripper(self):
         self.gripper_lock["right"] = False
@@ -412,7 +408,6 @@ class ManipulationCartesianControl:
             ref_link = self.ee_link
         else:
             ref_link = self.ref_link
-
         # locked end effector control mode
         if self.ee_ctrl_mode:
             goal = cartesian_goal(
@@ -433,9 +428,6 @@ class ManipulationCartesianControl:
             (roll, pitch, yaw) = euler_from_quaternion(quaternion_list)
             euler_orientation = Orientation(roll=roll, pitch=pitch, yaw=yaw)
             goal = cartesian_goal(pose.position, ref_link, euler_orientation)
-
-        rospy.loginfo("goal: ")
-        rospy.loginfo(goal)
 
         self.arm.send_goal(goal)
         self.arm.wait_for_result()
@@ -554,58 +546,56 @@ class ManipulationControl:
             self.left_gripper_joint_names,
             self.right_gripper_joint_names,
             self.left_gripper_open_joint_values,
-            self.left_gripper_open_joint_values,
+            self.left_gripper_closed_joint_values,
         )
         self.right_cartesian = ManipulationCartesianControl("right")
         self.left_cartesian = ManipulationCartesianControl("left")
+        self.planning_scene = PlanningSceneInterface()
 
     def home_right(self, tries=3):
         # CAUTION: This function should only ever home the arms. Don't add homing of other things here
         # right gripper is openend on bootup by kinova. not sure where, but not in init
         def home_right_internal():
-            # if not self.gpr_ctrl.close_right():
-            #    rospy.logerr("ManipulationControl failed to close right gripper")
-            #    return False
-            home_pose = GeometryPose()
-            # need to add cartesian to lookup service
-            # TODO get this from the service
-            home_pose.position.x = 0.581
-            home_pose.position.y = 0.003
-            home_pose.position.z = 0.637
-            home_pose.orientation.x = -0.456
-            home_pose.orientation.y = -0.583
-            home_pose.orientation.z = 0.430
-            home_pose.orientation.w = 0.517
-            if not self.right_cartesian.cmd_orientation(home_pose.orientation):
-                rospy.logerr("ManipulationControl failed to orient right arm")
+            if not self.gpr_ctrl.close_right():
+                rospy.logerr("ManipulationControl failed to close right gripper")
                 return False
-            if not self.right_cartesian.cmd_position(home_pose.position, True):
-                rospy.logerr("ManipulationControl failed to move right arm")
-                return False
-            return True
+
+            return self.jnt_ctrl.cmd_right_arm(
+                self.jnt_ctrl.right_arm_home_joint_values
+            )
 
         for _ in range(tries):
             if home_right_internal():
+                self.planning_scene.remove_box()
                 return True
         return False
 
     def retract_right(self, tries=3):
         def home_right_internal():
+            self.planning_scene.add_box()
             home_pose = GeometryPose()
             # TODO get this from the service
-            home_pose.position.x = 0.581
-            home_pose.position.y = 0.003
-            home_pose.position.z = 0.637
+            home_pose.position.x = 0.356
+            home_pose.position.y = -0.122
+            home_pose.position.z = 0.051
             home_pose.orientation.x = -0.456
             home_pose.orientation.y = -0.583
             home_pose.orientation.z = 0.430
             home_pose.orientation.w = 0.517
+            self.right_cartesian.set_ref_link("upper_body_link")
             if not self.right_cartesian.cmd_orientation(home_pose.orientation):
                 rospy.logerr("ManipulationControl failed to orient right arm")
+                self.right_cartesian.set_ref_link("base_link")
+                self.planning_scene.remove_box()
                 return False
+            self.right_cartesian.set_ref_link("upper_body_link")
             if not self.right_cartesian.cmd_position(home_pose.position, True):
                 rospy.logerr("ManipulationControl failed to move right arm")
+                self.right_cartesian.set_ref_link("base_link")
+                self.planning_scene.remove_box()
                 return False
+            self.planning_scene.remove_box()
+            self.right_cartesian.set_ref_link("base_link")
             return True
 
         for _ in range(tries):
@@ -643,8 +633,11 @@ class ManipulationControl:
             restock_pose = GeometryPose()
             restock_pose.position.x = 0.807
             restock_pose.position.y = 0.053
-            restock_pose.position.z = 0.978
-            return self.right_cartesian.cmd_position(restock_pose.position, True)
+            restock_pose.position.z = 0.278
+            self.right_cartesian.set_ref_link("upper_body_link")
+            status = self.right_cartesian.cmd_position(restock_pose.position, True)
+            self.right_cartesian.set_ref_link("base_link")
+            return status
 
         for _ in range(tries):
             if extend_restock_internal():
@@ -652,16 +645,16 @@ class ManipulationControl:
         return False
 
     def open_left_gripper(self):
-        self.gpr_ctrl.open_left()
+        return self.gpr_ctrl.open_left()
 
     def open_right_gripper(self):
-        self.gpr_ctrl.open_right()
+        return self.gpr_ctrl.open_right()
 
     def close_left_gripper(self):
-        self.gpr_ctrl.close_left()
+        return self.gpr_ctrl.close_left()
 
     def close_right_gripper(self):
-        self.gpr_ctrl.close_right()
+        return self.gpr_ctrl.close_right()
 
 
 # test code
@@ -669,11 +662,23 @@ if __name__ == "__main__":
     rospy.init_node("manipulation_control")
     manipulation = ManipulationControl()
 
-    rospy.loginfo(manipulation.jnt_ctrl.left_arm_home_joint_values)
-    for _ in range(3):
-        rospy.loginfo("going home")
-        assert manipulation.home_left() and manipulation.home_right()
+    rospy.loginfo("Testing gripper")
+    assert manipulation.open_right_gripper()
+    assert manipulation.close_right_gripper()
+    rospy.loginfo("Done testing gripper")
+
+    rospy.loginfo("going home")
+    assert manipulation.home_left()
+    assert manipulation.jnt_ctrl.cmd_right_arm(
+        manipulation.jnt_ctrl.right_arm_home_joint_values
+    )
+
+    for _ in range(20):
         rospy.loginfo("restocking")
         assert manipulation.extend_restock()
+        rospy.loginfo("retracting")
+        assert manipulation.retract_right()
+
     rospy.loginfo("going home")
-    assert manipulation.home_left() and manipulation.home_right()
+    assert manipulation.home_left()
+    assert manipulation.home_right()
