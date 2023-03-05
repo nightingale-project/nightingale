@@ -574,13 +574,13 @@ class ManipulationControl:
             self.planning_scene.add_box()
             home_pose = GeometryPose()
             # TODO get this from the service
-            home_pose.position.x = 0.581
-            home_pose.position.y = 0.003
-            home_pose.position.z = 0.12
-            home_pose.orientation.x = -0.456
-            home_pose.orientation.y = -0.583
-            home_pose.orientation.z = 0.430
-            home_pose.orientation.w = 0.517
+            home_pose.position.x = 0.356
+            home_pose.position.y = -0.122
+            home_pose.position.z = 0.051
+            home_pose.orientation.x = -0.5
+            home_pose.orientation.y = 0.5
+            home_pose.orientation.z = 0.5
+            home_pose.orientation.w = 0.5
             self.right_cartesian.set_ref_link("upper_body_link")
             if not self.right_cartesian.cmd_orientation(home_pose.orientation):
                 rospy.logerr("ManipulationControl failed to orient right arm")

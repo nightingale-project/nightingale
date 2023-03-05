@@ -14,7 +14,7 @@ joint_configurations: {
         },
         right_arm: {
             names: ["right_shoulder_pan_joint", "right_shoulder_lift_joint", "right_arm_half_joint", "right_elbow_joint", "right_wrist_spherical_1_joint", "right_wrist_spherical_2_joint", "right_wrist_3_joint"],
-            joints: [-1.189840720238987, -1.8304754388921793, -0.31277335632770153, -2.367960136151233, 0.9231204765356429, 1.534414350511106, 2.8363235525817165],
+            joints: [-0.9361272221415344, -2.018918054465096, -0.17841900986207548, -2.092460582177362, 0.8110426070611756, 1.5588563103636353, 2.9943379548038234],
         }
     },
     handoff: {
