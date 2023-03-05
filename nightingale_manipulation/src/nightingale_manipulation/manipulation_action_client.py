@@ -559,9 +559,9 @@ class ManipulationControl:
         # CAUTION: This function should only ever home the arms. Don't add homing of other things here
         # right gripper is openend on bootup by kinova. not sure where, but not in init
         def home_right_internal():
-            if not self.gpr_ctrl.close_right():
-                rospy.logerr("ManipulationControl failed to close right gripper")
-                return False
+            #if not self.gpr_ctrl.close_right():
+            #    rospy.logerr("ManipulationControl failed to close right gripper")
+            #    return False
 
             return self.jnt_ctrl.cmd_right_arm(
                 self.jnt_ctrl.right_arm_home_joint_values
