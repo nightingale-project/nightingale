@@ -6,4 +6,5 @@ local_costmap:
    width: 8.0
    height: 8.0
    resolution: 0.05
+   inflation_radius: 0.35
    footprint_padding: 0.0
