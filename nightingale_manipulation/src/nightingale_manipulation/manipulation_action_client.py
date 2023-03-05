@@ -309,7 +309,6 @@ class ManipulationGripperControl:
     def cmd_right_gripper(self, joint_target):
         goal = joint_goal(joint_target, self.right_gripper_joint_names)
         self.right_gripper.send_goal(goal)
-        rospy.loginfo(f"{goal}")
         return self.right_gripper.wait_for_result()
 
     def cmd_left_gripper(self, joint_target):
@@ -558,10 +557,12 @@ class ManipulationControl:
         # right gripper is openend on bootup by kinova. not sure where, but not in init
         def home_right_internal():
             if not self.gpr_ctrl.close_right():
-               rospy.logerr("ManipulationControl failed to close right gripper")
-               return False
+                rospy.logerr("ManipulationControl failed to close right gripper")
+                return False
 
-            return self.jnt_ctrl.cmd_right_arm(self.jnt_ctrl.right_arm_home_joint_values)
+            return self.jnt_ctrl.cmd_right_arm(
+                self.jnt_ctrl.right_arm_home_joint_values
+            )
 
         for _ in range(tries):
             if home_right_internal():
@@ -577,10 +578,10 @@ class ManipulationControl:
             home_pose.position.x = 0.356
             home_pose.position.y = -0.122
             home_pose.position.z = 0.051
-            home_pose.orientation.x = -0.5
-            home_pose.orientation.y = 0.5
-            home_pose.orientation.z = 0.5
-            home_pose.orientation.w = 0.5
+            home_pose.orientation.x = -0.456
+            home_pose.orientation.y = -0.583
+            home_pose.orientation.z = 0.430
+            home_pose.orientation.w = 0.517
             self.right_cartesian.set_ref_link("upper_body_link")
             if not self.right_cartesian.cmd_orientation(home_pose.orientation):
                 rospy.logerr("ManipulationControl failed to orient right arm")
@@ -668,7 +669,9 @@ if __name__ == "__main__":
 
     rospy.loginfo("going home")
     assert manipulation.home_left()
-    assert manipulation.jnt_ctrl.cmd_right_arm(manipulation.jnt_ctrl.right_arm_home_joint_values)
+    assert manipulation.jnt_ctrl.cmd_right_arm(
+        manipulation.jnt_ctrl.right_arm_home_joint_values
+    )
 
     for _ in range(20):
         rospy.loginfo("restocking")
