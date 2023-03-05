@@ -32,7 +32,9 @@ from geometry_msgs.msg import Pose as GeometryPose
 from geometry_msgs.msg import Quaternion, Point
 from tf.transformations import euler_from_quaternion
 
-from nightingale_manipulation.trajectory_intercept_server import TrajectoryInterceptServer
+from nightingale_manipulation.trajectory_intercept_server import (
+    TrajectoryInterceptServer,
+)
 
 MoveItActionHandlerSuccess = "Success"
 
@@ -394,7 +396,9 @@ class ManipulationCartesianControl:
         self.pose.orientation = q
         return True
 
-    def cmd_arm(self, pose: GeometryPose, ref_link="upper_body_link", ee_relative=False):
+    def cmd_arm(
+        self, pose: GeometryPose, ref_link="upper_body_link", ee_relative=False
+    ):
         """
         Commands the arm to move to a target Pose in the cartesian space
         @param pose: type geometry_msgs.msg Pose, also accepts manipulation_action_client.Pose type
@@ -559,7 +563,7 @@ class ManipulationControl:
         # CAUTION: This function should only ever home the arms. Don't add homing of other things here
         # right gripper is openend on bootup by kinova. not sure where, but not in init
         def home_right_internal():
-            #if not self.gpr_ctrl.close_right():
+            # if not self.gpr_ctrl.close_right():
             #    rospy.logerr("ManipulationControl failed to close right gripper")
             #    return False
 
@@ -663,7 +667,9 @@ if __name__ == "__main__":
 
     rospy.loginfo("going home")
     assert manipulation.home_left()
-    assert manipulation.jnt_ctrl.cmd_right_arm(manipulation.jnt_ctrl.right_arm_home_joint_values)
+    assert manipulation.jnt_ctrl.cmd_right_arm(
+        manipulation.jnt_ctrl.right_arm_home_joint_values
+    )
 
     for _ in range(20):
         rospy.loginfo("restocking")

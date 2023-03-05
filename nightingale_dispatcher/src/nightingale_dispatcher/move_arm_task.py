@@ -24,7 +24,6 @@ class MoveArmTask(Task):
         rospy.sleep(2.0)
         self.manipulation.close_right_gripper()
 
-
     def extend_restock(self):
         result = self.manipulation.extend_restock()
         assert type(result) is bool

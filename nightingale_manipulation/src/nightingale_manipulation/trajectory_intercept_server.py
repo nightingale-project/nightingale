@@ -3,7 +3,7 @@ import actionlib
 from control_msgs.msg import (
     FollowJointTrajectoryActionGoal,
     FollowJointTrajectoryAction,
-    FollowJointTrajectoryGoal
+    FollowJointTrajectoryGoal,
 )
 
 
@@ -14,7 +14,9 @@ class TrajectoryInterceptServer:
         )
         self.action_client.wait_for_server()
         self.goal_interceptor = rospy.Subscriber(
-            action_server + "/goal", FollowJointTrajectoryActionGoal, self.goal_interceptor_cb
+            action_server + "/goal",
+            FollowJointTrajectoryActionGoal,
+            self.goal_interceptor_cb,
         )
         self.inverted_trajectory = None
         self.previous_path_tolerance = []
@@ -24,9 +26,16 @@ class TrajectoryInterceptServer:
     def goal_interceptor_cb(self, goal):
         intercepted_trajectory = goal.goal.trajectory
 
-        inverted_position_list = [point.positions for point in reversed(intercepted_trajectory.points)]
-        negative_velocities_list = [-1 * point.velocities for point in reversed(intercepted_trajectory.points)]
-        negative_acceleration_list = [-1 * point.accelerations for point in reversed(intercepted_trajectory.points)]
+        inverted_position_list = [
+            point.positions for point in reversed(intercepted_trajectory.points)
+        ]
+        negative_velocities_list = [
+            -1 * point.velocities for point in reversed(intercepted_trajectory.points)
+        ]
+        negative_acceleration_list = [
+            -1 * point.accelerations
+            for point in reversed(intercepted_trajectory.points)
+        ]
 
         for index, point in enumerate(intercepted_trajectory.points):
             point.positions = inverted_position_list[index]

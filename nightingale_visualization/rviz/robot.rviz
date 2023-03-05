@@ -8,6 +8,10 @@ Panels:
         - /TF1/Frames1
         - /Navigation1
         - /Navigation1/Local Plan1
+        - /MotionPlanning1
+        - /MotionPlanning1/Scene Geometry1
+        - /MotionPlanning1/Scene Robot1
+        - /PointStamped1
       Splitter Ratio: 0.5952379703521729
     Tree Height: 787
   - Class: rviz/Selection
@@ -77,6 +81,11 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
         camera_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        camera_mount:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -180,6 +189,11 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        mating_block:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         mid_body_link:
           Alpha: 1
           Show Axes: false
@@ -211,6 +225,26 @@ Visualization Manager:
           Show Trail: false
           Value: true
         right_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_bin:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_bin_clamp_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_bin_clamp_2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_bin_handle:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -283,6 +317,11 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
+        tablet_and_mount:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         tilt_link:
           Alpha: 1
           Show Axes: false
@@ -300,10 +339,132 @@ Visualization Manager:
       Value: true
       Visual Enabled: true
     - Class: rviz/TF
-      Enabled: false
+      Enabled: true
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        base_chassis_link:
+          Value: true
+        base_link:
+          Value: true
+        camera_aligned_depth_to_color_frame:
+          Value: true
+        camera_bottom_screw_frame:
+          Value: true
+        camera_color_frame:
+          Value: true
+        camera_color_optical_frame:
+          Value: true
+        camera_depth_frame:
+          Value: true
+        camera_depth_optical_frame:
+          Value: true
+        camera_link:
+          Value: true
+        camera_mount:
+          Value: true
+        front_laser_link:
+          Value: true
+        left_arm_half_1_link:
+          Value: true
+        left_arm_half_2_link:
+          Value: true
+        left_base_link:
+          Value: true
+        left_ee_link:
+          Value: true
+        left_forearm_link:
+          Value: true
+        left_gripper_base_link:
+          Value: true
+        left_gripper_finger1_finger_tip_link:
+          Value: true
+        left_gripper_finger1_knuckle_link:
+          Value: true
+        left_gripper_finger2_finger_tip_link:
+          Value: true
+        left_gripper_finger2_knuckle_link:
+          Value: true
+        left_gripper_finger3_finger_tip_link:
+          Value: true
+        left_gripper_finger3_knuckle_link:
+          Value: true
+        left_shoulder_link:
+          Value: true
+        left_wrist_3_link:
+          Value: true
+        left_wrist_spherical_1_link:
+          Value: true
+        left_wrist_spherical_2_link:
+          Value: true
+        linear_actuator_fixed_link:
+          Value: true
+        linear_actuator_link:
+          Value: true
+        lower_body_link:
+          Value: true
+        map:
+          Value: true
+        mating_block:
+          Value: true
+        mid_body_link:
+          Value: true
+        odom:
+          Value: true
+        pan_base_link:
+          Value: true
+        pan_link:
+          Value: true
+        rear_laser_link:
+          Value: true
+        right_arm_half_1_link:
+          Value: true
+        right_arm_half_2_link:
+          Value: true
+        right_base_link:
+          Value: true
+        right_bin:
+          Value: true
+        right_bin_clamp_1:
+          Value: true
+        right_bin_clamp_2:
+          Value: true
+        right_bin_handle:
+          Value: true
+        right_ee_link:
+          Value: true
+        right_forearm_link:
+          Value: true
+        right_gripper_base_link:
+          Value: true
+        right_gripper_finger1_finger_tip_link:
+          Value: true
+        right_gripper_finger1_knuckle_link:
+          Value: true
+        right_gripper_finger2_finger_tip_link:
+          Value: true
+        right_gripper_finger2_knuckle_link:
+          Value: true
+        right_gripper_finger3_finger_tip_link:
+          Value: true
+        right_gripper_finger3_knuckle_link:
+          Value: true
+        right_shoulder_link:
+          Value: true
+        right_wrist_3_link:
+          Value: true
+        right_wrist_spherical_1_link:
+          Value: true
+        right_wrist_spherical_2_link:
+          Value: true
+        sic_imu_frame:
+          Value: true
+        tablet_and_mount:
+          Value: true
+        tilt_link:
+          Value: true
+        upper_body_link:
+          Value: true
       Marker Alpha: 1
       Marker Scale: 0.20000000298023224
       Name: TF
@@ -311,9 +472,91 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
-        {}
+        map:
+          odom:
+            base_link:
+              base_chassis_link:
+                front_laser_link:
+                  {}
+                linear_actuator_fixed_link:
+                  linear_actuator_link:
+                    left_base_link:
+                      left_shoulder_link:
+                        left_arm_half_1_link:
+                          left_arm_half_2_link:
+                            left_forearm_link:
+                              left_wrist_spherical_1_link:
+                                left_wrist_spherical_2_link:
+                                  left_wrist_3_link:
+                                    left_ee_link:
+                                      left_gripper_base_link:
+                                        left_gripper_finger1_knuckle_link:
+                                          left_gripper_finger1_finger_tip_link:
+                                            {}
+                                        left_gripper_finger2_knuckle_link:
+                                          left_gripper_finger2_finger_tip_link:
+                                            {}
+                                        left_gripper_finger3_knuckle_link:
+                                          left_gripper_finger3_finger_tip_link:
+                                            {}
+                    pan_base_link:
+                      pan_link:
+                        tilt_link:
+                          camera_bottom_screw_frame:
+                            camera_link:
+                              camera_aligned_depth_to_color_frame:
+                                camera_color_optical_frame:
+                                  {}
+                              camera_color_frame:
+                                {}
+                              camera_depth_frame:
+                                camera_depth_optical_frame:
+                                  {}
+                          camera_mount:
+                            {}
+                          mating_block:
+                            {}
+                          tablet_and_mount:
+                            {}
+                    right_base_link:
+                      right_shoulder_link:
+                        right_arm_half_1_link:
+                          right_arm_half_2_link:
+                            right_forearm_link:
+                              right_wrist_spherical_1_link:
+                                right_wrist_spherical_2_link:
+                                  right_wrist_3_link:
+                                    right_ee_link:
+                                      right_bin:
+                                        {}
+                                      right_bin_clamp_1:
+                                        {}
+                                      right_bin_clamp_2:
+                                        {}
+                                      right_bin_handle:
+                                        {}
+                                      right_gripper_base_link:
+                                        right_gripper_finger1_knuckle_link:
+                                          right_gripper_finger1_finger_tip_link:
+                                            {}
+                                        right_gripper_finger2_knuckle_link:
+                                          right_gripper_finger2_finger_tip_link:
+                                            {}
+                                        right_gripper_finger3_knuckle_link:
+                                          right_gripper_finger3_finger_tip_link:
+                                            {}
+                    upper_body_link:
+                      {}
+                lower_body_link:
+                  {}
+                mid_body_link:
+                  {}
+                rear_laser_link:
+                  {}
+                sic_imu_frame:
+                  {}
       Update Interval: 0
-      Value: false
+      Value: true
     - Class: rviz/InteractiveMarkers
       Enable Transparency: true
       Enabled: false
@@ -550,7 +793,7 @@ Visualization Manager:
       Value: true
     - Acceleration_Scaling_Factor: 0.1
       Class: moveit_rviz_plugin/MotionPlanning
-      Enabled: false
+      Enabled: true
       Move Group Namespace: ""
       MoveIt_Allow_Approximate_IK: false
       MoveIt_Allow_External_Program: false
@@ -593,6 +836,11 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
           camera_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          camera_mount:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -696,6 +944,11 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          mating_block:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           mid_body_link:
             Alpha: 1
             Show Axes: false
@@ -727,6 +980,26 @@ Visualization Manager:
             Show Trail: false
             Value: true
           right_base_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          right_bin:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          right_bin_clamp_1:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          right_bin_clamp_2:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          right_bin_handle:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -799,6 +1072,11 @@ Visualization Manager:
             Alpha: 1
             Show Axes: false
             Show Trail: false
+          tablet_and_mount:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           tilt_link:
             Alpha: 1
             Show Axes: false
@@ -873,6 +1151,11 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          camera_mount:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           front_laser_link:
             Alpha: 1
             Show Axes: false
@@ -972,6 +1255,11 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          mating_block:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           mid_body_link:
             Alpha: 1
             Show Axes: false
@@ -1003,6 +1291,26 @@ Visualization Manager:
             Show Trail: false
             Value: true
           right_base_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          right_bin:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          right_bin_clamp_1:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          right_bin_clamp_2:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          right_bin_handle:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -1075,6 +1383,11 @@ Visualization Manager:
             Alpha: 1
             Show Axes: false
             Show Trail: false
+          tablet_and_mount:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           tilt_link:
             Alpha: 1
             Show Axes: false
@@ -1088,8 +1401,19 @@ Visualization Manager:
         Robot Alpha: 1
         Show Robot Collision: false
         Show Robot Visual: true
-      Value: false
+      Value: true
       Velocity_Scaling_Factor: 0.1
+    - Alpha: 1
+      Class: rviz/PointStamped
+      Color: 204; 41; 204
+      Enabled: true
+      History Length: 1
+      Name: PointStamped
+      Queue Size: 10
+      Radius: 0.05000000074505806
+      Topic: /nightingale_perception/bin_goal_viz
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -1116,7 +1440,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 62.90831756591797
+      Distance: 3.1629292964935303
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -1124,17 +1448,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 3.5188400745391846
-        Y: -3.3330399990081787
-        Z: -0.45833900570869446
+        X: -2.341226816177368
+        Y: 3.4695773124694824
+        Z: 0.0005230293609201908
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5948008298873901
+      Pitch: -0.21019883453845978
       Target Frame: <Fixed Frame>
-      Yaw: 2.423583507537842
+      Yaw: 4.0235915184021
     Saved: ~
 Window Geometry:
   Displays:
@@ -1146,7 +1470,7 @@ Window Geometry:
     collapsed: false
   MotionPlanning - Trajectory Slider:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000400000000000001f30000039efc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f0070006500720074006900650073000000003d000001290000005c00fffffffb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d0000039e000000c900fffffffb000000280020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000000000000000fb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e00670000000253000001880000018800fffffffb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000001600000016000000010000010f000002ddfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a005600690065007700730000000043000002dd000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a00000041800fffffffb0000000800540069006d006501000000000000045000000000000000000000053f0000039e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000400000000000001f30000039efc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f0070006500720074006900650073000000003d000001290000005c00fffffffb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d0000039e000000c900fffffffb000000280020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000000000000000fb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e00670000000253000001880000018800fffffffb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000001600000016000000010000010f000002ddfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a005600690065007700730000000043000002dd000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a0000003bc00fffffffb0000000800540069006d006501000000000000045000000000000000000000053f0000039e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:

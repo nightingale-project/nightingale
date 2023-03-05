@@ -7,7 +7,6 @@ import geometry_msgs.msg
 
 
 class PlanningSceneInterface(object):
-
     def __init__(self):
         super(PlanningSceneInterface, self).__init__()
 
@@ -34,7 +33,9 @@ class PlanningSceneInterface(object):
     def __del__(self):
         self.remove_box()
 
-    def wait_for_state_update(self, box_is_known=False, box_is_attached=False, timeout=4):
+    def wait_for_state_update(
+        self, box_is_known=False, box_is_attached=False, timeout=4
+    ):
         start = rospy.get_time()
         seconds = rospy.get_time()
         while (seconds - start < timeout) and not rospy.is_shutdown():
@@ -141,4 +142,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
