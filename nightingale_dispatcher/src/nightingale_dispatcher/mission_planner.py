@@ -224,11 +224,14 @@ class MissionPlanner:
         # rospy.loginfo(f"node returns {pose_result}")
         status, pose_result = self.estimate_pose_task.execute("body")
         bin_goal_pt = pose_result.bin_goal.point
+        # move goal closer to robot for possible better configuration
+        bin_goal_pt.x = bin_goal_pt.x*0.9
+
         rospy.loginfo(f"node returns {pose_result}")
 
-        task_response = self.send_interface_request_task.execute(
-            RobotStatus.BEDSIDE_DELIVER
-        )
+        #task_response = self.send_interface_request_task.execute(
+        #    RobotStatus.BEDSIDE_DELIVER
+        #)
 
         # extend arm
         rospy.loginfo("Nightingale Mission Planner extending arm for handoff")
@@ -247,12 +250,12 @@ class MissionPlanner:
         rospy.loginfo("Nightingale Mission Planner extended arm for handoff")
 
         # arm extended
-        task_response = self.send_interface_request_task.execute(
-            RobotStatus.ARM_EXTENDED
-        )
+        #task_response = self.send_interface_request_task.execute(
+        #    RobotStatus.ARM_EXTENDED
+        #)
 
         # show arm movement and get input to start
-        status = self.send_interface_request_task.execute(RobotStatus.RETRACTING_ARM)
+        #status = self.send_interface_request_task.execute(RobotStatus.RETRACTING_ARM)
 
         # retract arm
         rospy.loginfo("Nightingale Mission Planner retracting arm after handoff")

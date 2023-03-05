@@ -595,9 +595,9 @@ class ManipulationControl:
                 return False
             return True
 
-        for _ in range(tries):
-            if move_left():
-                break
+        #for _ in range(tries):
+        #    if move_left():
+        #        break
 
         self.planning_scene.add_box()
         for _ in range(tries):
