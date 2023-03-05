@@ -63,6 +63,9 @@ class MissionPlanner:
 
         rospy.loginfo("Lowering body to home")
         status = self.move_body_task.home()
+        if status != TaskCodes.SUCCESS:
+            rospy.logerr("UNABLE TO LOWER TORSO")
+            raise NotImplementedError()
 
         status = self.navigate_task.execute(self.room, "bedside")
         if status == TaskCodes.ERROR:
@@ -80,6 +83,9 @@ class MissionPlanner:
 
         rospy.loginfo("Lowering body to home")
         status = self.move_body_task.home()
+        if status != TaskCodes.SUCCESS:
+            rospy.logerr("UNABLE TO LOWER TORSO")
+            raise NotImplementedError()
 
         status = self.navigate_task.execute("home", "default")
         if status == TaskCodes.ERROR:
@@ -89,6 +95,13 @@ class MissionPlanner:
 
     def triage_patient_phase(self):
         # Arrived at patient's bedside
+
+        rospy.loginfo("Raising body to handoff")
+        status = self.move_body_task.handoff()
+        if status != TaskCodes.SUCCESS:
+            rospy.logerr("UNABLE TO RAISE TORSO")
+            raise NotImplementedError()
+
         # get patient input
         rospy.loginfo("Nightingale Mission Planner waiting on user input")
         task_response = self.send_interface_request_task.execute(
@@ -117,6 +130,9 @@ class MissionPlanner:
 
         rospy.loginfo("Lowering body to home")
         status = self.move_body_task.home()
+        if status != TaskCodes.SUCCESS:
+            rospy.logerr("UNABLE TO LOWER TORSO")
+            raise NotImplementedError()
 
         status = self.navigate_task.execute("stock", "default")
         if status == TaskCodes.ERROR:
@@ -171,6 +187,9 @@ class MissionPlanner:
 
         rospy.loginfo("Lowering body to home")
         status = self.move_body_task.home()
+        if status != TaskCodes.SUCCESS:
+            rospy.logerr("UNABLE TO LOWER TORSO")
+            raise NotImplementedError()
 
         status = self.navigate_task.execute(self.room, "bedside")
         if status == TaskCodes.ERROR:
@@ -184,6 +203,9 @@ class MissionPlanner:
 
         rospy.loginfo("Raising body to handoff")
         status = self.move_body_task.handoff()
+        if status != TaskCodes.SUCCESS:
+            rospy.logerr("UNABLE TO RAISE TORSO")
+            raise NotImplementedError()
 
         rospy.sleep(2.5)
 
@@ -200,10 +222,11 @@ class MissionPlanner:
         #        if self.move_arm_task.witihin_workspace(bin_goal_pt): break
         #        rospy.logerr(f"Closer point still outside of workspace, trying even closer point {bin_goal_pt}")
         # rospy.loginfo(f"node returns {pose_result}")
-        # if unable to find patient pose place bin at predetermined position
-        # could also abort and go home instead but this decision complexity
-        # is likely not within current scope
-        # show arm movement and get input to start
+        status, pose_result = self.estimate_pose_task.execute("body")
+        bin_goal_pt = pose_result.bin_goal.point
+
+        rospy.loginfo(f"node returns {pose_result}")
+
         task_response = self.send_interface_request_task.execute(
             RobotStatus.BEDSIDE_DELIVER
         )
@@ -211,14 +234,15 @@ class MissionPlanner:
         # extend arm
         rospy.loginfo("Nightingale Mission Planner extending arm for handoff")
 
-        # UNCOMMENT FOR POSE GOAL
-        # if status != TaskCodes.SUCCESS:
-        #    rospy.logwarn("UNABLE TO FIND POSE. FALLING BACK TO SAFE HANDOFF POSITION")
-        #    status = self.move_arm_task.extend_restock()
-        # else:
-        #     status = self.move_arm_task.extend_handoff(bin_goal_pt)
-        # if status != TaskCodes.SUCCESS:
-        if self.move_arm_task.extend_restock() != TaskCodes.SUCCESS:
+        if status != TaskCodes.SUCCESS or not self.move_arm_task.within_workspace(
+            bin_goal_pt
+        ):
+            rospy.logwarn("UNABLE TO FIND POSE. FALLING BACK TO SAFE HANDOFF POSITION")
+            status = self.move_arm_task.extend_restock()
+        else:
+            status = self.move_arm_task.extend_handoff(bin_goal_pt)
+
+        if status != TaskCodes.SUCCESS:
             rospy.logerr("Nightingale Mission Planner failed to extend arm for handoff")
             raise NotImplementedError()
         rospy.loginfo("Nightingale Mission Planner extended arm for handoff")
@@ -238,9 +262,6 @@ class MissionPlanner:
             raise NotImplementedError()
         rospy.loginfo("Nightingale Mission Planner retracted arm after handoff")
 
-        rospy.loginfo("Lowering body to home")
-        status = self.move_body_task.home()
-
         # when done automatically goes back to triage patient
         self.phases.put(self.triage_patient_phase)
         return PhaseStatus.PHASE_COMPLETE
@@ -251,9 +272,6 @@ class MissionPlanner:
 
         # Update idle screen
         task_response = self.send_interface_request_task.execute(RobotStatus.IDLE_HOME)
-
-        # move arms to home position?
-        # add a block to check arm status first before interpreting input
 
         if task_response == TaskCodes.ERROR:
             raise NotImplementedError()
