@@ -39,7 +39,7 @@ class RetractArmScreen:
             title="Nightingale Action Center",
             content=layout,
             size_hint=(None, None),
-            size=(500, 300),
+            size=(800, 300),
             pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": cfg.SCREEN_Y_CENTER},
         )
         popup.open()

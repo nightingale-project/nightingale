@@ -41,14 +41,14 @@ class ExtendArmScreen:
             valign="center",
             halign="center",
         )
->>>>>>> 65606759cae8faa1320c8b00a336cf9912634740
+
         layout.add_widget(popupLabel)
         # Instantiate the modal popup and display
         popup = Popup(
             title="Nightingale Action Center",
             content=layout,
             size_hint=(None, None),
-            size=(500, 300),
+            size=(800, 300),
             pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": cfg.SCREEN_Y_CENTER},
         )
 
