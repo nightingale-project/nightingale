@@ -6,21 +6,21 @@ from kivymd.uix.button import MDRectangleFlatButton
 from screens.screen_config import ScreenConfig as cfg
 from selenium import webdriver
 
-driver = None
-
 
 class VideoCallScreen:
+    driver = None
+
     def exit_call(self, button_data):
         button_data.parent.manager.transition = NoTransition()
         self.screen_stack.append(button_data.parent.manager.current)
-        driver.quit()
+        self.driver.quit()
         button_data.parent.manager.current = cfg.HUB_SCREEN_NAME
 
     def start_call(self, button_data):
-        driver = webdriver.Firefox()
-        driver.get("https://meet.google.com/jfw-cdmy-hum")
-        driver.set_window_size(400, 600)
-        driver.set_window_position(300, 20, windowHandle="current")
+        self.driver = webdriver.Chrome("C:\chromedriver.exe")
+        self.driver.get("https://meet.google.com/jfw-cdmy-hum")
+        self.driver.set_window_size(900, 600)
+        self.driver.set_window_position(500, 10, windowHandle="current")
 
     def video_call_build(self):
         screen = Screen(name=cfg.VIDEO_CALL_SCREEN_NAME)
