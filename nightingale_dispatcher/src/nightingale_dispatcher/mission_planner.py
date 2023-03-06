@@ -6,6 +6,7 @@ import rospy
 import actionlib
 from actionlib_msgs.msg import GoalStatus
 from std_msgs.msg import String
+from std_srvs.srv import Empty
 from nightingale_msgs.msg import MissionPlanAction, MissionPlanGoal
 from geometry_msgs.msg import Point
 from nightingale_dispatcher.navigate_task import NavigateTask
@@ -26,6 +27,14 @@ class PhaseStatus(Enum):
 class MissionPlanner:
     def __init__(self):
         rospy.init_node("mission_planner_node")
+
+        rospy.loginfo("Waiting to get octomap service")
+        rospy.wait_for_service("/clear_octomap")
+        rospy.loginfo("Got octomap service")
+        self.clear_octomap = rospy.ServiceProxy("/clear_octomap", Empty)
+        rospy.loginfo("Clearing octomap")
+        self.clear_octomap()
+        rospy.loginfo("Cleared octomap")
 
         self.estop_sub = rospy.Subscriber(
             BridgeConfig.USER_INPUT_TOPIC, String, self.estop_cb
@@ -96,6 +105,8 @@ class MissionPlanner:
     def triage_patient_phase(self):
         # Arrived at patient's bedside
 
+        self.clear_octomap()
+
         rospy.loginfo("Raising body to handoff")
         status = self.move_body_task.handoff()
         if status != TaskCodes.SUCCESS:
@@ -143,6 +154,7 @@ class MissionPlanner:
     def get_items_phase(self):
         rospy.loginfo("Nightingale Mission Planner getting items")
         # Arrived at stock area
+        self.clear_octomap()
 
         # arm extend stuff
         rospy.loginfo("Nightingale Mission Planner extending arm for stocking")
@@ -200,6 +212,7 @@ class MissionPlanner:
     def handoff_items_phase(self):
         rospy.loginfo("Nightingale Mission Planner starting to hand items")
         # Arrived at patient's bedside
+        self.clear_octomap()
 
         rospy.loginfo("Raising body to handoff")
         status = self.move_body_task.handoff()
