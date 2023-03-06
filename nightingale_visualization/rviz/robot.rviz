@@ -6,7 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /TF1/Frames1
-        - /Navigation1
+        - /Sensing1/PointCloud21
       Splitter Ratio: 0.5952379703521729
     Tree Height: 787
   - Class: rviz/Selection
@@ -75,30 +75,6 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        camera_color_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_color_optical_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_depth_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_depth_optical_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_left_ir_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_left_ir_optical_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
         camera_link:
           Alpha: 1
           Show Axes: false
@@ -109,14 +85,6 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        camera_right_ir_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_right_ir_optical_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
         front_laser_link:
           Alpha: 1
           Show Axes: false
@@ -252,6 +220,26 @@ Visualization Manager:
           Show Trail: false
           Value: true
         right_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_bin:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_bin_clamp_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_bin_clamp_2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_bin_handle:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -444,9 +432,9 @@ Visualization Manager:
           Channel Name: intensity
           Class: rviz/PointCloud2
           Color: 255; 255; 255
-          Color Transformer: Intensity
+          Color Transformer: RGB8
           Decay Time: 0
-          Enabled: false
+          Enabled: true
           Invert Rainbow: false
           Max Color: 255; 255; 255
           Min Color: 0; 0; 0
@@ -457,11 +445,11 @@ Visualization Manager:
           Size (Pixels): 3
           Size (m): 0.009999999776482582
           Style: Flat Squares
-          Topic: /kinect2/sd/points
+          Topic: /camera/depth/color/points
           Unreliable: false
           Use Fixed Frame: true
           Use rainbow: true
-          Value: false
+          Value: true
       Enabled: true
       Name: Sensing
     - Class: rviz/Group
@@ -700,6 +688,17 @@ Visualization Manager:
         Show Robot Visual: true
       Value: false
       Velocity_Scaling_Factor: 0.1
+    - Alpha: 1
+      Class: rviz/PointStamped
+      Color: 204; 41; 204
+      Enabled: true
+      History Length: 5
+      Name: PointStamped
+      Queue Size: 10
+      Radius: 0.05000000074505806
+      Topic: /nightingale_perception/bin_goal_viz
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -726,7 +725,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 112.1447982788086
+      Distance: 24.162330627441406
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -734,17 +733,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 3.5188400745391846
-        Y: -3.3330399990081787
-        Z: -0.45833900570869446
+        X: 0.9316026568412781
+        Y: 0.7418577671051025
+        Z: 0.38736048340797424
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.4948011636734009
+      Pitch: 0.5898008346557617
       Target Frame: <Fixed Frame>
-      Yaw: 2.178582191467285
+      Yaw: 4.328623294830322
     Saved: ~
 Window Geometry:
   Displays:
