@@ -18,7 +18,6 @@ from moveit_action_handlers.msg import (
     MoveToPoseMoveItGoal,
     PoseStamped,
 )
-from geometry_msgs.msg import Pose
 
 from nightingale_msgs.srv import (
     RobotConfigurationLookup,
