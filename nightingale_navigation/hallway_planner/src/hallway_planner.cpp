@@ -23,9 +23,10 @@ bool HallwayPlanner::makePlan(const geometry_msgs::PoseStamped &start,
       ROS_ERROR("HallwayPlanner could not makeplan");
       return false;
     }
-    bias_path(plan);
+    std::vector<geometry_msgs::PoseStamped> biased_plan = plan;
+    bias_path(biased_plan);
     nav_msgs::Path gui_path;
-    gui_path.header.frame_id = plan.at(0).header.frame_id;
+    gui_path.header.frame_id = biased_plan.at(0).header.frame_id;
     gui_path.header.stamp = ros::Time::now();
     gui_path.poses = plan;
     biased_plan_pub_.publish(gui_path);

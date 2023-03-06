@@ -6,8 +6,8 @@ robot_base_frame:           base_link
 transform_tolerance:        0.5
 
 # ---Vector footprint (Meters):---
-footprint: [[0.39,0.3],[0.39,-0.3],[-0.39,-0.3],[-0.39,0.3]]
-#footprint: [[0.87,0.52],[0.87,-0.4],[-0.56,-0.4],[-0.56,0.52]]
+#footprint: [[0.39,0.3],[0.39,-0.3],[-0.39,-0.3],[-0.39,0.3]]
+footprint: [[0.87,0.52],[0.87,-0.4],[-0.56,-0.4],[-0.56,0.52]]
 
 ### Costmap definitions ###
 update_frequency: 8.0 # laserscans are 15 Hz. Be conservative
