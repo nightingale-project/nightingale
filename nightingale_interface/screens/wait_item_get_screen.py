@@ -2,6 +2,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.screenmanager import NoTransition
 from kivy.uix.video import Video
 from kivy.uix.button import Button
+from kivy.uix.label import Label
 
 from kivymd.uix.button import MDRectangleFlatButton
 from screens.screen_config import ScreenConfig as cfg
@@ -21,15 +22,15 @@ class WaitItemGetScreen:
         screen = Screen(name=cfg.WAIT_ITEM_GET_SCREEN_NAME)
 
         # estop button
-        screen.add_widget(
-            Button(
-                background_normal="images/stop.png",
-                size_hint_x=cfg.ESTOP_XHINT,
-                size_hint_y=cfg.ESTOP_YHINT,
-                pos_hint={"center_x": cfg.ESTOP_XPOS, "center_y": cfg.ESTOP_YPOS},
-                on_release=self.estop,
-            )
-        )
+        # screen.add_widget(
+        #     Button(
+        #         background_normal="images/stop.png",
+        #         size_hint_x=cfg.ESTOP_XHINT,
+        #         size_hint_y=cfg.ESTOP_YHINT,
+        #         pos_hint={"center_x": cfg.ESTOP_XPOS, "center_y": cfg.ESTOP_YPOS},
+        #         on_release=self.estop,
+        #     )
+        # )
 
         # go to screen to retract arm
         screen.add_widget(
@@ -55,6 +56,17 @@ class WaitItemGetScreen:
                     "center_y": cfg.VIDEO_PLAYER_YPOS,
                 },
             )
+        )
+
+        screen.add_widget(
+            Label(
+                text="Please take items",
+                pos_hint={
+                    "center_x": cfg.VIDEO_PLAYER_XPOS,
+                    "center_y": 0.9,
+                },
+                font_size="60dp",
+            ),
         )
 
         return screen

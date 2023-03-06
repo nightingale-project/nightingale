@@ -36,16 +36,22 @@ class ExtendArmScreen:
 
         # popup feedback
         layout = GridLayout(cols=1, padding=10)
-        popupLabel = Label(text="Extending arm!\nPlease wait until arm is extended")
+        popupLabel = Label(text="Extending arm!\nPlease wait until arm is extended",
+            font_size="50dp",
+            valign="center",
+            halign="center",
+        )
+>>>>>>> 65606759cae8faa1320c8b00a336cf9912634740
         layout.add_widget(popupLabel)
         # Instantiate the modal popup and display
         popup = Popup(
             title="Nightingale Action Center",
             content=layout,
             size_hint=(None, None),
-            size=(300, 100),
-            pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.9},
+            size=(500, 300),
+            pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": cfg.SCREEN_Y_CENTER},
         )
+
         popup.open()
         # Schedule pop up auto dismiss for 2 seconds
         Clock.schedule_once(popup.dismiss, 2)
@@ -54,15 +60,15 @@ class ExtendArmScreen:
         screen = Screen(name=cfg.EXTEND_ARM_SCREEN_NAME)
 
         # estop button
-        screen.add_widget(
-            Button(
-                background_normal="images/stop.png",
-                size_hint_x=cfg.ESTOP_XHINT,
-                size_hint_y=cfg.ESTOP_YHINT,
-                pos_hint={"center_x": cfg.ESTOP_XPOS, "center_y": cfg.ESTOP_YPOS},
-                on_release=self.estop,
-            )
-        )
+        # screen.add_widget(
+        #     Button(
+        #         background_normal="images/stop.png",
+        #         size_hint_x=cfg.ESTOP_XHINT,
+        #         size_hint_y=cfg.ESTOP_YHINT,
+        #         pos_hint={"center_x": cfg.ESTOP_XPOS, "center_y": cfg.ESTOP_YPOS},
+        #         on_release=self.estop,
+        #     )
+        # )
 
         # retract arm
         # screen.add_widget(
@@ -78,7 +84,7 @@ class ExtendArmScreen:
         # start extend arm
         screen.add_widget(
             MDRectangleFlatButton(
-                text="Start",
+                text="Start arm extend",
                 font_style="H4",
                 pos_hint={"center_x": 0.85, "center_y": 0.15},
                 size_hint=(cfg.SHORT_RECT_WIDTH, cfg.SHORT_RECT_HEIGHT),

@@ -53,15 +53,20 @@ class ConfirmationScreen:
 
         # popup feedback for yes selection. Only for actual ROS commands
         layout = GridLayout(cols=1, padding=10)
-        popupLabel = Label(text="Selection received! Tap to dismiss")
+        popupLabel = Label(
+            text="Selection received! \nTap to dismiss",
+            font_size="50dp",
+            valign="center",
+            halign="center",
+        )
         layout.add_widget(popupLabel)
         # Instantiate the modal popup and display
         popup = Popup(
             title="Nightingale Action Center",
             content=layout,
             size_hint=(None, None),
-            size=(300, 100),
-            pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": 0.9},
+            size=(500, 300),
+            pos_hint={"center_x": cfg.SCREEN_X_CENTER, "center_y": cfg.SCREEN_Y_CENTER},
         )
         popup.open()
         # Schedule pop up auto dismiss for 2 seconds
@@ -103,15 +108,15 @@ class ConfirmationScreen:
         screen = Screen(name=cfg.CONFIRMATION_SCREEN_NAME)
 
         # estop button
-        screen.add_widget(
-            Button(
-                background_normal="images/stop.png",
-                size_hint_x=cfg.ESTOP_XHINT,
-                size_hint_y=cfg.ESTOP_YHINT,
-                pos_hint={"center_x": cfg.ESTOP_XPOS, "center_y": cfg.ESTOP_YPOS},
-                on_release=self.estop,
-            )
-        )
+        # screen.add_widget(
+        #     Button(
+        #         background_normal="images/stop.png",
+        #         size_hint_x=cfg.ESTOP_XHINT,
+        #         size_hint_y=cfg.ESTOP_YHINT,
+        #         pos_hint={"center_x": cfg.ESTOP_XPOS, "center_y": cfg.ESTOP_YPOS},
+        #         on_release=self.estop,
+        #     )
+        # )
 
         # add label asking to confirm
         confirmation_label = MDLabel(
