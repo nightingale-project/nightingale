@@ -251,7 +251,10 @@ class MissionPlanner:
             bin_goal_pt
         ):
             rospy.logwarn("UNABLE TO FIND POSE. FALLING BACK TO SAFE HANDOFF POSITION")
-            status = self.move_arm_task.extend_restock()
+            bin_goal_pt.x = 0.8
+            bin_goal_pt.y = -0.1
+            bin_goal_pt.z = 1.3
+            status = self.move_arm_task.extend_handoff(bin_goal_pt)
         else:
             status = self.move_arm_task.extend_handoff(bin_goal_pt)
 
