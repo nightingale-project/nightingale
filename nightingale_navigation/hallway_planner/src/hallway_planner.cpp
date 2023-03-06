@@ -28,7 +28,7 @@ bool HallwayPlanner::makePlan(const geometry_msgs::PoseStamped &start,
     nav_msgs::Path gui_path;
     gui_path.header.frame_id = biased_plan.at(0).header.frame_id;
     gui_path.header.stamp = ros::Time::now();
-    gui_path.poses = plan;
+    gui_path.poses = biased_plan;
     biased_plan_pub_.publish(gui_path);
     return true;
   }
