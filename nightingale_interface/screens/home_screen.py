@@ -67,15 +67,15 @@ class HomeScreen:
         screen = Screen(name=cfg.HUB_SCREEN_NAME)
 
         # estop button
-        screen.add_widget(
-            Button(
-                background_normal="images/stop.png",
-                size_hint_x=cfg.ESTOP_XHINT,
-                size_hint_y=cfg.ESTOP_YHINT,
-                pos_hint={"center_x": cfg.ESTOP_XPOS, "center_y": cfg.ESTOP_YPOS},
-                on_release=self.estop,
-            )
-        )
+        # screen.add_widget(
+        #    Button(
+        #        background_normal="images/stop.png",
+        #        size_hint_x=cfg.ESTOP_XHINT,
+        #        size_hint_y=cfg.ESTOP_YHINT,
+        #        pos_hint={"center_x": cfg.ESTOP_XPOS, "center_y": cfg.ESTOP_YPOS},
+        #        on_release=self.estop,
+        #    )
+        # )
 
         screen.add_widget(
             MDRectangleFlatButton(
@@ -110,18 +110,18 @@ class HomeScreen:
         #    )
         # )
 
-        # screen.add_widget(
-        #    MDRectangleFlatButton(
-        #        text="Chat with Nurse",
-        #        font_style="H4",
-        #        pos_hint={
-        #            "center_x": cfg.SCREEN_X_CENTER,
-        #            "center_y": cfg.SCREEN_Y_CENTER,
-        #        },
-        #        size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
-        #        on_release=self.to_video_call,
-        #    )
-        # )
+        screen.add_widget(
+            MDRectangleFlatButton(
+                text="Chat with Nurse",
+                font_style="H4",
+                pos_hint={
+                    "center_x": cfg.SCREEN_X_CENTER,
+                    "center_y": 0.25,
+                },
+                size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
+                on_release=self.to_video_call,
+            )
+        )
 
         # screen.add_widget(
         #    MDRectangleFlatButton(
