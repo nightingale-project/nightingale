@@ -162,9 +162,11 @@ class RoomRunnerNode(object):
             y_cur = trans.transform.translation.y
             x = goal_pose.pose.position.x
             y = goal_pose.pose.position.y
-            target = np.array([x,y])
-            cur = np.array([x_cur,y_cur])
-            result.final_distance_to_goal = euclidean_distance = np.linalg.norm(target - cur)
+            target = np.array([x, y])
+            cur = np.array([x_cur, y_cur])
+            result.final_distance_to_goal = euclidean_distance = np.linalg.norm(
+                target - cur
+            )
         except (
             tf2_ros.LookupException,
             tf2_ros.ConnectivityException,

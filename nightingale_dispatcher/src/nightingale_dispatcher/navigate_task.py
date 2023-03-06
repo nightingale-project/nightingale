@@ -30,8 +30,10 @@ class NavigateTask(Task):
             self.action_client.send_goal(goal)
             self.action_client.wait_for_result()
             if self.action_client.get_result().final_distance_to_goal < small_distance:
-                return TaskCodes().SUCCESS
-            rospy.logerr(f"RoomRunner failed. The final distance {self.action_client.get_result().final_distance_to_goal} is high. Trying {tries-i-1} more times.")
+                return TaskCodes.SUCCESS
+            rospy.logerr(
+                f"RoomRunner failed. The final distance {self.action_client.get_result().final_distance_to_goal} is high. Trying {tries-i-1} more times."
+            )
             rospy.logerr(f"Give the robot more space")
             rospy.sleep(5)
-        return TaskCodes().ERROR
+        return TaskCodes.ERROR
