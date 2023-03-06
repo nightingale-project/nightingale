@@ -623,6 +623,12 @@ class ManipulationControl:
         return False
 
     def extend_handoff(self, goal_point: Point, tries=3):
+        if goal_point is None:
+            goal_point = Point()
+            goal_point.x = 0.8
+            goal_point.y = -0.1
+            goal_point.z = 1.3
+
         def extend_handoff_internal():
             return self.right_cartesian.cmd_position(goal_point, ref_link="base_link")
 
