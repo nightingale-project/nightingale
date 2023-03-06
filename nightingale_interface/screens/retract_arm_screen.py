@@ -46,15 +46,15 @@ class RetractArmScreen:
         screen = Screen(name=cfg.RETRACT_ARM_SCREEN_NAME)
 
         # estop button
-        screen.add_widget(
-            Button(
-                background_normal="images/stop.png",
-                size_hint_x=cfg.ESTOP_XHINT,
-                size_hint_y=cfg.ESTOP_YHINT,
-                pos_hint={"center_x": cfg.ESTOP_XPOS, "center_y": cfg.ESTOP_YPOS},
-                on_release=self.estop,
-            )
-        )
+        # screen.add_widget(
+        #     Button(
+        #         background_normal="images/stop.png",
+        #         size_hint_x=cfg.ESTOP_XHINT,
+        #         size_hint_y=cfg.ESTOP_YHINT,
+        #         pos_hint={"center_x": cfg.ESTOP_XPOS, "center_y": cfg.ESTOP_YPOS},
+        #         on_release=self.estop,
+        #     )
+        # )
 
         # start extend arm
         screen.add_widget(
