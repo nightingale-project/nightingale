@@ -9,6 +9,7 @@ string sublocation
 # so its a little hard to determine what could've
 # gone wrong with the action and return a useful error code
 # could be improved.
+float64 final_distance_to_goal
 ---
 # Feedback is euclidean distance to goal
 # current phase describes is a descriptive string

@@ -156,6 +156,25 @@ class RoomRunnerNode(object):
 
         # move base result is empty so no need to check
         result = RoomRunnerResult()
+        try:
+            trans = self.tf_buffer.lookup_transform("map", "base_link", rospy.Time(0))
+            x_cur = trans.transform.translation.x
+            y_cur = trans.transform.translation.y
+            x = goal_pose.pose.position.x
+            y = goal_pose.pose.position.y
+            target = np.array([x,y])
+            cur = np.array([x_cur,y_cur])
+            result.final_distance_to_goal = euclidean_distance = np.linalg.norm(target - cur)
+        except (
+            tf2_ros.LookupException,
+            tf2_ros.ConnectivityException,
+            tf2_ros.ExtrapolationException,
+        ):
+            rospy.logerr(
+                "Failed to look up transform from map to base_link",
+                logger_name=self.logger_name,
+            )
+
         if self.client.get_state() == GoalStatus.SUCCEEDED:
             rospy.loginfo(
                 "RoomRunner Completed Successfully :)", logger_name=self.logger_name
