@@ -241,8 +241,17 @@ class MissionPlanner:
             status = self.move_arm_task.extend_handoff(bin_goal_pt)
 
         if status != TaskCodes.SUCCESS:
-            rospy.logerr("Nightingale Mission Planner failed to extend arm for handoff")
-            raise NotImplementedError()
+            rospy.logerr(
+                "Nightingale Mission Planner failed to extend arm for handoff\n"
+                "Trying default point [0.8, -0.1, 1.3]"
+            )
+            status = self.move_arm_task.extend_handoff(None)
+            if status != TaskCodes.SUCCESS:
+                rospy.logerr(
+                    "Nightingale Mission Planner failed to extend arm for handoff"
+                )
+                raise NotImplementedError
+
         rospy.loginfo("Nightingale Mission Planner extended arm for handoff")
 
         # arm extended
