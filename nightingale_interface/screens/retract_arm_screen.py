@@ -28,7 +28,7 @@ class RetractArmScreen:
 
         # popup feedback
         layout = GridLayout(cols=1, padding=10)
-        popupLabel = Label(text="Retracting arm! Tap to dismiss")
+        popupLabel = Label(text="Retracting arm!\nPlease wait until arm is retracted")
         layout.add_widget(popupLabel)
         # Instantiate the modal popup and display
         popup = Popup(
