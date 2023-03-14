@@ -5,7 +5,6 @@ import tf2_ros
 import tf_conversions
 import numpy as np
 
-from nightingale_msgs.msg import Payload
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Bool
 from urdf_parser_py.urdf import Robot
@@ -18,9 +17,13 @@ class SensorCalibration:
 
         self.record_func = record_func
 
-        self.record_sub = rospy.Subscriber("analysis/record", Bool, self.record)
-        self.clear_sub = rospy.Subscriber("analysis/clear", Bool, self.clear)
-        self.analyze_sub = rospy.Subscriber("analysis/analyze", Bool, self.analyze)
+        self.record_sub = rospy.Subscriber(
+            "torque_calibration/record", Bool, self.record
+        )
+        self.clear_sub = rospy.Subscriber("torque_calibration/clear", Bool, self.clear)
+        self.analyze_sub = rospy.Subscriber(
+            "torque_calibration/analyze", Bool, self.analyze
+        )
 
         self.weights = None
 
@@ -30,38 +33,42 @@ class SensorCalibration:
         self.xdata.append(list(x))
         self.ydata.append(list(y))
 
-        rospy.loginfo(f"Recorded:\nx={self.xdata}\ny={self.ydata}")
-
     def clear(self, msg):
         self.xdata = []
         self.ydata = []
-
-        rospy.loginfo("Cleared")
 
     def analyze(self, msg):
         x = np.array(self.xdata)
         y = np.array(self.ydata)
         N, M = x.shape
 
-        rospy.loginfo(f"Analyzed:\nx={x}\ny={y}")
-
         weights = np.zeros((7, 2))
+        error_deviations = np.zeros((7, N))
 
         for idx in range(M):
-            X = np.stack((x[:, idx], np.ones(N))).T
-            Y = y[:, idx]
+            xi = x[:, idx]
+            yi = y[:, idx]
 
-            rospy.loginfo(f"{X} {Y}")
-            weights[idx, :] = np.linalg.inv(X.T @ X) @ X.T @ Y
+            Xi = np.stack((xi, np.ones(N))).T
+            Yi = np.copy(yi)
 
-        rospy.loginfo(f"weights: {weights}")
+            Wi = np.linalg.inv(Xi.T @ Xi) @ Xi.T @ Yi
 
-        self.weights = weights
+            weights[idx, :] = Wi
 
-        np.savez("/home/lyndon/Documents/mte_4812/data.npz", x=x, y=y)
+            err = yi - Xi @ Wi
+            error_deviations[idx, :] = err - np.mean(err)
+        error_covariance = error_deviations @ error_deviations.T / (N - 1)
+
+        rospy.loginfo(
+            f"Torque weights T_scaled[i] = w[i, 0] * T_raw + w[i, 1]\n{weights}"
+        )
+        rospy.loginfo(f"Error model covariance\n{error_covariance}")
+
+        return (weights, np.linalg.inv(error_covariance))
 
 
-class PayloadEstimator:
+class CollisionDetector:
     GRAVITATIONAL_ACCELERATION = 9.8  # [m/sec^2]
     PAYLOAD_DETECTION_THRESHOLD = 50  # std dev
 
@@ -118,67 +125,67 @@ class PayloadEstimator:
             "left": np.array(
                 [
                     [
-                        5.68075404e01,
-                        -1.24970088e01,
-                        2.49631265e00,
-                        3.24242928e00,
-                        1.80881417e01,
-                        -5.92326271e-01,
-                        -9.34355742e-15,
+                        1.08250411e06,
+                        -1.35973568e06,
+                        -1.08006283e07,
+                        -1.96282654e06,
+                        -1.92171379e06,
+                        1.12331074e08,
+                        -6.00798205e21,
                     ],
                     [
-                        -1.24970088e01,
-                        2.96429465e01,
-                        -1.58984130e-01,
-                        -2.08735398e00,
-                        -8.15410739e00,
-                        1.20005465e-01,
-                        -3.14085321e-15,
+                        -1.35973568e06,
+                        1.70796697e06,
+                        1.35666927e07,
+                        2.46551045e06,
+                        2.41386878e06,
+                        -1.41099305e08,
+                        7.54663934e21,
                     ],
                     [
-                        2.49631265e00,
-                        -1.58984130e-01,
-                        5.55697289e00,
-                        7.44006773e-01,
-                        5.52154569e-01,
-                        1.74704528e-01,
-                        -6.65731777e-15,
+                        -1.08006283e07,
+                        1.35666927e07,
+                        1.07762715e08,
+                        1.95839973e07,
+                        1.91737995e07,
+                        -1.12077752e09,
+                        5.99443328e22,
                     ],
                     [
-                        3.24242928e00,
-                        -2.08735398e00,
-                        7.44006773e-01,
-                        9.03829531e-01,
-                        4.42269859e-01,
-                        2.41429762e-02,
-                        -2.66232176e-16,
+                        -1.96282654e06,
+                        2.46551045e06,
+                        1.95839973e07,
+                        3.55905354e06,
+                        3.48450479e06,
+                        -2.03681809e08,
+                        1.08938389e22,
                     ],
                     [
-                        1.80881417e01,
-                        -8.15410739e00,
-                        5.52154569e-01,
-                        4.42269859e-01,
-                        1.10720364e01,
-                        -1.64741943e-01,
-                        -2.65425581e-15,
+                        -1.92171379e06,
+                        2.41386878e06,
+                        1.91737995e07,
+                        3.48450479e06,
+                        3.41151965e06,
+                        -1.99415573e08,
+                        1.06656613e22,
                     ],
                     [
-                        -5.92326271e-01,
-                        1.20005465e-01,
-                        1.74704528e-01,
-                        2.41429762e-02,
-                        -1.64741943e-01,
-                        2.80167501e-02,
-                        1.20682787e-16,
+                        1.12331074e08,
+                        -1.41099305e08,
+                        -1.12077752e09,
+                        -2.03681809e08,
+                        -1.99415573e08,
+                        1.16565572e10,
+                        -6.23446249e23,
                     ],
                     [
-                        -9.34355742e-15,
-                        -3.14085321e-15,
-                        -6.65731777e-15,
-                        -2.66232176e-16,
-                        -2.65425581e-15,
-                        1.20682787e-16,
-                        1.41876623e-29,
+                        -6.00798205e21,
+                        7.54663934e21,
+                        5.99443328e22,
+                        1.08938389e22,
+                        1.06656613e22,
+                        -6.23446249e23,
+                        3.33447709e37,
                     ],
                 ]
             ),
@@ -187,24 +194,16 @@ class PayloadEstimator:
         self.iter = 0
         self.iter_decimation = 10
 
-        self.forces = np.zeros(6)
-        self.last_forces = np.zeros(6)
-        self.filter_coeff = 1
-
-        self.mass_num = 100
-        self.mass_idx = 0
-        self.masses = np.zeros(self.mass_num)
-
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
         self.lookup_gravity_tf()
 
-        self.analysis = SensorCalibration(self.calibration_record_cb)
+        self.torque_calibration = SensorCalibration(self.calibration_record_cb)
         self.measured_torques = np.zeros(7)
         self.computed_torques = np.zeros(7)
 
-        self.payload_pub = rospy.Publisher(
-            f"/nightingale/payload", Payload, queue_size=10
+        self.collision_pub = rospy.Publisher(
+            f"/nightingale/collision", Bool, queue_size=10
         )
 
         self.joint_state_sub = rospy.Subscriber(
@@ -329,36 +328,20 @@ class PayloadEstimator:
         self.gravity_forces = gravity_forces
 
     def compare_torques(self, torques):
-        computed_torques = self.jacobian[:3, :].T @ self.gravity_forces[:3]
-        error = np.array(torques) - computed_torques
-        error_norm = np.sqrt(np.sum(np.square(error)))
-
-        # rospy.loginfo(
-        #     f"{np.round(torques, 2)} {np.round(computed_torques)} {np.round(error_norm)}"
-        # )
-
-        # if self.analysis.weights is not None:
-        #     calibrated_torques = (
-        #         np.array(torques) * self.analysis.weights[:, 0]
-        #         + self.analysis.weights[:, 1]
-        #     )
-        #     rospy.loginfo(
-        #         f"{np.round(calibrated_torques, 2)} {np.round(computed_torques)}"
-        #     )
-
         self.measured_torques = torques
         self.computed_torques = self.jacobian[:3, :].T @ self.gravity_forces[:3]
 
         error = (self.measured_torques - self.computed_torques).reshape((self.dof, 1))
         error_distance = np.sqrt(
-            error[:6, 0].T
-            @ np.linalg.inv(self.error_models[self.arm_side][:6, :6])
-            @ error[:6, 0]
+            error[:6, 0].T @ self.error_models[self.arm_side][:6, :6] @ error[:6, 0]
         )
-        if np.any(error_distance > self.PAYLOAD_DETECTION_THRESHOLD):
+
+        collision_detected = np.any(error_distance > self.PAYLOAD_DETECTION_THRESHOLD)
+        self.collision_pub.publish(Bool(collision_detected))
+        if collision_detected:
             rospy.logwarn(f"COLLISION_DETECTED: {error_distance}")
 
 
 if __name__ == "__main__":
-    payload_estimator = PayloadEstimator("left")
+    collision_detector = CollisionDetector("left")
     rospy.spin()
