@@ -70,10 +70,10 @@ class SensorCalibration:
 
 class CollisionDetector:
     GRAVITATIONAL_ACCELERATION = 9.8  # [m/sec^2]
-    PAYLOAD_DETECTION_THRESHOLD = 50  # std dev
+    COLLISION_DETECTION_THRESHOLD = 50  # std dev
 
     def __init__(self, arm_side):
-        rospy.init_node("payload_estimator_node")
+        rospy.init_node("collision_detector_node")
 
         self.robot = Robot.from_parameter_server()
 
@@ -336,10 +336,10 @@ class CollisionDetector:
             error[:6, 0].T @ self.error_models[self.arm_side][:6, :6] @ error[:6, 0]
         )
 
-        collision_detected = np.any(error_distance > self.PAYLOAD_DETECTION_THRESHOLD)
-        self.collision_pub.publish(Bool(collision_detected))
+        collision_detected = np.any(error_distance > self.COLLISION_DETECTION_THRESHOLD)
         if collision_detected:
             rospy.logwarn(f"COLLISION_DETECTED: {error_distance}")
+            self.collision_pub.publish(Bool(collision_detected))
 
 
 if __name__ == "__main__":
