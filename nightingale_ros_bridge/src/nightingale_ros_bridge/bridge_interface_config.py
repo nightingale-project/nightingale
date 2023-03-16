@@ -10,6 +10,7 @@ class RobotStatus:
     ARM_EXTENDED = 6
     RETRACTING_ARM = 7
     ARM_RETRACTED = 8
+    ARM_COLLISION = 9
 
 
 class BridgeConfig:

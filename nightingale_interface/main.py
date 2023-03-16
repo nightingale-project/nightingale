@@ -20,6 +20,9 @@ from functools import partial
 import argparse
 import kivy
 from kivy.config import Config
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+from kivy.uix.gridlayout import GridLayout
 from kivy.clock import Clock
 
 Config.set("graphics", "width", "1280")
@@ -59,19 +62,20 @@ class MainApp(MDApp, ScreenWrapper):
     pending_action = "0"
     payload = ""
 
+    arm_collision = False
+
     def main(self):
         self._other_task = asyncio.ensure_future(self.backend())
-        #self._wd_task = asyncio.ensure_future(self.watchdog_run())
+        # self._wd_task = asyncio.ensure_future(self.watchdog_run())
 
         async def run_wrapper():
             await self.async_run(async_lib="asyncio")
             print("App done")
             self._other_task.cancel()
-            #self._wd_task.cancel()
+            # self._wd_task.cancel()
 
-        #return asyncio.gather(run_wrapper(), self._other_task, self._wd_task)
+        # return asyncio.gather(run_wrapper(), self._other_task, self._wd_task)
         return asyncio.gather(run_wrapper(), self._other_task)
-
 
     # add a task to do after a delay
     def queue(self, task, delay=0, args=None):
@@ -189,12 +193,6 @@ class MainApp(MDApp, ScreenWrapper):
         )
         self.interface_screen_topic.subscribe(self.process_robot_status)
 
-        # subscriber to collision topic
-        self.collision_topic = roslibpy.Topic(
-            self.client, BridgeConfig.ARM_COLLISION_TOPIC, "std_msgs/String"
-        )
-        self.collision_topic.subscribe(self.process_collision_status)
-
     # override
     def call_ros_action(self, action: int, args: dict = {}) -> bool:
         """
@@ -271,6 +269,9 @@ class MainApp(MDApp, ScreenWrapper):
             # show popup or message that arm is retracting
             self.call_ros_action(UserInputs.NO_ROS_ACTION)
             return True
+        elif status == RobotStatus.ARM_COLLISION:
+            self.queue(self.collision_popup_task, 0)
+            return True
 
         else:
             print(f"CODE {status} UNKNOWN")
@@ -289,6 +290,31 @@ class MainApp(MDApp, ScreenWrapper):
         if next_screen is not None and self.get_screen(next_screen):
             self.root.current = next_screen
             self.screen_stack.append(self.root.current)
+
+    def collision_popup_task(self):
+        # popup feedback
+        layout = GridLayout(cols=1, padding=10)
+        popupLabel = Label(
+            text="Collision Detected!",
+            font_size="50dp",
+            valign="center",
+            halign="center",
+        )
+        layout.add_widget(popupLabel)
+        # Instantiate the modal popup and display
+        popup = Popup(
+            title="Nightingale Action Center",
+            content=layout,
+            size_hint=(None, None),
+            size=(800, 300),
+            pos_hint={
+                "center_x": ScreenConfig.SCREEN_X_CENTER,
+                "center_y": ScreenConfig.SCREEN_Y_CENTER,
+            },
+        )
+        popup.open()
+        # Schedule pop up auto dismiss for 2 seconds
+        Clock.schedule_once(popup.dismiss, 2)
 
     def reset_wd(self):
         # reset watchdog to max time
