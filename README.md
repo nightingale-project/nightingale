@@ -1,2 +1,7 @@
-# nightingale
-a set of ROS packages built for a robotic nurse assistant
+# Nightingale
+
+Welcome to the Nightingale project!
+
+Lear about the project at our [website](https://nightingale-project.github.io/)
+
+
