@@ -114,7 +114,15 @@ if __name__ == "__main__":
         ],
     ]
 
-    for joint_posns in right_joint_positions:
+    for iter in range(10):
+        shuffle = np.random.randint(0, 2, len(right_joint_positions[0]))
+        joint_posns = [
+            right_joint_positions[0][idx]
+            if shuffle[idx] > 0
+            else right_joint_positions[1][idx]
+            for idx in range(len(right_joint_positions))
+        ]
+
         manipulation.cmd_right_arm(joint_posns)
         torque_calibration.record()
 
@@ -143,7 +151,15 @@ if __name__ == "__main__":
         ],
     ]
 
-    for joint_posns in left_joint_positions:
+    for iter in range(10):
+        shuffle = np.random.randint(0, 2, len(right_joint_positions[0]))
+        joint_posns = [
+            right_joint_positions[0][idx]
+            if shuffle[idx] > 0
+            else right_joint_positions[1][idx]
+            for idx in range(len(right_joint_positions))
+        ]
+
         manipulation.cmd_left_arm(joint_posns)
         torque_calibration.record()
 
