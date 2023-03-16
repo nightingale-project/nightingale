@@ -14,13 +14,14 @@ class CollisionDetector:
     GRAVITATIONAL_ACCELERATION = 9.8  # [m/sec^2]
     COLLISION_DETECTION_THRESHOLD = 50  # std dev
 
-    def __init__(self, arm_side):
+    def __init__(self, arm_side, box_mass):
         rospy.init_node("collision_detection_node")
 
         self.robot = Robot.from_parameter_server()
 
         self.dof = 7
         self.arm_side = arm_side
+        self.box_mass = box_mass
         self.joint_link_suffixes = [
             "base_link",
             "shoulder_link",
@@ -171,6 +172,10 @@ class CollisionDetector:
         self.measured_torques = self.scale_torques(torques)
         self.computed_torques = self.jacobian[:3, :].T @ self.gravity_forces[:3]
 
+        # Replace right elbow measurement because the sensor is broken
+        if self.arm_side == "right":
+            self.measured_torques[3] = self.computed_torques[3]
+
     def detect_collisions(self):
         error = (self.measured_torques - self.computed_torques).reshape((self.dof, 1))
         error_distance = np.sqrt(
@@ -264,12 +269,16 @@ class CollisionDetector:
 
         for idx in range(self.dof + 1):
             to_link = f"{self.arm_side}_{self.joint_link_suffixes[idx]}"
+
+            if idx == self.dof and self.box_mass is not None:
+                link_mass = self.robot.link_map[to_link].inertial.mass + self.box_mass
+            else:
+                link_mass = self.robot.link_map[to_link].inertial.mass
+
             gravity_forces[:3] += (
-                self.robot.link_map[to_link].inertial.mass
-                * self.GRAVITATIONAL_ACCELERATION
-                * self.gravity_direction
+                link_mass * self.GRAVITATIONAL_ACCELERATION * self.gravity_direction
             )
-            gravity_forces[3:] += self.robot.link_map[to_link].inertial.mass * np.cross(
+            gravity_forces[3:] += link_mass * np.cross(
                 self.gravity_direction, self.translations[idx]
             )
 
@@ -293,5 +302,5 @@ class CollisionDetector:
 
 
 if __name__ == "__main__":
-    collision_detector = CollisionDetector("left")
+    collision_detector = CollisionDetector("right", 1.2)
     rospy.spin()
