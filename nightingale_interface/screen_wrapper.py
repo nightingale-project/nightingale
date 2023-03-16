@@ -12,6 +12,7 @@ from screens.item_fill_screen import ItemFillScreen
 from screens.confirmation_screen import ConfirmationScreen
 from screens.watchdog_screen import WatchdogScreen
 from screens.start_drive_screen import StartDriveScreen
+from screens.symposium_home_screen import SymposiumHomeScreen
 
 from kivy.uix.screenmanager import ScreenManager
 
@@ -31,6 +32,7 @@ class ScreenWrapper(
     ConfirmationScreen,
     WatchdogScreen,
     StartDriveScreen,
+    SymposiumHomeScreen,
 ):
     def get_screen(self, name):
         for i in range(len(self.root.screen_names)):
@@ -53,6 +55,7 @@ class ScreenWrapper(
         confirmationscreen = self.confirmation_build()
         watchdogscreen = self.watchdog_build()
         startdrivescreen = self.start_drive_build()
+        symposiumhomescreen = self.symposium_home_build()
 
         sm = ScreenManager()
         # id's of screens are in the order they are added, facescreen = 0, last is -1
@@ -70,5 +73,6 @@ class ScreenWrapper(
         sm.add_widget(confirmationscreen)
         sm.add_widget(watchdogscreen)
         sm.add_widget(startdrivescreen)
+        sm.add_widget(symposiumhomescreen)
 
         return sm

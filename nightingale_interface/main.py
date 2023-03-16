@@ -59,15 +59,17 @@ class MainApp(MDApp, ScreenWrapper):
 
     def main(self):
         self._other_task = asyncio.ensure_future(self.backend())
-        self._wd_task = asyncio.ensure_future(self.watchdog_run())
+        #self._wd_task = asyncio.ensure_future(self.watchdog_run())
 
         async def run_wrapper():
             await self.async_run(async_lib="asyncio")
             print("App done")
             self._other_task.cancel()
-            self._wd_task.cancel()
+            #self._wd_task.cancel()
 
-        return asyncio.gather(run_wrapper(), self._other_task, self._wd_task)
+        #return asyncio.gather(run_wrapper(), self._other_task, self._wd_task)
+        return asyncio.gather(run_wrapper(), self._other_task)
+
 
     # add a task to do after a delay
     def queue(self, task, delay=0, args=None):
@@ -79,7 +81,7 @@ class MainApp(MDApp, ScreenWrapper):
         self.root.transition = kivy.uix.screenmanager.FadeTransition()
 
         # set the initial screen
-        self.root.current = ScreenConfig.FACE_SCREEN_NAME
+        self.root.current = ScreenConfig.SYMPOSIUM_HOME_SCREEN_NAME
         self.screen_stack.append(self.root.current)
 
         try:
