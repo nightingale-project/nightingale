@@ -39,6 +39,8 @@ class MainApp(MDApp, ScreenWrapper):
     ros_action_topic = None
     interface_screen_topic = None
     estop_topic = None
+    arm_topic = None
+    collision_topic = None
 
     # task queue things
     task_queue = []  # dict of { "task": Int, "delay": Int, "args":""}
@@ -186,6 +188,12 @@ class MainApp(MDApp, ScreenWrapper):
             self.client, BridgeConfig.ROBOT_STATUS_TOPIC, "std_msgs/String"
         )
         self.interface_screen_topic.subscribe(self.process_robot_status)
+
+        # subscriber to collision topic
+        self.collision_topic = roslibpy.Topic(
+            self.client, BridgeConfig.ARM_COLLISION_TOPIC, "std_msgs/String"
+        )
+        self.collision_topic.subscribe(self.process_collision_status)
 
     # override
     def call_ros_action(self, action: int, args: dict = {}) -> bool:
