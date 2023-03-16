@@ -42,8 +42,6 @@ class MainApp(MDApp, ScreenWrapper):
     ros_action_topic = None
     interface_screen_topic = None
     estop_topic = None
-    arm_topic = None
-    collision_topic = None
 
     # task queue things
     task_queue = []  # dict of { "task": Int, "delay": Int, "args":""}
@@ -61,8 +59,6 @@ class MainApp(MDApp, ScreenWrapper):
     current_action = "0"
     pending_action = "0"
     payload = ""
-
-    arm_collision = False
 
     def main(self):
         self._other_task = asyncio.ensure_future(self.backend())

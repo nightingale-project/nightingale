@@ -18,8 +18,6 @@ class BridgeConfig:
     ROBOT_STATUS_TOPIC = "nightingale_ui/robot_status"
     ESTOP_TOPIC = "nightingale_ui/estop_status"
     UPDATE_UI_SERVICE = "nightingale_ui/update_ui_state"
-    EXTEND_ARM_TOPIC = "nightingale_ui/arm_status"
-    ARM_COLLISION_TOPIC = "nightingale_ui/arm_collision"
 
 
 class UserInputs:

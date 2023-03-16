@@ -38,11 +38,11 @@ class SymposiumHomeScreen:
 
         screen.add_widget(
             MDRectangleFlatButton(
-                text="EXTEND ARM",
+                text="Extend arm",
                 font_style="H4",
                 pos_hint={
                     "center_x": cfg.SCREEN_X_CENTER,
-                    "center_y": cfg.SCREEN_Y_CENTER,
+                    "center_y": cfg.SCREEN_Y_CENTER + 0.15,
                 },
                 size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
                 on_release=self.arm_extend,
@@ -50,11 +50,11 @@ class SymposiumHomeScreen:
         )
         screen.add_widget(
             MDRectangleFlatButton(
-                text="RETRACT ARM",
+                text="Retract arm",
                 font_style="H4",
                 pos_hint={
                     "center_x": cfg.SCREEN_X_CENTER,
-                    "center_y": cfg.SCREEN_Y_CENTER - 0.25,
+                    "center_y": cfg.SCREEN_Y_CENTER - 0.15,
                 },
                 size_hint=(cfg.LONG_RECT_WIDTH, cfg.LONG_RECT_HEIGHT),
                 on_release=self.arm_retract,
@@ -71,8 +71,4 @@ class SymposiumHomeScreen:
             )
         )
 
-
         return screen
-
-
-
