@@ -8,7 +8,7 @@ project(nightingale_proprioception)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  geometery_msgs
+  geometry_msgs
   rospy
   std_msgs
   tf2_ros
@@ -71,7 +71,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   geometery_msgs#   std_msgs
+#   geometry_msgs#   std_msgs
 # )
 
 ################################################
@@ -106,7 +106,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES nightingale_proprioception
-#  CATKIN_DEPENDS geometery_msgs rospy std_msgs tf2_ros
+#  CATKIN_DEPENDS geometry_msgs rospy std_msgs tf2_ros
 #  DEPENDS system_lib
 )
 
