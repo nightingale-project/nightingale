@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import rospy
 import tf2_ros
@@ -50,85 +50,161 @@ class CollisionDetector:
         self.gravity_forces = np.zeros(6)
 
         self.weights = {
-            "right": np.zeros((self.dof, 2)),
+            "right": np.array(
+                [
+                    [-2.30926984e00, 6.93681397e00],
+                    [-8.08320947e-01, -1.38377806e01],
+                    [-3.71524878e00, -2.53448633e-02],
+                    [1.00000000e00, 6.88338275e-15],
+                    [-7.18576259e00, -1.72952906e00],
+                    [-6.64805942e00, 1.12613666e01],
+                    [-1.17769116e-15, 1.55629856e-16],
+                ]
+            ),
             "left": np.array(
                 [
-                    [-2.44161661e00, -8.80378258e00],
-                    [-2.11674602e00, -3.00928765e00],
-                    [-3.19820241e00, -3.09657843e00],
-                    [-3.93661567e00, 2.14572217e00],
-                    [-2.28678270e00, -7.84129984e00],
-                    [-7.25424816e00, -6.86924505e-01],
-                    [-2.16260351e-14, 1.31909042e-14],
+                    [-2.49563151e00, -2.37168759e00],
+                    [-1.78462115e00, 3.66522204e00],
+                    [-3.41754670e00, -3.75087480e00],
+                    [-3.91916221e00, 1.68547519e00],
+                    [-3.03531958e00, -6.43691679e00],
+                    [-7.22451467e00, -3.32532619e-01],
+                    [3.77542114e-14, -2.40669758e-14],
                 ]
             ),
         }
         self.error_models = {
-            "right": np.zeros((self.dof, self.dof)),
+            "right": np.array(
+                [
+                    [
+                        1.95109362e01,
+                        1.44005817e01,
+                        -1.45924385e00,
+                        -8.35374824e-15,
+                        -2.96401194e-01,
+                        -2.35777284e-01,
+                        2.25790324e-15,
+                    ],
+                    [
+                        1.44005817e01,
+                        3.24846082e01,
+                        3.66515516e00,
+                        -2.27428444e-14,
+                        -1.66168338e00,
+                        -2.44940359e-01,
+                        -1.40715896e-15,
+                    ],
+                    [
+                        -1.45924385e00,
+                        3.66515516e00,
+                        4.32929229e00,
+                        -5.92178800e-15,
+                        -4.96042903e-01,
+                        -6.25821647e-02,
+                        3.92618002e-15,
+                    ],
+                    [
+                        -8.35374824e-15,
+                        -2.27428444e-14,
+                        -5.92178800e-15,
+                        1.94283891e-29,
+                        1.43947963e-15,
+                        2.28480868e-16,
+                        -1.58258012e-30,
+                    ],
+                    [
+                        -2.96401194e-01,
+                        -1.66168338e00,
+                        -4.96042903e-01,
+                        1.43947963e-15,
+                        1.50992237e-01,
+                        3.26223572e-02,
+                        2.44212239e-16,
+                    ],
+                    [
+                        -2.35777284e-01,
+                        -2.44940359e-01,
+                        -6.25821647e-02,
+                        2.28480868e-16,
+                        3.26223572e-02,
+                        2.11889851e-02,
+                        -1.77455405e-17,
+                    ],
+                    [
+                        2.25790324e-15,
+                        -1.40715896e-15,
+                        3.92618002e-15,
+                        -1.58258012e-30,
+                        2.44212239e-16,
+                        -1.77455405e-17,
+                        2.50033005e-29,
+                    ],
+                ]
+            ),
             "left": np.array(
                 [
                     [
-                        1.08250411e06,
-                        -1.35973568e06,
-                        -1.08006283e07,
-                        -1.96282654e06,
-                        -1.92171379e06,
-                        1.12331074e08,
-                        -6.00798205e21,
+                        9.88055768e01,
+                        2.41331141e00,
+                        7.07498122e00,
+                        6.23710774e00,
+                        7.46696889e00,
+                        1.33010332e00,
+                        2.52487445e-14,
                     ],
                     [
-                        -1.35973568e06,
-                        1.70796697e06,
-                        1.35666927e07,
-                        2.46551045e06,
-                        2.41386878e06,
-                        -1.41099305e08,
-                        7.54663934e21,
+                        2.41331141e00,
+                        5.28869064e00,
+                        -3.48079620e00,
+                        -2.29807168e00,
+                        -2.74507190e00,
+                        4.08223577e-01,
+                        -3.99456509e-17,
                     ],
                     [
-                        -1.08006283e07,
-                        1.35666927e07,
-                        1.07762715e08,
-                        1.95839973e07,
-                        1.91737995e07,
-                        -1.12077752e09,
-                        5.99443328e22,
+                        7.07498122e00,
+                        -3.48079620e00,
+                        3.57343121e00,
+                        2.56552069e00,
+                        3.31370422e00,
+                        -2.80352452e-01,
+                        2.68863201e-15,
                     ],
                     [
-                        -1.96282654e06,
-                        2.46551045e06,
-                        1.95839973e07,
-                        3.55905354e06,
-                        3.48450479e06,
-                        -2.03681809e08,
-                        1.08938389e22,
+                        6.23710774e00,
+                        -2.29807168e00,
+                        2.56552069e00,
+                        2.03109153e00,
+                        2.61665944e00,
+                        -1.59296845e-01,
+                        2.59215439e-15,
                     ],
                     [
-                        -1.92171379e06,
-                        2.41386878e06,
-                        1.91737995e07,
-                        3.48450479e06,
-                        3.41151965e06,
-                        -1.99415573e08,
-                        1.06656613e22,
+                        7.46696889e00,
+                        -2.74507190e00,
+                        3.31370422e00,
+                        2.61665944e00,
+                        3.51620637e00,
+                        -2.43736384e-01,
+                        3.06448851e-15,
                     ],
                     [
-                        1.12331074e08,
-                        -1.41099305e08,
-                        -1.12077752e09,
-                        -2.03681809e08,
-                        -1.99415573e08,
-                        1.16565572e10,
-                        -6.23446249e23,
+                        1.33010332e00,
+                        4.08223577e-01,
+                        -2.80352452e-01,
+                        -1.59296845e-01,
+                        -2.43736384e-01,
+                        8.13145995e-02,
+                        1.48376783e-16,
                     ],
                     [
-                        -6.00798205e21,
-                        7.54663934e21,
-                        5.99443328e22,
-                        1.08938389e22,
-                        1.06656613e22,
-                        -6.23446249e23,
-                        3.33447709e37,
+                        2.52487445e-14,
+                        -3.99456509e-17,
+                        2.68863201e-15,
+                        2.59215439e-15,
+                        3.06448851e-15,
+                        1.48376783e-16,
+                        1.42352356e-29,
                     ],
                 ]
             ),
@@ -139,11 +215,13 @@ class CollisionDetector:
         self.lookup_gravity_tf()
 
         self.collision_pub = rospy.Publisher(
-            f"/nightingale/proprioception/collision", Bool, queue_size=10
+            f"/nightingale/{self.arm_side}_arm/collision", Bool, queue_size=10
         )
 
         self.computed_torques_pub = rospy.Publisher(
-            f"/nightingale/proprioception/computed_torques", JointState, queue_size=10
+            f"/nightingale/{self.arm_side}_arm/computed_torques",
+            JointState,
+            queue_size=10,
         )
 
         self.iter = 0
@@ -169,6 +247,7 @@ class CollisionDetector:
             self.iter += 1
 
     def estimate_torques(self, torques):
+        self.raw_measured_torques = np.array(torques)
         self.measured_torques = self.scale_torques(torques)
         self.computed_torques = self.jacobian[:3, :].T @ self.gravity_forces[:3]
 
@@ -278,8 +357,12 @@ class CollisionDetector:
             gravity_forces[:3] += (
                 link_mass * self.GRAVITATIONAL_ACCELERATION * self.gravity_direction
             )
-            gravity_forces[3:] += link_mass * np.cross(
-                self.gravity_direction, self.translations[idx]
+
+            ee_translation = self.translations[self.dof, :] - self.translations[idx, :]
+            gravity_forces[3:] += (
+                link_mass
+                * self.GRAVITATIONAL_ACCELERATION
+                * np.cross(ee_translation, self.gravity_direction)
             )
 
         self.gravity_forces = gravity_forces
@@ -292,15 +375,16 @@ class CollisionDetector:
 
     def pub_torques(self):
         joint_states = JointState()
-        joint_states.name = [f"measured_joint_{idx}" for idx in range(self.dof)] + [
+        joint_states.name = [f"raw_measured_joint_{idx}" for idx in range(self.dof)] + [
             f"computed_joint_{idx}" for idx in range(self.dof)
         ]
         joint_states.effort = (
-            self.measured_torques.tolist() + self.computed_torques.tolist()
+            self.raw_measured_torques.tolist() + self.computed_torques.tolist()
         )
         self.computed_torques_pub.publish(joint_states)
 
 
 if __name__ == "__main__":
-    collision_detector = CollisionDetector("right", 1.2)
+    collision_detector = CollisionDetector("right", 0.0)
+    collision_detector = CollisionDetector("left", 0.0)
     rospy.spin()

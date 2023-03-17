@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import rospy
 import numpy as np
@@ -8,16 +8,11 @@ from std_msgs.msg import Bool
 
 
 class TorqueCalibration:
-    def __init__(self, record_func):
-        rospy.init_node("torque_calibration_node")
-
-        self.measured_torques = np.zeros(7)
-        self.computed_torques = np.zeros(7)
+    def __init__(self, arm_side):
+        self.arm_side = arm_side
 
         self.xdata = []
         self.ydata = []
-
-        self.record_func = record_func
 
         self.record_sub = rospy.Subscriber(
             "/nightingale/torque_calibration/record", Bool, self.record
@@ -31,23 +26,38 @@ class TorqueCalibration:
 
     def record(self, msg):
         joint_state = rospy.wait_for_message(
-            "/nightingale/proprioception/computed_torques", JointState
+            f"/nightingale/{self.arm_side}_arm/computed_torques", JointState
         )
+
+        x = [
+            effort
+            for joint, effort in zip(joint_state.name, joint_state.effort)
+            if "measured" in joint
+        ]
+        y = [
+            effort
+            for joint, effort in zip(joint_state.name, joint_state.effort)
+            if "computed" in joint
+        ]
+
+        rospy.loginfo(f"{x} {y}")
 
         self.xdata.append(
             [
                 effort
                 for joint, effort in zip(joint_state.name, joint_state.effort)
-                if "measured" in joint_state.name
+                if "measured" in joint
             ]
         )
         self.ydata.append(
             [
                 effort
                 for joint, effort in zip(joint_state.name, joint_state.effort)
-                if "computed" in joint_state.name
+                if "computed" in joint
             ]
         )
+
+        rospy.loginfo(f"Recorded {len(self.xdata)} points")
 
     def clear(self, msg):
         self.xdata = []
@@ -86,82 +96,94 @@ class TorqueCalibration:
 
 if __name__ == "__main__":
     from nightingale_manipulation.manipulation_action_client import (
-        ManipulationJointControl,
+        ManipulationControl,
     )
 
-    torque_calibration = TorqueCalibration()
-    manipulation = ManipulationJointControl()
+    rospy.init_node("torque_calibration_node")
 
-    rospy.loginfo("Right arm calibration:")
-    right_joint_positions = [
-        [
-            -1.497173771091874,
-            -0.05384432355144005,
-            -0.0472769683033043,
-            -1.4575817535881566,
-            3.1601009435928535,
-            1.2459021253979168,
-            1.515535734175753,
-        ],
-        [
-            -0.8926047783430242,
-            -1.8371089736934032,
-            9.374327037114938e-05,
-            -2.2107645893852976,
-            0.9909354102705024,
-            1.2854942760596888,
-            2.862406818614062,
-        ],
-    ]
+    manipulation = ManipulationControl()
 
-    for iter in range(10):
-        shuffle = np.random.randint(0, 2, len(right_joint_positions[0]))
-        joint_posns = [
-            right_joint_positions[0][idx]
-            if shuffle[idx] > 0
-            else right_joint_positions[1][idx]
-            for idx in range(len(right_joint_positions))
-        ]
+    torque_calibration = TorqueCalibration("right")
 
-        manipulation.cmd_right_arm(joint_posns)
-        torque_calibration.record()
+    # rospy.loginfo("Right arm calibration:")
+    # right_joint_p1 = np.array(
+    #     [
+    #         -1.497173771091874,
+    #         -0.05384432355144005,
+    #         -0.0472769683033043,
+    #         -1.4575817535881566,
+    #         3.1601009435928535,
+    #         1.2459021253979168,
+    #         1.515535734175753,
+    #     ]
+    # )
+    # right_joint_p2 = np.array(
+    #     [
+    #         -0.8926047783430242,
+    #         -1.8371089736934032,
+    #         9.374327037114938e-05,
+    #         -2.2107645893852976,
+    #         0.9909354102705024,
+    #         1.2854942760596888,
+    #         2.862406818614062,
+    #     ]
+    # )
 
-    weights, inv_noise_cov = torque_calibration.analyze()
-    torque_calibration.clear()
+    # torque_calibration.record(True)
+    # for iter in range(10):
+    #     shuffle = np.random.uniform(size=7)
+    #     joint_posns = [
+    #         shuffle[idx] * right_joint_p1[idx]
+    #         + (1 - shuffle[idx]) * right_joint_p2[idx]
+    #         for idx in range(7)
+    #     ]
+    #     rospy.loginfo(f"{joint_posns}")
+
+    #     manipulation.jnt_ctrl.cmd_right_arm(joint_posns)
+    #     rospy.sleep(1)
+    #     torque_calibration.record(True)
+
+    # weights, inv_noise_cov = torque_calibration.analyze(True)
+    # torque_calibration.clear(True)
+
+    torque_calibration.arm_side = "left"
 
     rospy.loginfo("Left arm calibration:")
-    left_joint_positions = [
+    left_joint_p1 = np.array(
         [
-            -1.497173771091874,
-            -0.05384432355144005,
-            -0.0472769683033043,
-            -1.4575817535881566,
-            3.1601009435928535,
-            1.2459021253979168,
-            1.515535734175753,
-        ],
-        [
-            -0.8926047783430242,
-            -1.8371089736934032,
-            9.374327037114938e-05,
-            -2.2107645893852976,
-            0.9909354102705024,
-            1.2854942760596888,
-            2.862406818614062,
-        ],
-    ]
-
-    for iter in range(10):
-        shuffle = np.random.randint(0, 2, len(right_joint_positions[0]))
-        joint_posns = [
-            right_joint_positions[0][idx]
-            if shuffle[idx] > 0
-            else right_joint_positions[1][idx]
-            for idx in range(len(right_joint_positions))
+            0.7075179454806886,
+            1.1448934852572825,
+            1.334183252372954,
+            1.987902747251979,
+            -2.147573103039898,
+            0.8198781100307042,
+            -2.8961557275280905,
         ]
+    )
+    left_joint_p2 = np.array(
+        [
+            2.1888951099877305,
+            0.6460906036203844,
+            -0.4657128387765539,
+            1.7709637753829963,
+            -2.1124188440186336,
+            -1.2119725210039258,
+            -2.8808196480747608,
+        ]
+    )
 
-        manipulation.cmd_left_arm(joint_posns)
-        torque_calibration.record()
+    torque_calibration.record(True)
+    for iter in range(10):
+        shuffle = np.random.uniform(size=7)
+        joint_posns = [
+            shuffle[idx] * left_joint_p1[idx] + (1 - shuffle[idx]) * left_joint_p2[idx]
+            for idx in range(7)
+        ]
+        rospy.loginfo(f"{joint_posns}")
 
-    weights, inv_noise_cov = torque_calibration.analyze()
-    torque_calibration.clear()
+        manipulation.jnt_ctrl.cmd_left_arm(joint_posns)
+        rospy.sleep(1)
+        torque_calibration.record(True)
+
+    weights, inv_noise_cov = torque_calibration.analyze(True)
+    torque_calibration.clear(True)
