@@ -105,46 +105,46 @@ if __name__ == "__main__":
 
     torque_calibration = TorqueCalibration("right")
 
-    # rospy.loginfo("Right arm calibration:")
-    # right_joint_p1 = np.array(
-    #     [
-    #         -1.497173771091874,
-    #         -0.05384432355144005,
-    #         -0.0472769683033043,
-    #         -1.4575817535881566,
-    #         3.1601009435928535,
-    #         1.2459021253979168,
-    #         1.515535734175753,
-    #     ]
-    # )
-    # right_joint_p2 = np.array(
-    #     [
-    #         -0.8926047783430242,
-    #         -1.8371089736934032,
-    #         9.374327037114938e-05,
-    #         -2.2107645893852976,
-    #         0.9909354102705024,
-    #         1.2854942760596888,
-    #         2.862406818614062,
-    #     ]
-    # )
+    rospy.loginfo("Right arm calibration:")
+    right_joint_p1 = np.array(
+        [
+            -1.497173771091874,
+            -0.05384432355144005,
+            -0.0472769683033043,
+            -1.4575817535881566,
+            3.1601009435928535,
+            1.2459021253979168,
+            1.515535734175753,
+        ]
+    )
+    right_joint_p2 = np.array(
+        [
+            -0.8926047783430242,
+            -1.8371089736934032,
+            9.374327037114938e-05,
+            -2.2107645893852976,
+            0.9909354102705024,
+            1.2854942760596888,
+            2.862406818614062,
+        ]
+    )
 
-    # torque_calibration.record(True)
-    # for iter in range(10):
-    #     shuffle = np.random.uniform(size=7)
-    #     joint_posns = [
-    #         shuffle[idx] * right_joint_p1[idx]
-    #         + (1 - shuffle[idx]) * right_joint_p2[idx]
-    #         for idx in range(7)
-    #     ]
-    #     rospy.loginfo(f"{joint_posns}")
+    torque_calibration.record(True)
+    for iter in range(10):
+        shuffle = np.random.uniform(size=7)
+        joint_posns = [
+            shuffle[idx] * right_joint_p1[idx]
+            + (1 - shuffle[idx]) * right_joint_p2[idx]
+            for idx in range(7)
+        ]
+        rospy.loginfo(f"{joint_posns}")
 
-    #     manipulation.jnt_ctrl.cmd_right_arm(joint_posns)
-    #     rospy.sleep(1)
-    #     torque_calibration.record(True)
+        manipulation.jnt_ctrl.cmd_right_arm(joint_posns)
+        rospy.sleep(1)
+        torque_calibration.record(True)
 
-    # weights, inv_noise_cov = torque_calibration.analyze(True)
-    # torque_calibration.clear(True)
+    weights, inv_noise_cov = torque_calibration.analyze(True)
+    torque_calibration.clear(True)
 
     torque_calibration.arm_side = "left"
 

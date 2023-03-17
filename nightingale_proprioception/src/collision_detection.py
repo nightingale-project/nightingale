@@ -210,6 +210,8 @@ class CollisionDetector:
             ),
         }
 
+        self.collision_state = False
+
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
         self.lookup_gravity_tf()
@@ -249,7 +251,7 @@ class CollisionDetector:
     def estimate_torques(self, torques):
         self.raw_measured_torques = np.array(torques)
         self.measured_torques = self.scale_torques(torques)
-        self.computed_torques = self.jacobian[:3, :].T @ self.gravity_forces[:3]
+        self.computed_torques = self.jacobian.T @ self.gravity_forces
 
         # Replace right elbow measurement because the sensor is broken
         if self.arm_side == "right":
@@ -262,8 +264,9 @@ class CollisionDetector:
         )
 
         collision_detected = np.any(error_distance > self.COLLISION_DETECTION_THRESHOLD)
-        if collision_detected:
+        if self.collision_state != collision_detected:
             self.collision_pub.publish(Bool(collision_detected))
+            self.collision_state = not self.collision_state
 
     def lookup_gravity_tf(self):
         try:
@@ -354,16 +357,19 @@ class CollisionDetector:
             else:
                 link_mass = self.robot.link_map[to_link].inertial.mass
 
-            gravity_forces[:3] += (
-                link_mass * self.GRAVITATIONAL_ACCELERATION * self.gravity_direction
-            )
-
-            ee_translation = self.translations[self.dof, :] - self.translations[idx, :]
-            gravity_forces[3:] += (
-                link_mass
-                * self.GRAVITATIONAL_ACCELERATION
-                * np.cross(ee_translation, self.gravity_direction)
-            )
+            if idx == self.dof:
+                gravity_forces[:3] += (
+                    link_mass * self.GRAVITATIONAL_ACCELERATION * self.gravity_direction
+                )
+            else:
+                ee_translation = (
+                    self.translations[self.dof, :] - self.translations[idx, :]
+                )
+                gravity_forces[3:] += (
+                    link_mass
+                    * self.GRAVITATIONAL_ACCELERATION
+                    * np.cross(ee_translation, self.gravity_direction)
+                )
 
         self.gravity_forces = gravity_forces
 
