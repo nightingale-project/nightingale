@@ -275,6 +275,9 @@ class ManipulationJointControl:
         rospy.logwarn("cmd_left_arm failed with status: " + str(status))
         return False
 
+    def home_right_arm(self):
+        return self.cmd_right_arm(self.right_arm_home_joint_values)
+
     def home(self):
         left_status = self.cmd_left_arm(self.left_arm_home_joint_values)
         right_status = self.cmd_right_arm(self.right_arm_home_joint_values)

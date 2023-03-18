@@ -49,6 +49,8 @@ class SymposiumDemo:
             BridgeConfig.USER_INPUT_TOPIC, String, self.screen_button_cb
         )
 
+        self.arm_control = ManipulationControl()
+
     def right_collision_cb(self, msg):
         if self.enable_right_collision and msg.data == True:
             self.collision_screen_pub.publish(String(f"9"))
@@ -64,19 +66,16 @@ class SymposiumDemo:
         self.enable_left_collision = msg.data
 
     def screen_button_cb(self, msg):
-        goal = FollowJointTrajectoryGoal()
-        goal.path_tolerance = 1
-        goal.goal_tolerance = 1
-        goal.goal_time_tolerance = rospy.Duration(10)
-
         dict_data = json.loads(msg.data)
         action = int(dict_data["action"])
+        print(f'action: {action}')
         if action == UserInputs.START_EXTEND_ARM:
-            goal.trajectory = []
+            return self.arm_control.trajectory_inversion_server.fast_extend()
         elif action == UserInputs.START_RETRACT_ARM:
-            goal.trajectory = []
+            return self.arm_control.trajectory_inversion_server.fast_extend()
+        elif action == UserInputs.HOME_RIGH_ARM:
+            return self.arm_control.jnt_ctrl.home_right_arm()
 
-        self.arm_action_client.send_goal(goal)
 
 
 if __name__ == "__main__":
