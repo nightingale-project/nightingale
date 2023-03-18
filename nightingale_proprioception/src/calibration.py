@@ -29,19 +29,6 @@ class TorqueCalibration:
             f"/nightingale/{self.arm_side}_arm/computed_torques", JointState
         )
 
-        x = [
-            effort
-            for joint, effort in zip(joint_state.name, joint_state.effort)
-            if "measured" in joint
-        ]
-        y = [
-            effort
-            for joint, effort in zip(joint_state.name, joint_state.effort)
-            if "computed" in joint
-        ]
-
-        rospy.loginfo(f"{x} {y}")
-
         self.xdata.append(
             [
                 effort
@@ -70,6 +57,7 @@ class TorqueCalibration:
 
         weights = np.zeros((7, 2))
         error_deviations = np.zeros((7, N))
+        rsquared = np.zeros(7)
 
         for idx in range(M):
             xi = x[:, idx]
@@ -84,11 +72,17 @@ class TorqueCalibration:
 
             err = yi - Xi @ Wi
             error_deviations[idx, :] = err - np.mean(err)
+
+            rsquared[idx] = 1 - np.sum(np.square(err)) / np.sum(
+                np.square(error_deviations[idx, :])
+            )
+
         error_covariance = error_deviations @ error_deviations.T / (N - 1)
 
         rospy.loginfo(
             f"Torque weights T_scaled[i] = w[i, 0] * T_raw + w[i, 1]\n{weights}"
         )
+        rospy.loginfo(f"R2\n{rsquared}")
         rospy.loginfo(f"Error model covariance\n{error_covariance}")
 
         return (weights, np.linalg.inv(error_covariance))
@@ -146,6 +140,8 @@ if __name__ == "__main__":
     weights, inv_noise_cov = torque_calibration.analyze(True)
     torque_calibration.clear(True)
 
+    manipulation.jnt_ctrl.cmd_right_arm(right_joint_p1.tolist())
+
     torque_calibration.arm_side = "left"
 
     rospy.loginfo("Left arm calibration:")
@@ -187,3 +183,5 @@ if __name__ == "__main__":
 
     weights, inv_noise_cov = torque_calibration.analyze(True)
     torque_calibration.clear(True)
+
+    manipulation.jnt_ctrl.cmd_left_arm(left_joint_p1.tolist())

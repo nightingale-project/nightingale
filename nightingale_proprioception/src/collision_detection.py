@@ -6,15 +6,14 @@ import tf_conversions
 import numpy as np
 
 from sensor_msgs.msg import JointState
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, Float64
 from urdf_parser_py.urdf import Robot
 
 
 class CollisionDetector:
     GRAVITATIONAL_ACCELERATION = 9.8  # [m/sec^2]
-    COLLISION_DETECTION_THRESHOLD = 50  # std dev
 
-    def __init__(self, arm_side, box_mass):
+    def __init__(self, arm_side, box_mass, collision_detection_threshold):
         rospy.init_node("collision_detection_node")
 
         self.robot = Robot.from_parameter_server()
@@ -22,6 +21,7 @@ class CollisionDetector:
         self.dof = 7
         self.arm_side = arm_side
         self.box_mass = box_mass
+        self.collision_detection_threshold = collision_detection_threshold
         self.joint_link_suffixes = [
             "base_link",
             "shoulder_link",
@@ -52,13 +52,13 @@ class CollisionDetector:
         self.weights = {
             "right": np.array(
                 [
-                    [-2.30926984e00, 6.93681397e00],
-                    [-8.08320947e-01, -1.38377806e01],
-                    [-3.71524878e00, -2.53448633e-02],
-                    [1.00000000e00, 6.88338275e-15],
-                    [-7.18576259e00, -1.72952906e00],
-                    [-6.64805942e00, 1.12613666e01],
-                    [-1.17769116e-15, 1.55629856e-16],
+                    [-1.62545946, 8.78906103],
+                    [-0.66488735, -9.69140664],
+                    [-2.96047262, 0.98921177],
+                    [-63.26756862, 8.20346974],
+                    [-7.44528914, -4.88434097],
+                    [-13.7096366, 17.69099921],
+                    [48.5912395, 9.22901083],
                 ]
             ),
             "left": np.array(
@@ -87,7 +87,7 @@ class CollisionDetector:
                     ],
                     [
                         1.44005817e01,
-                        3.24846082e01,
+                        2.24846082e01,
                         3.66515516e00,
                         -2.27428444e-14,
                         -1.66168338e00,
@@ -96,7 +96,7 @@ class CollisionDetector:
                     ],
                     [
                         -1.45924385e00,
-                        3.66515516e00,
+                        2.66515516e00,
                         4.32929229e00,
                         -5.92178800e-15,
                         -4.96042903e-01,
@@ -233,6 +233,12 @@ class CollisionDetector:
             f"/movo/{self.arm_side}_arm/joint_states", JointState, self.joint_state_cb
         )
 
+        self.collision_threshold_sub = rospy.Subscriber(
+            f"/nightingale/{self.arm_side}_arm/collision_threshold",
+            Float64,
+            self.collision_threshold_cb,
+        )
+
     def joint_state_cb(self, msg):
         if self.iter == self.iter_decimation - 1:
             self.lookup_tf()
@@ -263,7 +269,9 @@ class CollisionDetector:
             error[:6, 0].T @ self.error_models[self.arm_side][:6, :6] @ error[:6, 0]
         )
 
-        collision_detected = np.any(error_distance > self.COLLISION_DETECTION_THRESHOLD)
+        collision_detected = np.any(error_distance > self.collision_detection_threshold)
+        if collision_detected:
+            rospy.loginfo(f"Collision detected {error_distance}")
         if self.collision_state != collision_detected:
             self.collision_pub.publish(Bool(collision_detected))
             self.collision_state = not self.collision_state
@@ -389,8 +397,15 @@ class CollisionDetector:
         )
         self.computed_torques_pub.publish(joint_states)
 
+    def collision_threshold_cb(self, msg):
+        self.collision_detection_threshold = msg.data
+
 
 if __name__ == "__main__":
-    collision_detector = CollisionDetector("right", 0.0)
-    collision_detector = CollisionDetector("left", 0.0)
+    collision_detector = CollisionDetector(
+        "right", box_mass=1.0, collision_detection_threshold=55
+    )
+    collision_detector = CollisionDetector(
+        "left", box_mass=0.0, collision_detection_threshold=50
+    )
     rospy.spin()

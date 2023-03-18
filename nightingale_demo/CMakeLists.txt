@@ -10,6 +10,8 @@ project(nightingale_demo)
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   nightingale_msgs
+  nightingale_ros_bridge
+  nightingale_utils
   rospy
 )
 

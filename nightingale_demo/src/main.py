@@ -11,7 +11,8 @@ from nightingale_ros_bridge.bridge_interface_config import (
     UserInputs,
 )
 from nightingale_manipulation.manipulation_action_client import ManipulationControl
-from std_msgs.msg import Bool, String
+from std_msgs.msg import Bool, Float64, String
+from geometry_msgs.msg import Point
 
 
 class SymposiumDemo:
@@ -23,13 +24,18 @@ class SymposiumDemo:
             FollowJointTrajectoryAction,
         )
 
+        self.manipulation = ManipulationControl()
+
         self.right_collision_sub = rospy.Subscriber(
             "/nightingale/right_arm/collision", Bool, self.right_collision_cb
         )
         self.left_collision_sub = rospy.Subscriber(
             "/nightingale/left_arm/collision", Bool, self.left_collision_cb
         )
-        self.enable_right_collision = False
+        self.right_collision_threshold_pub = rospy.Publisher(
+            "/nightingale/right_arm/collision_threshold", Float64, queue_size=10
+        )
+        self.enable_right_collision = True
         self.enable_left_collision = True
         self.enable_right_collision_sub = rospy.Subscriber(
             "/nightingale/right_arm/collision_enable",
@@ -53,10 +59,12 @@ class SymposiumDemo:
 
     def right_collision_cb(self, msg):
         if self.enable_right_collision and msg.data == True:
+            rospy.loginfo("Collision right")
             self.collision_screen_pub.publish(String(f"9"))
 
     def left_collision_cb(self, msg):
         if self.enable_left_collision and msg.data == True:
+            rospy.loginfo("Collision left")
             self.collision_screen_pub.publish(String("9"))
 
     def enable_right_collision_cb(self, msg):
@@ -68,14 +76,13 @@ class SymposiumDemo:
     def screen_button_cb(self, msg):
         dict_data = json.loads(msg.data)
         action = int(dict_data["action"])
-        print(f'action: {action}')
+        print(f"action: {action}")
         if action == UserInputs.START_EXTEND_ARM:
             return self.arm_control.trajectory_inversion_server.fast_extend()
         elif action == UserInputs.START_RETRACT_ARM:
             return self.arm_control.trajectory_inversion_server.fast_extend()
         elif action == 10:
             return self.arm_control.jnt_ctrl.home_right_arm()
-
 
 
 if __name__ == "__main__":
