@@ -2,14 +2,15 @@
 
 import actionlib
 import rospy
+import json
 
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
 from nightingale_ros_bridge.bridge_interface_config import (
     BridgeConfig,
     RobotStatus,
-    UserInput,
+    UserInputs,
 )
-from nightingale_manipulation import ManipulationControl
+from nightingale_manipulation.manipulation_action_client import ManipulationControl
 from std_msgs.msg import Bool, String
 
 
@@ -28,7 +29,7 @@ class SymposiumDemo:
         self.left_collision_sub = rospy.Subscriber(
             "/nightingale/left_arm/collision", Bool, self.left_collision_cb
         )
-        self.enable_right_collision = True
+        self.enable_right_collision = False
         self.enable_left_collision = True
         self.enable_right_collision_sub = rospy.Subscriber(
             "/nightingale/right_arm/collision_enable",
@@ -50,11 +51,11 @@ class SymposiumDemo:
 
     def right_collision_cb(self, msg):
         if self.enable_right_collision and msg.data == True:
-            self.collision_screen_pub.publish(String(f"{RobotStatus.ARM_COLLISION}"))
+            self.collision_screen_pub.publish(String(f"9"))
 
     def left_collision_cb(self, msg):
         if self.enable_left_collision and msg.data == True:
-            self.collision_screen_pub.publish(String(f"{RobotStatus.ARM_COLLISON}"))
+            self.collision_screen_pub.publish(String("9"))
 
     def enable_right_collision_cb(self, msg):
         self.enable_right_collision = msg.data
@@ -63,20 +64,21 @@ class SymposiumDemo:
         self.enable_left_collision = msg.data
 
     def screen_button_cb(self, msg):
-        # goal = FollowJointTrajectoryGoal()
-        # goal.path_tolerance = 1
-        # goal.goal_tolerance = 1
-        # goal.goal_time_tolerance = rospy.Duration(10)
+        goal = FollowJointTrajectoryGoal()
+        goal.path_tolerance = 1
+        goal.goal_tolerance = 1
+        goal.goal_time_tolerance = rospy.Duration(10)
 
-        if msg.data == UserInput.START_EXTEND_ARM:
-            rospy.loginfo(f"Start extending arm")
-        #     goal.trajectory = []
-        elif msg.data == UserInput.START_RETRACT_ARM:
-            rospy.loginfo(f"Start retracting arm")
-        #     goal.trajectory = []
+        dict_data = json.loads(msg.data)
+        action = int(dict_data["action"])
+        if action == UserInputs.START_EXTEND_ARM:
+            goal.trajectory = []
+        elif action == UserInputs.START_RETRACT_ARM:
+            goal.trajectory = []
 
-        # self.arm_action_client.send_goal(goal)
+        self.arm_action_client.send_goal(goal)
 
 
 if __name__ == "__main__":
-    main()
+    demo = SymposiumDemo()
+    rospy.spin()
