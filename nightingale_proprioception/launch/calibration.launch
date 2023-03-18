@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+  <node name="proprioception_collision_detection" pkg="nightingale_proprioception" type="collision_detection.py" output="screen" />
+  <node name="proprioception_calibration" pkg="nightingale_proprioception" type="calibration.py" output="screen" />
+</launch>
