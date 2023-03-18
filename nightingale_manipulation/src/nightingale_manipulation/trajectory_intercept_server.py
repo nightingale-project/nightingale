@@ -1,5 +1,6 @@
 import rospy
 import actionlib
+import copy
 from control_msgs.msg import (
     FollowJointTrajectoryActionGoal,
     FollowJointTrajectoryAction,
@@ -102,8 +103,17 @@ fet_p3.time_from_start = rospy.Duration(3.28259116)
 fet_p4.time_from_start = rospy.Duration(4.384977234)
 
 fast_extend_trajectory = JointTrajectory()
+fast_extend_trajectory.joint_names = [
+      "right_arm_half_joint",
+      "right_elbow_joint",
+      "right_shoulder_lift_joint",
+      "right_shoulder_pan_joint",
+      "right_wrist_3_joint",
+      "right_wrist_spherical_1_joint",
+      "right_wrist_spherical_2_joint"
+    ]
+fast_extend_trajectory.header.frame_id = "odom"
 fast_extend_trajectory.points = [fet_p1, fet_p2, fet_p3, fet_p4]
-
 
 def invert_trajectory(trajectory):
     inverted_position_list = [point.positions for point in reversed(trajectory.points)]
@@ -114,15 +124,27 @@ def invert_trajectory(trajectory):
         -1 * point.accelerations for point in reversed(trajectory.points)
     ]
 
+    inv_trajectory = JointTrajectory()
     for index, point in enumerate(trajectory.points):
-        point.positions = inverted_position_list[index]
-        point.velocities = negative_velocities_list[index]
-        point.accelerations = negative_acceleration_list[index]
+        inv_pt = JointTrajectoryPoint()
+        inv_pt.positions = inverted_position_list[index]
+        inv_pt.velocities = negative_velocities_list[index]
+        inv_pt.accelerations = negative_acceleration_list[index]
 
-    return trajectory
+        inv_trajectory.points.append(inv_pt)
+
+    return inv_trajectory
 
 
 fast_retract_trajectory = invert_trajectory(fast_extend_trajectory)
+fast_retract_trajectory.joint_names = ["right_arm_half_joint",
+      "right_elbow_joint",
+      "right_shoulder_lift_joint",
+      "right_shoulder_pan_joint",
+      "right_wrist_3_joint",
+      "right_wrist_spherical_1_joint",
+      "right_wrist_spherical_2_joint"]
+fast_retract_trajectory.header.frame_id = "odom"
 
 
 class TrajectoryInterceptServer:
@@ -174,9 +196,11 @@ class TrajectoryInterceptServer:
     def fast_extend(self):
         goal = FollowJointTrajectoryGoal()
         goal.trajectory = fast_extend_trajectory
+        rospy.loginfo(f"Extend {fast_extend_trajectory}")
         goal.path_tolerance = self.previous_path_tolerance
         goal.goal_tolerance = self.previous_goal_tolerance
         goal.goal_time_tolerance = self.previous_duration
+        rospy.loginfo(f"Extend goal\n{goal}")
         self.action_client.send_goal(goal)
         self.action_client.wait_for_result()
         return self.action_client.get_result()
@@ -184,9 +208,11 @@ class TrajectoryInterceptServer:
     def fast_retract(self):
         goal = FollowJointTrajectoryGoal()
         goal.trajectory = fast_retract_trajectory
+        rospy.loginfo(f"Retract {fast_retract_trajectory}")
         goal.path_tolerance = self.previous_path_tolerance
         goal.goal_tolerance = self.previous_goal_tolerance
         goal.goal_time_tolerance = self.previous_duration
+        rospy.loginfo(f"Retract goal\n{goal}")
         self.action_client.send_goal(goal)
         self.action_client.wait_for_result()
         return self.action_client.get_result()

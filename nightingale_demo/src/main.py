@@ -54,7 +54,7 @@ class SymposiumDemo:
         )
 
         self.arm_control = ManipulationControl()
-        self.arm_control.home_left()
+        #self.arm_control.home_left()
         self.arm_control.jnt_ctrl.cmd_right_arm(
             self.arm_control.jnt_ctrl.right_arm_home_joint_values
         )
@@ -78,11 +78,13 @@ class SymposiumDemo:
     def screen_button_cb(self, msg):
         dict_data = json.loads(msg.data)
         action = int(dict_data["action"])
-        print(f"action: {action}")
+        rospy.loginfo(f"action: {action}")
         if action == UserInputs.START_EXTEND_ARM:
-            return self.arm_control.trajectory_inversion_server.fast_extend()
+            status = self.arm_control.trajectory_inversion_server.fast_extend()
+            rospy.loginfo(f"Extend {status}")
         elif action == UserInputs.START_RETRACT_ARM:
-            return self.arm_control.trajectory_inversion_server.fast_retract()
+            status = self.arm_control.trajectory_inversion_server.fast_retract()
+            rospy.loginfo(f"Retract {status}")
         elif action == 10:
             return self.arm_control.jnt_ctrl.home_right_arm()
 
