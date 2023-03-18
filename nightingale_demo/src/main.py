@@ -73,7 +73,7 @@ class SymposiumDemo:
             return self.arm_control.trajectory_inversion_server.fast_extend()
         elif action == UserInputs.START_RETRACT_ARM:
             return self.arm_control.trajectory_inversion_server.fast_extend()
-        elif action == UserInputs.HOME_RIGH_ARM:
+        elif action == 10:
             return self.arm_control.jnt_ctrl.home_right_arm()
 
 

@@ -558,7 +558,8 @@ class ManipulationControl:
         self.right_cartesian = ManipulationCartesianControl("right")
         self.left_cartesian = ManipulationCartesianControl("left")
         self.trajectory_inversion_server = TrajectoryInterceptServer(
-            "/movo/right_arm_controller/follow_joint_trajectory"
+            "/movo/right_arm_controller/follow_joint_trajectory",
+            debug=True
         )
 
     def home_right(self, tries=3):
