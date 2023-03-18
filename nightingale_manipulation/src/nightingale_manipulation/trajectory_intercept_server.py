@@ -104,16 +104,17 @@ fet_p4.time_from_start = rospy.Duration(4.384977234)
 
 fast_extend_trajectory = JointTrajectory()
 fast_extend_trajectory.joint_names = [
-      "right_arm_half_joint",
-      "right_elbow_joint",
-      "right_shoulder_lift_joint",
-      "right_shoulder_pan_joint",
-      "right_wrist_3_joint",
-      "right_wrist_spherical_1_joint",
-      "right_wrist_spherical_2_joint"
-    ]
+    "right_arm_half_joint",
+    "right_elbow_joint",
+    "right_shoulder_lift_joint",
+    "right_shoulder_pan_joint",
+    "right_wrist_3_joint",
+    "right_wrist_spherical_1_joint",
+    "right_wrist_spherical_2_joint",
+]
 fast_extend_trajectory.header.frame_id = "odom"
 fast_extend_trajectory.points = [fet_p1, fet_p2, fet_p3, fet_p4]
+
 
 def invert_trajectory(trajectory):
     inverted_position_list = [point.positions for point in reversed(trajectory.points)]
@@ -124,26 +125,24 @@ def invert_trajectory(trajectory):
         -1 * point.accelerations for point in reversed(trajectory.points)
     ]
 
-    inv_trajectory = JointTrajectory()
     for index, point in enumerate(trajectory.points):
-        inv_pt = JointTrajectoryPoint()
-        inv_pt.positions = inverted_position_list[index]
-        inv_pt.velocities = negative_velocities_list[index]
-        inv_pt.accelerations = negative_acceleration_list[index]
+        point.positions = inverted_position_list[index]
+        point.velocities = negative_velocities_list[index]
+        point.accelerations = negative_acceleration_list[index]
 
-        inv_trajectory.points.append(inv_pt)
-
-    return inv_trajectory
+    return trajectory
 
 
-fast_retract_trajectory = invert_trajectory(fast_extend_trajectory)
-fast_retract_trajectory.joint_names = ["right_arm_half_joint",
-      "right_elbow_joint",
-      "right_shoulder_lift_joint",
-      "right_shoulder_pan_joint",
-      "right_wrist_3_joint",
-      "right_wrist_spherical_1_joint",
-      "right_wrist_spherical_2_joint"]
+fast_retract_trajectory = invert_trajectory(copy.deepcopy(fast_extend_trajectory))
+fast_retract_trajectory.joint_names = [
+    "right_arm_half_joint",
+    "right_elbow_joint",
+    "right_shoulder_lift_joint",
+    "right_shoulder_pan_joint",
+    "right_wrist_3_joint",
+    "right_wrist_spherical_1_joint",
+    "right_wrist_spherical_2_joint",
+]
 fast_retract_trajectory.header.frame_id = "odom"
 
 
