@@ -80,10 +80,9 @@ class SymposiumHomeScreen:
                 text="Home right arm",
                 font_style="H6",
                 pos_hint={"center_x": 0.9, "center_y": 0.9},
-                size_hint=(cfg.SHORT_RECT_WIDTH - 0.15, cfg.SHORT_RECT_HEIGHT-0.05),
+                size_hint=(cfg.SHORT_RECT_WIDTH - 0.15, cfg.SHORT_RECT_HEIGHT - 0.05),
                 on_release=self.home_right_arm,
             )
         )
-
 
         return screen

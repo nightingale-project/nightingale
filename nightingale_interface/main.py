@@ -36,6 +36,7 @@ from kivy.properties import NumericProperty, StringProperty
 class MainApp(MDApp, ScreenWrapper):
     _other_task = None
     _wd_task = None
+    _symposium_Task = None
 
     # ros things
     client = None
@@ -60,18 +61,29 @@ class MainApp(MDApp, ScreenWrapper):
     pending_action = "0"
     payload = ""
 
+    symposium = False
+
     def main(self):
-        self._other_task = asyncio.ensure_future(self.backend())
-        # self._wd_task = asyncio.ensure_future(self.watchdog_run())
+        if self.symposium == True:
+            self._symposium_task = asyncio.ensure_future(self.symposium_run())
+        else:
+            self._other_task = asyncio.ensure_future(self.backend())
+            self._wd_task = asyncio.ensure_future(self.watchdog_run())
 
         async def run_wrapper():
             await self.async_run(async_lib="asyncio")
             print("App done")
-            self._other_task.cancel()
-            # self._wd_task.cancel()
 
-        # return asyncio.gather(run_wrapper(), self._other_task, self._wd_task)
-        return asyncio.gather(run_wrapper(), self._other_task)
+            if self.symposium == True:
+                self._symposium_task.cancel()
+            else:
+                self._other_task.cancel()
+                self._wd_task.cancel()
+
+        if self.symposium == True:
+            return asyncio.gather(run_wrapper(), self._symposium_task)
+        else:
+            return asyncio.gather(run_wrapper(), self._other_task, self._wd_task)
 
     # add a task to do after a delay
     def queue(self, task, delay=0, args=None):
@@ -79,6 +91,36 @@ class MainApp(MDApp, ScreenWrapper):
 
     # backend polling to read from ros coms
     async def backend(self):
+        await asyncio.sleep(0.5)
+        self.root.transition = kivy.uix.screenmanager.FadeTransition()
+
+        # set the initial screen
+        self.root.current = ScreenConfig.FACE_SCREEN_NAME
+        self.screen_stack.append(self.root.current)
+
+        try:
+            while True:
+                # execute a queued task
+                if len(self.task_queue) > 0:
+                    current = self.task_queue.pop()
+                    func = current["task"]
+                    await asyncio.sleep(current["delay"])
+                    func_args = current["args"]
+
+                    if func_args:
+                        func(func_args)
+                    else:
+                        func()
+
+                await asyncio.sleep(0.2)
+
+        except asyncio.CancelledError:
+            pass
+        finally:
+            print("Backend Done")
+
+    # backend polling to read from ros coms
+    async def symposium_run(self):
         await asyncio.sleep(0.5)
         self.root.transition = kivy.uix.screenmanager.FadeTransition()
 
@@ -188,6 +230,9 @@ class MainApp(MDApp, ScreenWrapper):
             self.client, BridgeConfig.ROBOT_STATUS_TOPIC, "std_msgs/String"
         )
         self.interface_screen_topic.subscribe(self.process_robot_status)
+
+    def set_symposium(self):
+        self.symposium = True
 
     # override
     def call_ros_action(self, action: int, args: dict = {}) -> bool:
@@ -330,6 +375,12 @@ if __name__ == "__main__":
         help="If set then True to run on movo, False if on own computer",
     )
 
+    parser.add_argument(
+        "--symposium",
+        action="store_true",
+        help="If set then True to run on movo, False if on own computer",
+    )
+
     args = parser.parse_args()
     # initialize the app and event loop
     loop = asyncio.get_event_loop()
@@ -338,6 +389,9 @@ if __name__ == "__main__":
     # initializes everything related to ros bridge
     if args.ros_comms == True:
         app.init_ros(args.on_movo)
+
+    if args.symposium == True:
+        app.set_symposium()
 
     # start the app event loop
     loop.run_until_complete(app.main())
