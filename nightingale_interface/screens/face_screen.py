@@ -10,7 +10,7 @@ class FaceScreen:
     def to_homescreen(self, button_data):
         button_data.parent.manager.transition = NoTransition()
         self.screen_stack.append(button_data.parent.manager.current)
-        button_data.parent.manager.current = cfg.HUB_SCREEN_NAME
+        button_data.parent.manager.current = cfg.SYMPOSIUM_HOME_SCREEN_NAME
 
     def face_build(self):
         screen = Screen(name=cfg.FACE_SCREEN_NAME)
