@@ -4,6 +4,9 @@ import actionlib
 import rospy
 import json
 from playsound import playsound
+import numpy as np
+
+from movo_msgs.msg import PanTiltCmd
 
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
 from nightingale_ros_bridge.bridge_interface_config import (
@@ -21,6 +24,8 @@ class SymposiumDemo:
         rospy.init_node("symposium_demo_node")
 
         self.audio_file = rospy.get_param("/symposium_demo/audio_file")
+
+        self.head_pub = rospy.Publisher("/movo/head/cmd", PanTiltCmd, queue_size=10)
 
         self.arm_action_client = actionlib.SimpleActionClient(
             "/movo/right_arm_controller/follow_joint_trajectory",
@@ -81,7 +86,32 @@ class SymposiumDemo:
     def chime(self):
         playsound(self.audio_file)
 
+    def look_around(self):
+        msg = PanTiltCmd()
+        msg.pan_cmd.pos_rad = np.radians(40)
+        msg.pan_cmd.vel_rps = 0.2
+        msg.tilt_cmd.pos_rad = np.radians(10)
+        msg.tilt_cmd.vel_rps = 0.2/4 # to travel in straight line
+        self.head_pub.publish(msg)
+        rospy.sleep(5)
+        msg.pan_cmd.pos_rad = np.radians(-40)
+        msg.pan_cmd.vel_rps = 0.2
+        msg.tilt_cmd.pos_rad = np.radians(10)
+        msg.tilt_cmd.vel_rps = 0
+        self.head_pub.publish(msg)
+        rospy.sleep(8)
+        msg.pan_cmd.pos_rad = np.radians(0)
+        msg.pan_cmd.vel_rps = 0.2
+        msg.tilt_cmd.pos_rad = np.radians(0)
+        msg.tilt_cmd.vel_rps = 0.2/4 # to travel in straight line
+        self.head_pub.publish(msg)
+        rospy.sleep(3)
+
     def screen_button_cb(self, msg):
+        idle = rospy.get_param("/symposium_demo/idle", False)
+        if idle:
+            rospy.logerr("CAUTION: Screen Interface Pressed while idle! Make sure to set the robot to non-idle state with <rosparam set /symposium_demo/idle false> before using the UI. The code will set it for you in this case. But to be cautious do it yourself before interacting with the UI.")
+            rospy.set_param("/symposium_demo/idle", False)
         dict_data = json.loads(msg.data)
         action = int(dict_data["action"])
         rospy.loginfo(f"action: {action}")
@@ -95,7 +125,28 @@ class SymposiumDemo:
         elif action == 10:
             return self.arm_control.jnt_ctrl.home_right_arm()
 
+    def run(self):
+        while not rospy.is_shutdown():
+            rospy.sleep(10)
+            idle = rospy.get_param("/symposium_demo/idle", False)
+            if idle:
+                rospy.loginfo("The demo mode is currently idle. We chime and look around.") 
+                self.chime()
+                self.look_around()
+                total_wait_time = 3*60 # 3 minutes
+                step_time = 10
+                for time_remaining  in range(total_wait_time,0,-step_time):
+                    idle = rospy.get_param("/symposium_demo/idle", False)
+                    if not idle:
+                        rospy.loginfo("Robot set to not idle. Robot will not move head until idle state is restored")
+                        break
+                    rospy.loginfo(f"{time_remaining} seconds before head starts looking around")
+                    rospy.sleep(step_time)
+            else:
+                rospy.loginfo("The demo mode is currently not idle. We dont look around.")
+
 
 if __name__ == "__main__":
     demo = SymposiumDemo()
-    rospy.spin()
+    demo.run()
+
