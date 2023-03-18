@@ -97,9 +97,9 @@ fet_p4.accelerations = [
     -0.15556643988697272,
 ]
 fet_p1.time_from_start = rospy.Duration(0)
-fet_p2.time_from_start = rospy.Duration(0)
-fet_p3.time_from_start = rospy.Duration(0)
-fet_p4.time_from_start = rospy.Duration(0)
+fet_p2.time_from_start = rospy.Duration(1.655034937)
+fet_p3.time_from_start = rospy.Duration(3.28259116)
+fet_p4.time_from_start = rospy.Duration(4.384977234)
 
 fast_extend_trajectory = JointTrajectory()
 fast_extend_trajectory.points = [fet_p1, fet_p2, fet_p3, fet_p4]
@@ -146,13 +146,13 @@ class TrajectoryInterceptServer:
         intercepted_trajectory = goal.goal.trajectory
         if self.debug:
             print("positions: ")
-            print(point.positions for point in intercepted_trajectory.points)
+            print([point.positions for point in intercepted_trajectory.points])
             print("velocities: ")
-            print(point.velocities for point in intercepted_trajectory.points)
+            print([point.velocities for point in intercepted_trajectory.points])
             print("accelerations: ")
-            print(point.accelerations for point in intercepted_trajectory.points)
+            print([point.accelerations for point in intercepted_trajectory.points])
             print("durations: ")
-            print(point.time_from_start for point in intercepted_trajectory.points)
+            print([point.time_from_start for point in intercepted_trajectory.points])
 
         self.inverted_trajectory = invert_trajectory(intercepted_trajectory)
         self.previous_goal_tolerance = goal.goal.goal_tolerance
