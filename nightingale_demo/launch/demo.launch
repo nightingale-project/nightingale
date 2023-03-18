@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <launch>
-    <!-- This launch file is intended as a system level launch file -->
-    <!-- This file launches all launch files performing core nightingale functions -->
     <include file="$(find nightingale_utils)/launch/utils.launch"/>
     <include file="$(find nightingale_ros_bridge)/launch/interface.launch"/>
     <include file="$(find nightingale_manipulation)/launch/moveit_action_servers.launch"/>
     <include file="$(find nightingale_body)/launch/moveit_action_servers.launch"/>
     <include file="$(find nightingale_proprioception)/launch/collision_detection.launch"/>
 
-    <node name="symposium_demo" pkg="nightingale_demo" type="main.py" output="screen" />
+    <node name="symposium_demo" pkg="nightingale_demo" type="main.py" output="screen" >
+        <param name="audio_file" value="$(find nightingale_demo)/audio/audio.mp3" />
+    </node>
 </launch>

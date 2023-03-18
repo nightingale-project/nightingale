@@ -3,6 +3,7 @@
 import actionlib
 import rospy
 import json
+from playsound import playsound
 
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
 from nightingale_ros_bridge.bridge_interface_config import (
@@ -18,6 +19,8 @@ from geometry_msgs.msg import Point
 class SymposiumDemo:
     def __init__(self):
         rospy.init_node("symposium_demo_node")
+
+        self.audio_file = rospy.get_param("/symposium_demo/audio_file")
 
         self.arm_action_client = actionlib.SimpleActionClient(
             "/movo/right_arm_controller/follow_joint_trajectory",
@@ -75,10 +78,14 @@ class SymposiumDemo:
     def enable_left_collision_cb(self, msg):
         self.enable_left_collision = msg.data
 
+    def chime(self):
+        playsound(self.audio_file)
+
     def screen_button_cb(self, msg):
         dict_data = json.loads(msg.data)
         action = int(dict_data["action"])
         rospy.loginfo(f"action: {action}")
+        self.chime()
         if action == UserInputs.START_EXTEND_ARM:
             status = self.arm_control.trajectory_inversion_server.fast_extend()
             rospy.loginfo(f"Extend {status}")

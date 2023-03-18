@@ -22,3 +22,6 @@ ssh robohub@movo2
 sudo ip route add default via 10.66.171.1
 sudo resolvectl dns br0 8.8.8.8
 exit
+
+# Change the volume through CLI
+pactl -- set-sink-volume 0 70%
