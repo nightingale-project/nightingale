@@ -10,6 +10,7 @@ project(nightingale_demo)
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   nightingale_msgs
+  nightingale_proprioception
   nightingale_ros_bridge
   nightingale_utils
   rospy
@@ -188,11 +189,10 @@ catkin_install_python(PROGRAMS
 # )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
+install(FILES
+  launch/nightingale_system.launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
 
 #############
 ## Testing ##

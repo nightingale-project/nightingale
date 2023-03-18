@@ -27,12 +27,21 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>nightingale_msgs</build_depend>
+  <build_depend>nightingale_proprioception</build_depend>
+  <build_depend>nightingale_ros_bridge</build_depend>
+  <build_depend>nightingale_utils</build_depend>
   <build_depend>rospy</build_depend>
   <build_export_depend>geometry_msgs</build_export_depend>
   <build_export_depend>nightingale_msgs</build_export_depend>
+  <build_export_depend>nightingale_proprioception</build_export_depend>
+  <build_export_depend>nightingale_ros_bridge</build_export_depend>
+  <build_export_depend>nightingale_utils</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>nightingale_msgs</exec_depend>
+  <exec_depend>nightingale_proprioception</exec_depend>
+  <exec_depend>nightingale_ros_bridge</exec_depend>
+  <exec_depend>nightingale_utils</exec_depend>
   <exec_depend>rospy</exec_depend>
 
 

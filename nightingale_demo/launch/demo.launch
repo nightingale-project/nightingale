@@ -6,7 +6,7 @@
     <include file="$(find nightingale_ros_bridge)/launch/interface.launch"/>
     <include file="$(find nightingale_manipulation)/launch/moveit_action_servers.launch"/>
     <include file="$(find nightingale_body)/launch/moveit_action_servers.launch"/>
-    <include file="$(find nightingale_proprioception/launch/collision_detection.launch"/>
+    <include file="$(find nightingale_proprioception)/launch/collision_detection.launch"/>
 
     <node name="symposium_demo" pkg="nightingale_demo" type="main.py" output="screen" />
 </launch>
