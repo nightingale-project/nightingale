@@ -270,8 +270,8 @@ class CollisionDetector:
         )
 
         collision_detected = np.any(error_distance > self.collision_detection_threshold)
-        if collision_detected:
-            rospy.loginfo(f"Collision detected {error_distance}")
+        # if collision_detected:
+        #     rospy.loginfo(f"{self.arm_side} arm collision detected {error_distance}")
         if self.collision_state != collision_detected:
             self.collision_pub.publish(Bool(collision_detected))
             self.collision_state = not self.collision_state

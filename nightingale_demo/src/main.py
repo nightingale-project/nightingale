@@ -24,8 +24,6 @@ class SymposiumDemo:
             FollowJointTrajectoryAction,
         )
 
-        self.manipulation = ManipulationControl()
-
         self.right_collision_sub = rospy.Subscriber(
             "/nightingale/right_arm/collision", Bool, self.right_collision_cb
         )
@@ -56,6 +54,10 @@ class SymposiumDemo:
         )
 
         self.arm_control = ManipulationControl()
+        self.arm_control.home_left()
+        self.arm_control.jnt_ctrl.cmd_right_arm(
+            self.arm_control.jnt_ctrl.right_arm_home_joint_values
+        )
 
     def right_collision_cb(self, msg):
         if self.enable_right_collision and msg.data == True:
@@ -80,7 +82,7 @@ class SymposiumDemo:
         if action == UserInputs.START_EXTEND_ARM:
             return self.arm_control.trajectory_inversion_server.fast_extend()
         elif action == UserInputs.START_RETRACT_ARM:
-            return self.arm_control.trajectory_inversion_server.fast_extend()
+            return self.arm_control.trajectory_inversion_server.fast_retract()
         elif action == 10:
             return self.arm_control.jnt_ctrl.home_right_arm()
 
