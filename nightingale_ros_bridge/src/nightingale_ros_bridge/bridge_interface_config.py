@@ -33,3 +33,4 @@ class UserInputs:
     ESTOP = 7
     ESTOP_CANCEL = 8
     WD_TIMEOUT = 9
+    HOME_RIGHT_ARM = 10

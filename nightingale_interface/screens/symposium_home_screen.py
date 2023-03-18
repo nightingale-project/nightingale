@@ -30,8 +30,12 @@ class SymposiumHomeScreen:
         self.call_ros_action(UserInputs.START_EXTEND_ARM)
 
     def arm_retract(self, button_data):
-        # set action to extend
+        # set action to retract
         self.call_ros_action(UserInputs.START_RETRACT_ARM)
+
+    def home_right_arm(self, button_data):
+        # set action to home right arm
+        self.call_ros_action(UserInputs.HOME_RIGHT_ARM)
 
     def symposium_home_build(self):
         screen = Screen(name=cfg.SYMPOSIUM_HOME_SCREEN_NAME)
@@ -70,5 +74,16 @@ class SymposiumHomeScreen:
                 on_release=self.exit,
             )
         )
+
+        screen.add_widget(
+            MDRectangleFlatButton(
+                text="Home right arm",
+                font_style="H6",
+                pos_hint={"center_x": 0.9, "center_y": 0.9},
+                size_hint=(cfg.SHORT_RECT_WIDTH - 0.15, cfg.SHORT_RECT_HEIGHT-0.05),
+                on_release=self.home_right_arm,
+            )
+        )
+
 
         return screen
