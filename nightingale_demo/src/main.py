@@ -67,6 +67,10 @@ class SymposiumDemo:
             self.arm_control.jnt_ctrl.right_arm_home_joint_values
         )
 
+        self.arm_control.open_right_gripper()
+        rospy.sleep(2.0)
+        self.arm_control.close_right_gripper()
+
         # set last action to home
         self.arm_at_home = True
 
@@ -120,17 +124,19 @@ class SymposiumDemo:
         dict_data = json.loads(msg.data)
         action = int(dict_data["action"])
         rospy.loginfo(f"action: {action}")
-        self.chime()
 
         if action == UserInputs.START_EXTEND_ARM and self.arm_at_home:
+            self.chime()
             status = self.arm_control.trajectory_inversion_server.fast_extend()
             rospy.loginfo(f"Extend {status}")
             self.arm_at_home = False
         elif action == UserInputs.START_RETRACT_ARM and not self.arm_at_home:
+            self.chime()
             status = self.arm_control.trajectory_inversion_server.fast_retract()
             rospy.loginfo(f"Retract {status}")
             self.arm_at_home = True
         elif action == 10:
+            self.chime()
             status = self.arm_control.jnt_ctrl.home_right_arm()
             rospy.loginfo(f"Home {status}")
             self.arm_at_home = True
