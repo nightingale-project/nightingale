@@ -110,7 +110,7 @@ class SymposiumDemo:
     def screen_button_cb(self, msg):
         idle = rospy.get_param("/symposium_demo/idle", False)
         if idle:
-            rospy.logerr("CAUTION: Screen Interface Pressed while idle! Make sure to set the robot to non-idle state with <rosparam set /symposium_demo/idle false> before using the UI. The code will set it for you in this case. But to be cautious do it yourself before interacting with the UI.")
+            rospy.loginfo("CAUTION: Screen Interface Pressed while idle! Make sure to set the robot to non-idle state with <rosparam set /symposium_demo/idle false> before using the UI. The code will set it for you in this case. But to be cautious do it yourself before interacting with the UI.")
             rospy.set_param("/symposium_demo/idle", False)
         dict_data = json.loads(msg.data)
         action = int(dict_data["action"])
