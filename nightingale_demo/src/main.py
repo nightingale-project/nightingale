@@ -62,10 +62,13 @@ class SymposiumDemo:
         )
 
         self.arm_control = ManipulationControl()
-        #self.arm_control.home_left()
+        # self.arm_control.home_left()
         self.arm_control.jnt_ctrl.cmd_right_arm(
             self.arm_control.jnt_ctrl.right_arm_home_joint_values
         )
+
+        # set last action to home
+        self.arm_at_home = True
 
     def right_collision_cb(self, msg):
         if self.enable_right_collision and msg.data == True:
@@ -91,7 +94,7 @@ class SymposiumDemo:
         msg.pan_cmd.pos_rad = np.radians(40)
         msg.pan_cmd.vel_rps = 0.2
         msg.tilt_cmd.pos_rad = np.radians(10)
-        msg.tilt_cmd.vel_rps = 0.2/4 # to travel in straight line
+        msg.tilt_cmd.vel_rps = 0.2 / 4  # to travel in straight line
         self.head_pub.publish(msg)
         rospy.sleep(5)
         msg.pan_cmd.pos_rad = np.radians(-40)
@@ -103,50 +106,65 @@ class SymposiumDemo:
         msg.pan_cmd.pos_rad = np.radians(0)
         msg.pan_cmd.vel_rps = 0.2
         msg.tilt_cmd.pos_rad = np.radians(0)
-        msg.tilt_cmd.vel_rps = 0.2/4 # to travel in straight line
+        msg.tilt_cmd.vel_rps = 0.2 / 4  # to travel in straight line
         self.head_pub.publish(msg)
         rospy.sleep(3)
 
     def screen_button_cb(self, msg):
         idle = rospy.get_param("/symposium_demo/idle", False)
         if idle:
-            rospy.loginfo("CAUTION: Screen Interface Pressed while idle! Make sure to set the robot to non-idle state with <rosparam set /symposium_demo/idle false> before using the UI. The code will set it for you in this case. But to be cautious do it yourself before interacting with the UI.")
+            rospy.loginfo(
+                "CAUTION: Screen Interface Pressed while idle! Make sure to set the robot to non-idle state with <rosparam set /symposium_demo/idle false> before using the UI. The code will set it for you in this case. But to be cautious do it yourself before interacting with the UI."
+            )
             rospy.set_param("/symposium_demo/idle", False)
         dict_data = json.loads(msg.data)
         action = int(dict_data["action"])
         rospy.loginfo(f"action: {action}")
         self.chime()
-        if action == UserInputs.START_EXTEND_ARM:
+
+        if action == UserInputs.START_EXTEND_ARM and self.arm_at_home:
             status = self.arm_control.trajectory_inversion_server.fast_extend()
             rospy.loginfo(f"Extend {status}")
-        elif action == UserInputs.START_RETRACT_ARM:
+            self.arm_at_home = False
+        elif action == UserInputs.START_RETRACT_ARM and not self.arm_at_home:
             status = self.arm_control.trajectory_inversion_server.fast_retract()
             rospy.loginfo(f"Retract {status}")
+            self.arm_at_home = True
         elif action == 10:
-            return self.arm_control.jnt_ctrl.home_right_arm()
+            status = self.arm_control.jnt_ctrl.home_right_arm()
+            rospy.loginfo(f"Home {status}")
+            self.arm_at_home = True
+            return status
 
     def run(self):
         while not rospy.is_shutdown():
             rospy.sleep(10)
             idle = rospy.get_param("/symposium_demo/idle", False)
             if idle:
-                rospy.loginfo("The demo mode is currently idle. We chime and look around.") 
+                rospy.loginfo(
+                    "The demo mode is currently idle. We chime and look around."
+                )
                 self.chime()
                 self.look_around()
-                total_wait_time = 3*60 # 3 minutes
+                total_wait_time = 3 * 60  # 3 minutes
                 step_time = 10
-                for time_remaining  in range(total_wait_time,0,-step_time):
+                for time_remaining in range(total_wait_time, 0, -step_time):
                     idle = rospy.get_param("/symposium_demo/idle", False)
                     if not idle:
-                        rospy.loginfo("Robot set to not idle. Robot will not move head until idle state is restored")
+                        rospy.loginfo(
+                            "Robot set to not idle. Robot will not move head until idle state is restored"
+                        )
                         break
-                    rospy.loginfo(f"{time_remaining} seconds before head starts looking around")
+                    rospy.loginfo(
+                        f"{time_remaining} seconds before head starts looking around"
+                    )
                     rospy.sleep(step_time)
             else:
-                rospy.loginfo("The demo mode is currently not idle. We dont look around.")
+                rospy.loginfo(
+                    "The demo mode is currently not idle. We dont look around."
+                )
 
 
 if __name__ == "__main__":
     demo = SymposiumDemo()
     demo.run()
-
