@@ -403,7 +403,7 @@ class CollisionDetector:
 
 if __name__ == "__main__":
     collision_detector = CollisionDetector(
-        "right", box_mass=1.0, collision_detection_threshold=55
+        "right", box_mass=1.15, collision_detection_threshold=55
     )
     collision_detector = CollisionDetector(
         "left", box_mass=0.0, collision_detection_threshold=50

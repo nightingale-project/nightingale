@@ -75,7 +75,7 @@ class SymposiumDemo:
         self.arm_at_home = True
 
     def right_collision_cb(self, msg):
-        if self.enable_right_collision and msg.data == True:
+        if self.enable_right_collision == True and msg.data == True:
             rospy.loginfo("Collision right")
             self.collision_screen_pub.publish(String(f"9"))
 
@@ -117,14 +117,14 @@ class SymposiumDemo:
     def screen_button_cb(self, msg):
         idle = rospy.get_param("/symposium_demo/idle", False)
         if idle:
-            rospy.loginfo(
-                "CAUTION: Screen Interface Pressed while idle! Make sure to set the robot to non-idle state with <rosparam set /symposium_demo/idle false> before using the UI. The code will set it for you in this case. But to be cautious do it yourself before interacting with the UI."
-            )
+            rospy.loginfo("screen button pressed. setting state to not idle")
             rospy.set_param("/symposium_demo/idle", False)
         dict_data = json.loads(msg.data)
         action = int(dict_data["action"])
         rospy.loginfo(f"action: {action}")
 
+        self.enable_right_collision = False
+        self.enable_left_collision = False
         if action == UserInputs.START_EXTEND_ARM and self.arm_at_home:
             self.chime()
             status = self.arm_control.trajectory_inversion_server.fast_extend()
@@ -135,24 +135,25 @@ class SymposiumDemo:
             status = self.arm_control.trajectory_inversion_server.fast_retract()
             rospy.loginfo(f"Retract {status}")
             self.arm_at_home = True
+            idle = rospy.get_param("/symposium_demo/idle", False)
+            if not idle:
+                rospy.loginfo("arm retracted. now setting state to idle")
+                rospy.set_param("/symposium_demo/idle", True)
         elif action == 10:
             self.chime()
             status = self.arm_control.jnt_ctrl.home_right_arm()
             rospy.loginfo(f"Home {status}")
             self.arm_at_home = True
-            return status
+        
+        self.enable_right_collision = True
+        self.enable_left_collision = True
 
     def run(self):
         while not rospy.is_shutdown():
             rospy.sleep(10)
             idle = rospy.get_param("/symposium_demo/idle", False)
             if idle:
-                rospy.loginfo(
-                    "The demo mode is currently idle. We chime and look around."
-                )
-                self.chime()
-                self.look_around()
-                total_wait_time = 3 * 60  # 3 minutes
+                total_wait_time = 3 * 60 # 3 minutes
                 step_time = 10
                 for time_remaining in range(total_wait_time, 0, -step_time):
                     idle = rospy.get_param("/symposium_demo/idle", False)
@@ -165,6 +166,13 @@ class SymposiumDemo:
                         f"{time_remaining} seconds before head starts looking around"
                     )
                     rospy.sleep(step_time)
+                idle = rospy.get_param("/symposium_demo/idle", False)
+                if idle:
+                    rospy.loginfo(
+                        "The demo mode is currently idle. We chime and look around."
+                    )
+                    self.chime()
+                    self.look_around()
             else:
                 rospy.loginfo(
                     "The demo mode is currently not idle. We dont look around."
